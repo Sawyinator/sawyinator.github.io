@@ -37,70 +37,81 @@
 
     nav {
         width: 90%;
-        max-width: 900px; /* Widened slightly for the grid */
+        max-width: 1000px;
     }
 
     ul {
         list-style: none;
         padding: 0;
         display: grid;
-        /* Adjusted minmax for square proportions */
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 25px;
+        /* Responsive grid: buttons stay square and adjust size based on screen */
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 30px;
     }
 
     li a {
         display: flex;
-        flex-direction: column;
         align-items: center;
-        justify-content: center; /* Centers content vertically */
+        justify-content: center;
         text-decoration: none;
         color: white;
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
+        border-radius: 24px;
         padding: 20px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         text-align: center;
         
-        /* Forces the button to be a perfect square */
+        /* The Square Constraint */
         aspect-ratio: 1 / 1; 
         box-sizing: border-box;
-        position: relative;
+        position: relative; /* Necessary for absolute title positioning */
+        overflow: hidden;
     }
 
     li a:hover {
-        transform: translateY(-8px);
-        background: rgba(255, 255, 255, 0.08);
-        border-color: #ffffff;
-        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+        transform: translateY(-10px) scale(1.02);
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
     }
 
-    /* Large Logo/Icon Style */
-    .project-icon {
-        width: 80px;  /* Increased size */
-        height: 80px;
-        margin-bottom: 20px;
+    /* Large Centered Logo */
+    .project-icon, .icon-placeholder {
+        width: 120px; 
+        height: 120px;
         object-fit: contain;
-        filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        /* Keeps the logo perfectly centered regardless of text */
+        margin-bottom: 0; 
+        transition: transform 0.3s ease;
     }
 
-    /* Placeholder for links without an image */
+    /* Special handling for the placeholder emojis */
     .icon-placeholder {
-        font-size: 3rem;
-        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
     }
 
+    li a:hover .project-icon {
+        transform: scale(1.1);
+    }
+
+    /* Title at the bottom center */
     .project-title {
-        font-size: 1rem;
-        font-weight: 600;
-        line-height: 1.3;
-        /* Positioned at the bottom */
-        margin-top: auto; 
-        display: block;
-        width: 100%;
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        opacity: 0.7;
+        padding: 0 15px;
     }
 </style>
 </head>
