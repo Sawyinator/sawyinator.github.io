@@ -364,15 +364,7 @@ Back to main website
     let timerInterval, timeLeft = 10, allowedDigits = [0,1,2,3,4,5,6,7,8,9];
 
     const quizInput = document.getElementById('quiz-input');
-    const quizInput = document.getElementById('quiz-input');
     const timerBar = document.getElementById('timer-bar');
-
-    // Enter key triggers the continue button
-    quizInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            handleAction();
-        }
-    });
 
     function openProfile() { document.getElementById('profile-overlay').classList.add('active'); }
     function closeProfile() { document.getElementById('profile-overlay').classList.remove('active'); }
@@ -592,64 +584,32 @@ Back to main website
     }
 
     function handleAction() {
-    const btn = document.getElementById('main-action-btn');
-    const feedback = document.getElementById('feedback');
-    const currentNum = history[history.length - 1];
-
-    if (currentMode === 'generator') {
-        if (!isRevealed) {
-            document.getElementById('answer-display').innerText = currentNum.split('').map(d => digitScripts[basisScript].digits[d]).join('');
-            btn.innerText = "Continue";
-            isRevealed = true;
+        if (document.getElementById('main-action-btn').disabled) return;
+        const cur = history[history.length-1];
+        if (currentMode === 'generator') {
+            if (!isRevealed) { document.getElementById('answer-display').style.visibility='visible'; document.getElementById('main-action-btn').innerText='Continue'; isRevealed=true; }
+            else generate();
         } else {
-            document.getElementById('answer-display').innerText = "";
-            btn.innerText = "Reveal";
-            isRevealed = false;
-            generate();
-        }
-    } else if (currentMode === 'quiz') {
-        // If the button says "Continue", it means the user already got it right 
-        // and is pressing Enter to go to the next question.
-        if (btn.innerText === "Continue") {
-            feedback.innerText = "";
-            quizInput.value = "";
-            quizInput.disabled = false;
-            btn.innerText = "Submit";
-            generate();
-            quizInput.focus(); // Keeps the cursor in the box for the next round
-            return;
-        }
-
-        const userVal = quizInput.value;
-        const correctVal = currentNum.split('').map(d => digitScripts[basisScript].digits[d]).join('');
-
-        if (userVal === correctVal && timeLeft > 0) {
-            clearInterval(timerInterval);
-            streak++;
-            feedback.innerText = "CORRECT!";
-            feedback.className = "correct";
-            quizInput.disabled = true;
-            btn.innerText = "Continue"; // Now pressing Enter again will trigger the next question
-            
-            const bestKey = `best_len${currentLen}_time${selectedTime}`;
-            if (streak > (localStorage.getItem(bestKey) || 0)) {
-                localStorage.setItem(bestKey, streak);
-            }
-            document.getElementById('quiz-stats-display').innerText = `Streak: ${streak}`;
-        } else {
-            clearInterval(timerInterval);
-            feedback.innerText = `WRONG! (Ans: ${correctVal})`;
-            feedback.className = "incorrect";
-            triggerShake();
-            btn.disabled = true;
-            setTimeout(() => {
-                showMenu();
-                btn.disabled = false;
-                btn.innerText = "Action";
-            }, 2000);
+            if (!isRevealed) {
+                const val = quizInput.value.trim();
+                if (val.length < currentLen && timeLeft > 0) { triggerShake(); return; }
+                clearInterval(timerInterval); 
+                timerBar.style.opacity = '1';
+                isRevealed = true; quizInput.disabled = true;
+                if (val === cur) {
+                    document.getElementById('feedback').innerText = "Correct!"; document.getElementById('feedback').className = "correct";
+                    streak++; document.getElementById('quiz-stats-display').innerText = `Streak: ${streak}`;
+                    const k = `best_len${currentLen}_time${selectedTime}`;
+                    if (streak > (localStorage.getItem(k)||0)) localStorage.setItem(k, streak);
+                    document.getElementById('main-action-btn').innerText = 'Continue';
+                } else {
+                    document.getElementById('feedback').innerText = `Wrong! (${document.getElementById('answer-display').innerText})`;
+                    document.getElementById('feedback').className = "incorrect"; streak = 0;
+                    document.getElementById('main-action-btn').innerText = 'Game Over'; document.getElementById('main-action-btn').disabled = true;
+                }
+            } else generate();
         }
     }
-}
 
     function syncLabels(v) { document.getElementById('menu-length-label').innerText = `Digit Length: ${v}`; document.getElementById('app-length-label').innerText = `Digit Length: ${v}`; }
     function syncSliders(v) { currentLen = parseInt(v); document.getElementById('menu-slider').value = v; document.getElementById('app-slider').value = v; quizInput.maxLength = currentLen; if(currentMode === 'generator') generate(); }
@@ -664,6 +624,16 @@ Back to main website
 
     quizInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') handleAction(); });
     window.onload = () => { loadSettings(); initDropdowns(); };
+    
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        const actionBtn = document.getElementById('main-action-btn');
+        // Only click if the button is visible and not disabled
+        if (actionBtn && !actionBtn.disabled) {
+            actionBtn.click();
+        }
+    }
+});
 </script>
 
 </body>
