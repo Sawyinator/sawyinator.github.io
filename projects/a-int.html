@@ -26,6 +26,45 @@
     <meta property="twitter:description" content="A github.io of all of my projects and some relevant profiles.">
     <meta property="twitter:image" content="https://sawyinator.github.io/assets/logos/a-int-logo.png">
     <style>
+        .back-link {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--secondary);
+    transition: 0.2s;
+    z-index: 100;
+    border: 1px solid #444;
+}
+
+.back-link svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.back-link:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    outline: 2px solid var(--text);
+}
+
+/* Ensure it doesn't overlap on very small screens */
+@media (max-width: 400px) {
+    .back-link {
+        font-size: 0.75rem;
+        padding: 6px 8px;
+    }
+}
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #3f51b5;
             --accent: #ff9800; --secondary: #424242; --input-bg: #2d2d2d; --danger: #f44336;
