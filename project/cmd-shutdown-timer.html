@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: radial-gradient(circle at top right, #0a0e17, #05070a, #020203);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    header {
+        margin: 60px 20px 40px;
+        text-align: center;
+    }
+    .container {
+    background-color: #364259;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+  }
+
+    h1 {
+        font-size: 2.5rem;
+        letter-spacing: -1px;
+        margin-bottom: 10px;
+        color: #ffffff;
+    }
+
+    p {
+        opacity: 0.6;
+        font-weight: 300;
+    }
+
+    nav {
+        width: 90%;
+        max-width: 1000px;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        /* Responsive grid: buttons stay square and adjust size based on screen */
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 30px;
+    }
+
+    li a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: white;
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 20px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-align: center;
+        
+        /* The Square Constraint */
+        aspect-ratio: 1 / 1; 
+        box-sizing: border-box;
+        position: relative; /* Necessary for absolute title positioning */
+        overflow: hidden;
+    }
+
+    li a:hover {
+        transform: translateY(-10px) scale(1.02);
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Large Centered Logo */
+    .project-icon, .icon-placeholder {
+        width: 200px; 
+        height: 200px;
+        object-fit: contain;
+        /* Keeps the logo perfectly centered regardless of text */
+        margin-bottom: 50px; 
+        transition: transform 0.3s ease;
+    }
+
+    /* Special handling for the placeholder emojis */
+    .icon-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+    }
+
+    li a:hover .project-icon {
+        transform: scale(1.1);
+    }
+
+    /* Title at the bottom center */
+    .project-title {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        opacity: 0.7;
+        padding: 0 15px;
+    }
+</style>
+<body>
+<h>Please enter a time:</h>
+<br><br>
+Hours
+<br>
+<input type="number" id="hrs" placeholder="">
+<br>
+Minutes
+<br>
+<input type="number" id="min" placeholder="">
+<br>
+Seconds
+<br>
+<input type="number" id="sec" placeholder="">
+<br><br>
+<button onclick="calculate()">Copy CMD Command</button>
+<br><br>
+<span id="cmd">0</span>
+
+<script>
+    const hrs=document.getElementById('hrs')
+    const min=document.getElementById('min')
+    const sec=document.getElementById('sec')
+    const sum=Number((hrs)*3600)+Number((min)*60)+Number(sec)
+    const cmd="shutdown -s -t "+sum
+</script>
+</body>
