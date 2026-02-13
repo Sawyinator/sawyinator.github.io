@@ -1,161 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" type="image/png" href="assets/favicons/index-favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sawyer-Site</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: radial-gradient(circle at top right, #0a0e17, #05070a, #020203);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+    
+    <!-- Embed Behaviours -->
+    
+    <meta name="title" content="Sawyer-Site">
+    <meta name="description" content="A github.io of all of my projects and some relevant profiles.">
 
-        header { margin: 60px 20px 40px; text-align: center; }
-        h1 { font-size: 2.5rem; letter-spacing: -1px; margin-bottom: 10px; color: #ffffff; }
-        p { opacity: 0.6; font-weight: 300; }
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sawyinator.github.io/">
+    <meta property="og:title" content="Sawyer-Site">
+    <meta property="og:description" content="A github.io of all of my projects and some relevant profiles.">
+    <meta property="og:image" content="https://sawyinator.github.io/assets/logos/sawyinator-logo.png">
+    <meta name="theme-color" content="#007DFF">
 
-        nav { width: 90%; max-width: 1000px; }
-        ul {
-            list-style: none;
-            padding: 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 30px;
-        }
+    <!-- Twitter Embed Behaviours -->
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://sawyinator.github.io/">
+    <meta property="twitter:title" content="Sawyer-Site">
+    <meta property="twitter:description" content="A github.io of all of my projects and some relevant profiles.">
+    <meta property="twitter:image" content="https://sawyinator.github.io/assets/logos/sawyinator-logo.png">
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: radial-gradient(circle at top right, #0a0e17, #05070a, #020203);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
 
-        li { position: relative; } /* Added for button positioning */
+    header {
+        margin: 60px 20px 40px;
+        text-align: center;
+    }
 
-        li a.card-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: white;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 20px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            aspect-ratio: 1 / 1; 
-            box-sizing: border-box;
-            overflow: hidden;
-        }
+    h1 {
+        font-size: 2.5rem;
+        letter-spacing: -1px;
+        margin-bottom: 10px;
+        color: #ffffff;
+    }
 
-        li a.card-link:hover {
-            transform: translateY(-10px) scale(1.02);
-            background: rgba(255, 255, 255, 0.07);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-        }
+    p {
+        opacity: 0.6;
+        font-weight: 300;
+    }
 
-        /* The Info Button */
-        .info-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-            font-family: serif;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    nav {
+        width: 90%;
+        max-width: 1000px;
+    }
 
-        .info-btn:hover {
-            background: white;
-            color: black;
-        }
+    ul {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        /* Responsive grid: buttons stay square and adjust size based on screen */
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 30px;
+    }
 
-        .project-icon {
-            width: 140px; 
-            height: 140px;
-            object-fit: contain;
-            margin-bottom: 30px; 
-            transition: transform 0.3s ease;
-        }
-
-        .project-title {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            font-size: 0.8rem;
-            font-weight: 500;
-            text-align: center;
-            text-transform: uppercase;
-            opacity: 0.7;
-        }
-
-        /* --- MODAL STYLES --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            display: none; /* Hidden by default */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: #111;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 90%;
-            max-width: 600px;
-            padding: 40px;
-            border-radius: 24px;
-            position: relative;
-            display: grid;
-            grid-template-columns: 150px 1fr;
-            gap: 30px;
-        }
-
-        .modal-left img { width: 100%; object-fit: contain; }
+    li a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: white;
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 20px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-align: center;
         
-        .modal-right h2 { margin-top: 0; font-size: 1.5rem; }
-        .modal-right p { opacity: 0.8; line-height: 1.6; font-size: 0.95rem; }
+        /* The Square Constraint */
+        aspect-ratio: 1 / 1; 
+        box-sizing: border-box;
+        position: relative; /* Necessary for absolute title positioning */
+        overflow: hidden;
+    }
 
-        .launch-btn {
-            grid-column: 1 / span 2;
-            background: #007DFF;
-            color: white;
-            text-decoration: none;
-            padding: 12px;
-            text-align: center;
-            border-radius: 12px;
-            font-weight: 600;
-            margin-top: 20px;
-            transition: 0.3s;
-        }
+    li a:hover {
+        transform: translateY(-10px) scale(1.02);
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    }
 
-        .launch-btn:hover { background: #0056b3; }
+    /* Large Centered Logo */
+    .project-icon, .icon-placeholder {
+        width: 200px; 
+        height: 200px;
+        object-fit: contain;
+        /* Keeps the logo perfectly centered regardless of text */
+        margin-bottom: 50px; 
+        transition: transform 0.3s ease;
+    }
 
-        .close-modal {
-            position: absolute;
-            top: 20px; right: 20px;
-            background: none; border: none; color: white;
-            font-size: 1.5rem; cursor: pointer; opacity: 0.5;
-        }
-    </style>
+    /* Special handling for the placeholder emojis */
+    .icon-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+    }
+
+    li a:hover .project-icon {
+        transform: scale(1.1);
+    }
+
+    /* Title at the bottom center */
+    .project-title {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        opacity: 0.7;
+        padding: 0 15px;
+    }
+    /* Position the Info Button */
+.info-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.info-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Modal Styling */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    width: 90%;
+    max-width: 600px;
+    padding: 40px;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.modal-left { flex: 1; min-width: 150px; text-align: center; }
+.modal-right { flex: 2; min-width: 250px; }
+
+.modal-logo { width: 150px; height: 150px; object-fit: contain; }
+.modal-close { position: absolute; top: 20px; right: 20px; cursor: pointer; opacity: 0.5; }
+
+.launch-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: #007DFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+}
+</style>
 </head>
 <body>
 
@@ -166,50 +209,78 @@
 
     <nav>
         <ul>
-            <li>
-                <button class="info-btn" onclick="openModal('YouTube Channel', 'My official YouTube channel where I post updates and tutorials.', 'assets/logos/sawyinator-logo.png', 'https://youtube.com/@sawyinator')">i</button>
-                <a href="https://youtube.com/@sawyinator" class="card-link">
+            <<li>
+                <a href="https://youtube.com/@sawyinator" target="_blank" rel="noopener noreferrer">
+                 <button class="info-btn" onclick="openModal(event, this)">i</button>
+                    
                     <img src="assets/logos/sawyinator-logo.png" alt="YouTube Logo" class="project-icon">
                     <span class="project-title">YouTube Channel</span>
+                
+                    <div class="project-description" style="display:none;">
+                        This is my official YouTube channel where I post updates on my latest coding projects and tutorials.
+                    </div>
+                </a>
+            </li>
+                <a href="projects/a-int.html">
+                    <img src="assets/logos/a-int-logo.png" alt="A-INT Logo" class="project-icon">
+                    <span class="project-title">Arabic Indic Number Trainer (A-INT)</span>
                 </a>
             </li>
             <li>
-                <button class="info-btn" onclick="openModal('Arabic Indic Number Trainer', 'A specialized tool for learning and mastering Arabic Indic numerals.', 'assets/logos/a-int-logo.png', 'projects/a-int.html')">i</button>
-                <a href="projects/a-int.html" class="card-link">
-                    <img src="assets/logos/a-int-logo.png" alt="A-INT Logo" class="project-icon">
-                    <span class="project-title">A-INT</span>
+                <a href="https://github.com/Sawyinator" target="_blank" rel="noopener noreferrer">
+                    <img src="assets/logos/github-logo.png" alt="Github Logo" class="project-icon">
+                    <span class="project-title">GitHub Page</span>
+                </a>
+            </li>
+            <li>
+                <a href="projects/cmd-shutdown-timer.html">
+                    <img src="assets/logos/cmd-shutdown-timer-logo.png" alt="cmd Shutdown Timer Logo" class="project-icon">
+                    <span class="project-title">cmd Shutdown Timer</span>
                 </a>
             </li>
         </ul>
     </nav>
-
-    <div class="modal-overlay" id="infoModal" onclick="closeModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="close-modal" onclick="closeModal()">×</button>
-            <div class="modal-left">
-                <img id="modalLogo" src="" alt="Logo">
-            </div>
-            <div class="modal-right">
-                <h2 id="modalTitle">Title</h2>
-                <p id="modalDesc">Description goes here.</p>
-            </div>
-            <a id="modalLaunch" href="#" class="launch-btn">Launch Program</a>
+<div id="infoModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="document.getElementById('infoModal').style.display='none'">✕</span>
+        
+        <div class="modal-left">
+            <img id="modalLogo" src="" class="modal-logo">
+        </div>
+        
+        <div class="modal-right">
+            <h2 id="modalTitle"></h2>
+            <p id="modalDesc" style="opacity: 0.8; line-height: 1.6;"></p>
+            <a id="modalLaunch" href="" class="launch-btn" target="_blank">Launch Program</a>
         </div>
     </div>
+</div>
 
-    <script>
-        function openModal(title, desc, logo, link) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalDesc').innerText = desc;
-            document.getElementById('modalLogo').src = logo;
-            document.getElementById('modalLaunch').href = link;
-            document.getElementById('infoModal').style.display = 'flex';
-        }
+<script>
+function openModal(event, btn) {
+    // Prevent the main <a> tag from opening when clicking the 'i' button
+    event.preventDefault();
+    event.stopPropagation();
 
-        function closeModal(e) {
-            document.getElementById('infoModal').style.display = 'none';
-        }
-    </script>
+    const card = btn.closest('li');
+    const title = card.querySelector('.project-title').innerText;
+    const logo = card.querySelector('.project-icon').src;
+    const desc = card.querySelector('.project-description').innerHTML;
+    const link = card.querySelector('a').href;
 
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalLogo').src = logo;
+    document.getElementById('modalDesc').innerHTML = desc;
+    document.getElementById('modalLaunch').href = link;
+
+    document.getElementById('infoModal').style.display = 'flex';
+}
+
+function closeModal(event) {
+    if(event.target.id === 'infoModal') {
+        document.getElementById('infoModal').style.display = 'none';
+    }
+}
+</script>
 </body>
 </html>
