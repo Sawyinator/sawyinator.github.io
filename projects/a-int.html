@@ -341,20 +341,45 @@ Back to main website
 
 <script>
     
-// Enter key behavior
+// Enter key, Shake, and numerals only within quiz
 document.addEventListener('keydown', function(event) {
+    // 1. Handle ENTER key
     if (event.key === 'Enter') {
         const actionBtn = document.getElementById('main-action-btn');
-        
-        // Prevents the "Enter" key from double-triggering 
-        // if the user is currently typing in the input field.
-        event.preventDefault(); 
-
         if (actionBtn && !actionBtn.disabled) {
+            event.preventDefault(); 
             actionBtn.click();
+        }
+        return;
+    }
+
+    // 2. Handle quiz-input specifically
+    if (event.target && event.target.id === 'quiz-input') {
+        const input = event.target;
+        const isChar = event.key.length === 1;
+        const isModifier = event.ctrlKey || event.metaKey || event.altKey;
+        const bypassKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+
+        if (bypassKeys.includes(event.key)) return;
+
+        // NEW: Check if the key is NOT a number (0-9)
+        // If it's a character but not a digit, block it and shake
+        if (isChar && !isModifier && !/^\d$/.test(event.key)) {
+            event.preventDefault();
+            triggerShake();
+            return;
+        }
+
+        // Logic: if limit reached and trying to type more numbers
+        if (input.value.length >= input.maxLength && isChar && !isModifier) {
+            event.preventDefault();
+            if (typeof triggerShake === "function") {
+                triggerShake();
+            }
         }
     }
 });
+
     const digitScripts = {
 'western-arabic': { name: 'Western Arabic', digits: ['0','1','2','3','4','5','6','7','8','9'] },
 'arabic-indic':   { name: 'Arabic-Indic', digits: ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'] },
