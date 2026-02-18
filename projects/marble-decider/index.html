@@ -343,12 +343,9 @@ function setupRace(names) {
         else { countDisplay.innerText = count; }
     }, 1000);
 
-    Render.run(render); const runner = Runner.create({
-    isFixed: true,
-    delta: 1000 / 60 // This locks it to 60fps
-});
-
-Runner.run(runner, engine);
+    Render.run(render);
+const runnerInstance = Runner.create({ isFixed: true, delta: 1000 / 60 });
+Runner.run(runnerInstance, engine);
 }
 
 function toggleLeaderboard() {
