@@ -343,9 +343,26 @@ function setupRace(names) {
         else { countDisplay.innerText = count; }
     }, 1000);
 
-    Render.run(render);
-const runnerInstance = Runner.create({ isFixed: true, delta: 1000 / 60 });
-Runner.run(runnerInstance, engine);
+    let lastTime = 0;
+const fps = 60;
+const physicsDelta = 1000 / fps;
+
+function update(time) {
+    // Calculate how much time passed since the last browser frame
+    const deltaTime = time - lastTime;
+
+    // Only update the physics engine if enough time has passed (16.6ms)
+    if (deltaTime >= physicsDelta) {
+        // We pass physicsDelta (16.66) to keep the simulation speed constant
+        Engine.update(engine, physicsDelta);
+        lastTime = time;
+    }
+
+    requestAnimationFrame(update);
+}
+
+Render.run(render);
+requestAnimationFrame(update);
 }
 
 function toggleLeaderboard() {
