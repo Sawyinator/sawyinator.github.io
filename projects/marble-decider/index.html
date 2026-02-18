@@ -33,7 +33,14 @@
             border-radius: 12px; min-width: 280px; max-height: 80vh; overflow-y: auto; 
             backdrop-filter: blur(8px); display: none;
         }
-        .leader-row { display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; }
+        .leader-row { 
+    display: grid; 
+    grid-template-columns: 1fr 80px; /* Changed from 3 columns to 2 */
+    gap: 10px; 
+    margin-bottom: 8px; 
+    font-size: 0.85rem; 
+    font-weight: bold; 
+}
         .finished-row { border-left: 3px solid var(--gold); background: rgba(252, 211, 77, 0.1); padding-left: 5px; }
         .header-row { font-size: 0.65rem; color: #64748b; border-bottom: 1px solid #334155; }
         
@@ -61,9 +68,9 @@
 
 <div id="lobby">
     <div class="lobby-box">
-        <h1 style="color:var(--acc)">MARBLE RACE</h1>
+        <h1 style="color:var(--acc)">MARBLE DECIDER</h1>
         <textarea id="nameInput" placeholder="Enter Names">Alpha&#10;Beta&#10;Gamma&#10;Delta&#10;Epsilon&#10;Zeta&#10;Eta&#10;Theta&#10;Iota&#10;Kappa</textarea>
-        <button class="start-btn" id="startBtn">START GAME</button>
+        <button class="start-btn" id="startBtn">START RACE</button>
     </div>
 </div>
 
@@ -77,7 +84,7 @@
 
 <div id="overlay"><div id="countdown">3</div></div>
 <div id="leaderboard">
-    <div class="leader-row header-row"><span>Racer</span><span style="text-align:right">Status</span><span style="text-align:right">Gap</span></div>
+    <div class="leader-row header-row"><span>Racer</span></div>
     <div id="leader-list"></div>
 </div>
 
@@ -237,18 +244,43 @@ function setupRace(names) {
     Composite.add(engine.world, marbles);
 
     Events.on(engine, 'afterUpdate', () => {
-        const active = marbles.filter(m => !m.isFinished).sort((a, b) => b.position.y - a.position.y);
-        let html = '';
-        finishedMarbles.slice(0, 10).forEach((m, i) => {
-            html += `<div class="leader-row finished-row" style="color:${m.render.textColor}"><span>${i + 1}. ${m.label}</span><span style="text-align:right">FINISH</span><span>-</span></div>`;
-        });
-        active.slice(0, 10 - finishedMarbles.length).forEach((m, i) => {
-            const dist = Math.max(0, (finishLineY - m.position.y) / 100).toFixed(1) + 'm';
-            html += `<div class="leader-row" style="color:${m.render.textColor}"><span>${finishedMarbles.length + i + 1}. ${m.label}</span><span>${dist}</span><span>-</span></div>`;
-        });
-        document.getElementById('leader-list').innerHTML = html;
-        if (active.length === 0 && !autoResultsShown && marbles.length > 0) { autoResultsShown = true; showFullResults(); }
+    // Get marbles still racing, sorted by Y position (highest Y is "further down" the track)
+    const active = marbles.filter(m => !m.isFinished).sort((a, b) => b.position.y - a.position.y);
+    let html = '';
+
+    // 1. Render Finished Marbles (No gap needed once finished)
+    finishedMarbles.slice(0, 10).forEach((m, i) => {
+        html += `<div class="leader-row finished-row" style="color:${m.render.textColor}">
+                    <span>${i + 1}. ${m.label}</span>
+                    <span style="text-align:right; font-size: 0.7rem; opacity: 0.8;">FINISH</span>
+                 </div>`;
     });
+
+    // 2. Render Active Marbles with Gap logic
+    active.slice(0, 10 - finishedMarbles.length).forEach((m, i) => {
+        let gapDisplay = '-';
+        
+        // Calculate gap to the marble directly behind this one
+        const marbleBehind = active[i + 1];
+        if (marbleBehind) {
+            // Calculate pixel difference and convert to a "meter" scale
+            const gapPixels = m.position.y - marbleBehind.position.y;
+            gapDisplay = `+${(gapPixels / 50).toFixed(1)}m`;
+        }
+
+        html += `<div class="leader-row" style="color:${m.render.textColor}">
+                    <span>${finishedMarbles.length + i + 1}. ${m.label}</span>
+                    <span style="text-align:right">${gapDisplay}</span>
+                 </div>`;
+    });
+
+    document.getElementById('leader-list').innerHTML = html;
+    
+    if (active.length === 0 && !autoResultsShown && marbles.length > 0) { 
+        autoResultsShown = true; 
+        showFullResults(); 
+    }
+});
 
     Events.on(engine, 'collisionStart', (e) => {
         e.pairs.forEach(p => {
