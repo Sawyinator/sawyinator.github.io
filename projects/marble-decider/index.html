@@ -343,27 +343,57 @@ function setupRace(names) {
         else { countDisplay.innerText = count; }
     }, 1000);
 
+    // Stop the automatic renderer and runner
+    // We will now control them manually to stay in sync
+    
     let lastTime = 0;
-const fps = 60;
-const physicsDelta = 1000 / fps;
+    const fps = 60;
+    const physicsDelta = 1000 / fps;
 
-function update(time) {
-    // Calculate how much time passed since the last browser frame
-    const deltaTime = time - lastTime;
+    function update(time) {
+        const deltaTime = time - lastTime;
 
-    // Only update the physics engine if enough time has passed (16.6ms)
-    if (deltaTime >= physicsDelta) {
-        // We pass physicsDelta (16.66) to keep the simulation speed constant
-        Engine.update(engine, physicsDelta);
-        lastTime = time;
+        if (deltaTime >= physicsDelta) {
+            // 1. Update Physics
+            Engine.update(engine, physicsDelta);
+            
+            // 2. Update Camera/Follow logic
+            const followTargets = marbles.filter(m => !m.isFinished);
+            if (followTargets.length > 0) {
+                const leadY = Math.max(...followTargets.map(m => m.position.y));
+                camY += (leadY - camY - (window.innerHeight / 3)) * 0.1; 
+            }
+            Render.lookAt(render, { 
+                min: { x: cx - window.innerWidth/2, y: camY }, 
+                max: { x: cx + window.innerWidth/2, y: camY + window.innerHeight } 
+            });
+
+            // 3. Draw the frame
+            // This ensures we only draw when the physics actually change
+            Render.world(render);
+            
+            // 4. Draw labels (Custom overlay)
+            const ctx = render.context;
+            ctx.font = 'bold 20px "Segoe UI"';
+            ctx.textAlign = 'center';
+            marbles.forEach(m => {
+                if(!m.isFinished) {
+                    const x = m.position.x - render.bounds.min.x;
+                    const y = m.position.y - render.bounds.min.y;
+                    ctx.fillStyle = m.render.textColor;
+                    ctx.fillText(m.label, x, y - 35);
+                }
+            });
+
+            lastTime = time;
+        }
+
+        requestAnimationFrame(update);
     }
 
+    // Start the manual loop
     requestAnimationFrame(update);
-}
-
-Render.run(render);
-requestAnimationFrame(update);
-}
+} // End of setupRace
 
 function toggleLeaderboard() {
     const lb = document.getElementById('leaderboard');
