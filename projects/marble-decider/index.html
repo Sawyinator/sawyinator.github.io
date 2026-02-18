@@ -63,7 +63,7 @@
     <div class="lobby-box">
         <h1 style="color:var(--acc)">MARBLE RACE</h1>
         <textarea id="nameInput" placeholder="Enter Names">Alpha&#10;Beta&#10;Gamma&#10;Delta&#10;Epsilon&#10;Zeta&#10;Eta&#10;Theta&#10;Iota&#10;Kappa</textarea>
-        <button class="start-btn" onclick="initiateRace()">START GAME</button>
+        <button class="start-btn" id="startBtn">START GAME</button>
     </div>
 </div>
 
@@ -71,7 +71,7 @@
     <div class="results-box">
         <h2 style="color:var(--gold); text-align:center; margin-top:0;">🏆 FINAL STANDINGS 🏆</h2>
         <div id="full-results-list"></div>
-        <button class="start-btn" style="width:100%; margin-top:20px;" onclick="document.getElementById('results-modal').style.display='none'">CLOSE</button>
+        <button class="start-btn" style="width:100%; margin-top:20px;" id="closeResults">CLOSE</button>
     </div>
 </div>
 
@@ -82,9 +82,9 @@
 </div>
 
 <div id="controls">
-    <button class="ui-btn results-btn" id="resBtn" onclick="showFullResults()">FULL RESULTS</button>
-    <button class="ui-btn toggle-btn" onclick="toggleLeaderboard()">HIDE/SHOW BOARD</button>
-    <button class="ui-btn reset-btn" onclick="location.reload()">BACK TO LOBBY</button>
+    <button class="ui-btn results-btn" id="resBtn">FULL RESULTS</button>
+    <button class="ui-btn toggle-btn" id="toggleBoard">HIDE/SHOW BOARD</button>
+    <button class="ui-btn reset-btn" id="reloadBtn">BACK TO LOBBY</button>
 </div>
 
 <script>
@@ -93,9 +93,33 @@ const { Engine, Render, Runner, Bodies, Composite, Events, Constraint, Body } = 
 let engine, render, runner, marbles = [], finishedMarbles = [], finishLineY = 0;
 let camY = 0, autoResultsShown = false;
 
-const SEG_HEIGHT = 900; 
-const TRACK_WIDTH = 800; 
+// --- INITIALIZATION ---
+window.onload = function() {
+    const nameBox = document.getElementById('nameInput');
+    const startBtn = document.getElementById('startBtn');
 
+    // Load saved names
+    const saved = localStorage.getItem('marbleRacerNames');
+    if (saved) nameBox.value = saved;
+
+    // Attach Start Event
+    startBtn.onclick = function() {
+        const val = nameBox.value;
+        const names = val.split('\n').map(n => n.trim()).filter(n => n);
+        if (names.length > 0) {
+            localStorage.setItem('marbleRacerNames', val);
+            initiateRace(names);
+        }
+    };
+
+    // Attach UI helper events
+    document.getElementById('reloadBtn').onclick = () => location.reload();
+    document.getElementById('toggleBoard').onclick = toggleLeaderboard;
+    document.getElementById('closeResults').onclick = () => document.getElementById('results-modal').style.display='none';
+    document.getElementById('resBtn').onclick = showFullResults;
+};
+
+const SEG_HEIGHT = 900; 
 const TrackModules = [
     {
         name: "Deep Funnel",
@@ -148,14 +172,9 @@ const TrackModules = [
             const stepStyle = { isStatic: true, chamfer: { radius: 40 }, render: { fillStyle: '#10b981', strokeStyle: '#064e3b', lineWidth: 5 } };
             for (let i = 0; i < 4; i++) {
                 const isLeft = i % 2 === 0;
-                // Extended width to ensure obstacles penetrate side walls
                 const width = 700; 
-                // Offset position so the bars anchor deep into the wall and extend past the center
                 const xPos = isLeft ? cx - 380 : cx + 380;
-                Composite.add(world, Bodies.rectangle(xPos, y + (i * 220), width, 90, { 
-                    ...stepStyle, 
-                    angle: isLeft ? 0.7 : -0.7 
-                }));
+                Composite.add(world, Bodies.rectangle(xPos, y + (i * 220), width, 90, { ...stepStyle, angle: isLeft ? 0.7 : -0.7 }));
             }
         }
     },
@@ -171,9 +190,7 @@ const TrackModules = [
     }
 ];
 
-function initiateRace() {
-    const names = document.getElementById('nameInput').value.split('\n').map(n => n.trim()).filter(n => n);
-    if (!names.length) return;
+function initiateRace(names) {
     document.getElementById('lobby').style.display = 'none';
     document.getElementById('leaderboard').style.display = 'block';
     document.getElementById('controls').style.display = 'flex';
@@ -189,8 +206,8 @@ function setupRace(names) {
 
     const cx = window.innerWidth / 2;
     const trackDepth = 12; 
-
     let currentY = 400;
+
     for(let i = 0; i < trackDepth; i++) {
         const randModule = TrackModules[Math.floor(Math.random() * TrackModules.length)];
         randModule.create(engine.world, currentY, cx);
@@ -198,9 +215,9 @@ function setupRace(names) {
     }
 
     finishLineY = currentY;
-    
     const wallWidth = 2000;
     const wallStyle = { isStatic: true, friction: 0.1, restitution: 0.3, render: { fillStyle: '#0f172a' } };
+    
     Composite.add(engine.world, [
         Bodies.rectangle(cx - 410 - (wallWidth/2), currentY/2, wallWidth, currentY + 5000, wallStyle),
         Bodies.rectangle(cx + 410 + (wallWidth/2), currentY/2, wallWidth, currentY + 5000, wallStyle),
@@ -213,12 +230,8 @@ function setupRace(names) {
     marbles = names.map((n, i) => {
         const color = `hsl(${i * (360/names.length)}, 70%, 55%)`;
         return Bodies.circle(cx - 150 + (i*42 % 300), 100, 20, { 
-            restitution: 0.4, 
-            friction: 0.002, 
-            frictionAir: 0.005, 
-            label: n, 
-            render: { fillStyle: color, textColor: color }, 
-            isFinished: false 
+            restitution: 0.4, friction: 0.002, frictionAir: 0.005, label: n, 
+            render: { fillStyle: color, textColor: color }, isFinished: false 
         });
     });
     Composite.add(engine.world, marbles);
