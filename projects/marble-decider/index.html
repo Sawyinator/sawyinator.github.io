@@ -363,24 +363,32 @@ function setupRace(names) {
     Composite.add(engine.world, gate);
 
     // GRID SPAWNING (Maintained for overlap prevention)
-    const marbleRadius = 15; 
+    const marbleRadius = 20; 
     const padding = 4;
     const cellSize = (marbleRadius * 2) + padding;
     const gateWidth = 780; 
     const marblesPerRow = Math.floor(gateWidth / cellSize);
 
     marbles = names.map((n, i) => {
-        const color = `hsl(${i * (360/names.length)}, 70%, 55%)`;
-        const row = Math.floor(i / marblesPerRow);
-        const col = i % marblesPerRow;
-        const startX = (cx - gateWidth / 2) + (col * cellSize) + (cellSize / 2);
-        const startY = 150 - (row * cellSize); 
+    const color = `hsl(${i * (360/names.length)}, 70%, 55%)`;
+    const row = Math.floor(i / marblesPerRow);
+    const col = i % marblesPerRow;
 
-        return Bodies.circle(startX, startY, marbleRadius, { 
-            restitution: 0.4, friction: 0.002, frictionAir: 0.005, label: n, 
-            render: { fillStyle: color, textColor: color }, isFinished: false, finishTime: null
-        });
+    // Calculate how many marbles are actually in THIS specific row
+    const marblesInThisRow = Math.min(marblesPerRow, names.length - (row * marblesPerRow));
+    
+    // Calculate the total width this row takes up
+    const rowWidth = (marblesInThisRow - 1) * cellSize;
+    
+    // Center the row by starting at (Center - Half of the row's width)
+    const startX = cx - (rowWidth / 2) + (col * cellSize);
+    const startY = 150 - (row * cellSize); 
+
+    return Bodies.circle(startX, startY, marbleRadius, { 
+        restitution: 0.4, friction: 0.002, frictionAir: 0.005, label: n, 
+        render: { fillStyle: color, textColor: color }, isFinished: false, finishTime: null
     });
+});
     Composite.add(engine.world, marbles);
 
     Events.on(engine, 'afterUpdate', () => {
@@ -461,7 +469,7 @@ function setupRace(names) {
             Render.world(render);
             
             const ctx = render.context;
-            ctx.font = 'bold 14px "Segoe UI"'; 
+            ctx.font = 'bold 20px "Segoe UI"'; 
             ctx.textAlign = 'center';
 
             const minY = render.bounds.min.y - 50;
