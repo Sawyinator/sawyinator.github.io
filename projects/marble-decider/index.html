@@ -199,7 +199,7 @@ const TrackModules = [
                 const xPos = cx - 200 + (i * 400);
                 const weight = Bodies.rectangle(xPos, y + 600, 300, 100, { 
                     render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 30 }, 
-                    frictionAir: 0.01, restitution: 0.9, inertia: 4000 
+                    frictionAir: 0.02, restitution: 0.7, inertia: 7500 
                 });
                 const pivot = Constraint.create({ 
                     pointA: { x: xPos, y: y + 150 }, bodyB: weight, stiffness: 0.01, length: 400,
