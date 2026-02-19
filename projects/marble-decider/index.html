@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Marble Decider</title>
+    <title>Marble Decider - Refined Track</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -156,16 +156,81 @@ window.onload = function() {
 };
 
 const SEG_HEIGHT = 900; 
+
+const createGuides = (world, y, cx) => {
+    const wallStyle = { isStatic: true, render: { fillStyle: '#0f172a' } };
+    Composite.add(world, [
+        Bodies.rectangle(cx - 350, y + 100, 300, 60, { ...wallStyle, angle: 0.5 }),
+        Bodies.rectangle(cx + 350, y + 100, 300, 60, { ...wallStyle, angle: -0.5 })
+    ]);
+};
+
 const TrackModules = [
     {
-        name: "Deep Funnel",
+        name: "The Mixer",
         create: (world, y, cx) => {
-            const wallStyle = { isStatic: true, chamfer: { radius: 30 }, restitution: 0.2, render: { fillStyle: '#0f172a', strokeStyle: '#fcd34d', lineWidth: 8 } };
-            Composite.add(world, [
-                Bodies.rectangle(cx - 320, y + 250, 550, 110, { ...wallStyle, angle: 0.75 }),
-                Bodies.rectangle(cx + 320, y + 250, 550, 110, { ...wallStyle, angle: -0.75 }),
-                Bodies.circle(cx, y + 550, 80, { isStatic: true, restitution: 0.3, render: { fillStyle: '#38bdf8', strokeStyle: '#fff', lineWidth: 2 } })
-            ]);
+            createGuides(world, y, cx);
+            const parts = [];
+            for(let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2;
+                parts.push(Bodies.rectangle(cx + Math.cos(angle) * 120, y + 500 + Math.sin(angle) * 120, 320, 80, { 
+                    angle: angle, chamfer: { radius: 20 }, render: { fillStyle: '#f43f5e', strokeStyle: '#fff', lineWidth: 3 } 
+                }));
+            }
+            const spinner = Body.create({ parts: parts, isStatic: false });
+            const constraint = Constraint.create({ pointA: { x: cx, y: y + 500 }, bodyB: spinner, stiffness: 1, length: 0 });
+            Composite.add(world, [spinner, constraint]);
+            Events.on(engine, 'beforeUpdate', () => Body.rotate(spinner, 0.04));
+        }
+    },
+    {
+        name: "The Great Tightrope",
+        create: (world, y, cx) => {
+            const wallStyle = { isStatic: true, render: { fillStyle: '#1e293b', strokeStyle: '#fcd34d', lineWidth: 4 } };
+            const splitter = Bodies.polygon(cx, y + 450, 4, 180, { ...wallStyle, angle: Math.PI / 4 });
+            Composite.add(world, splitter);
+            
+            [cx - 300, cx + 300].forEach((xPos, i) => {
+                const gate = Bodies.rectangle(xPos, y + 750, 240, 70, { 
+                    render: { fillStyle: '#fcd34d' }, chamfer: { radius: 15 } 
+                });
+                const cons = Constraint.create({ pointA: { x: xPos, y: y + 750 }, bodyB: gate, stiffness: 1, length: 0 });
+                Composite.add(world, [gate, cons]);
+                Events.on(engine, 'beforeUpdate', () => Body.rotate(gate, i === 0 ? 0.08 : -0.08));
+            });
+        }
+    },
+    {
+        name: "Centripetal Slingshot",
+        create: (world, y, cx) => {
+            createGuides(world, y, cx);
+            [cx - 240, cx + 240].forEach((xPos, i) => {
+                const sat = Bodies.rectangle(xPos + (i === 0 ? 100 : -100), y + 500, 280, 80, { 
+                    render: { fillStyle: '#a855f7', strokeStyle: '#fff', lineWidth: 2 }, chamfer: { radius: 20 }
+                });
+                const cons = Constraint.create({ pointA: { x: xPos, y: y + 500 }, bodyB: sat, stiffness: 1, length: 0 });
+                Composite.add(world, [sat, cons]);
+                Events.on(engine, 'beforeUpdate', () => Body.rotate(sat, i === 0 ? 0.15 : -0.15));
+            });
+        }
+    },
+    {
+        name: "Heavy Pendulum Squeeze",
+        create: (world, y, cx) => {
+            for(let i = 0; i < 2; i++) {
+                const xPos = cx - 200 + (i * 400);
+                const weight = Bodies.rectangle(xPos, y + 600, 300, 100, { 
+                    render: { fillStyle: '#10b981' }, chamfer: { radius: 30 }, frictionAir: 0
+                });
+                const pivot = Constraint.create({ 
+                    pointA: { x: xPos, y: y + 150 }, 
+                    bodyB: weight, 
+                    stiffness: 0.05, 
+                    length: 400,
+                    render: { strokeStyle: '#334155', lineWidth: 8 }
+                });
+                Composite.add(world, [weight, pivot]);
+            }
         }
     },
     {
@@ -186,9 +251,29 @@ const TrackModules = [
                 const spinner = Body.create({ parts: parts, isStatic: false });
                 const constraint = Constraint.create({ pointA: { x: xPos, y: y + 450 }, bodyB: spinner, stiffness: 1, length: 0 });
                 Composite.add(world, [spinner, constraint]);
-                const speed = idx === 0 ? 0.07 : -0.07;
-                Events.on(engine, 'beforeUpdate', () => Body.rotate(spinner, speed));
+                Events.on(engine, 'beforeUpdate', () => Body.rotate(spinner, idx === 0 ? 0.07 : -0.07));
             });
+        }
+    },
+    {
+        name: "Zig-Zag Plunge",
+        create: (world, y, cx) => {
+            const stepStyle = { isStatic: true, chamfer: { radius: 40 }, render: { fillStyle: '#10b981', strokeStyle: '#064e3b', lineWidth: 5 } };
+            for (let i = 0; i < 5; i++) {
+                const isLeft = i % 2 === 0;
+                Composite.add(world, Bodies.rectangle(isLeft ? cx - 350 : cx + 350, y + (i * 180), 750, 100, { ...stepStyle, angle: isLeft ? 0.5 : -0.5 }));
+            }
+        }
+    },
+    {
+        name: "Deep Funnel",
+        create: (world, y, cx) => {
+            const wallStyle = { isStatic: true, chamfer: { radius: 30 }, restitution: 0.2, render: { fillStyle: '#0f172a', strokeStyle: '#fcd34d', lineWidth: 8 } };
+            Composite.add(world, [
+                Bodies.rectangle(cx - 320, y + 250, 550, 110, { ...wallStyle, angle: 0.75 }),
+                Bodies.rectangle(cx + 320, y + 250, 550, 110, { ...wallStyle, angle: -0.75 }),
+                Bodies.circle(cx, y + 550, 80, { isStatic: true, restitution: 0.3, render: { fillStyle: '#38bdf8', strokeStyle: '#fff', lineWidth: 2 } })
+            ]);
         }
     },
     {
@@ -200,18 +285,6 @@ const TrackModules = [
                 Bodies.rectangle(cx + 250, y + 300, 500, 80, { ...wallStyle, angle: -0.8 }),
                 Bodies.polygon(cx, y + 650, 3, 70, { isStatic: true, restitution: 0.8, angle: Math.PI, render: { fillStyle: '#f43f5e' } })
             ]);
-        }
-    },
-    {
-        name: "Zig-Zag Plunge",
-        create: (world, y, cx) => {
-            const stepStyle = { isStatic: true, chamfer: { radius: 40 }, render: { fillStyle: '#10b981', strokeStyle: '#064e3b', lineWidth: 5 } };
-            for (let i = 0; i < 4; i++) {
-                const isLeft = i % 2 === 0;
-                const width = 700; 
-                const xPos = isLeft ? cx - 380 : cx + 380;
-                Composite.add(world, Bodies.rectangle(xPos, y + (i * 220), width, 90, { ...stepStyle, angle: isLeft ? 0.7 : -0.7 }));
-            }
         }
     },
     {
@@ -243,9 +316,17 @@ function setupRace(names) {
     const cx = window.innerWidth / 2;
     const trackDepth = 12; 
     let currentY = 400;
+    let lastModuleIndex = -1;
 
     for(let i = 0; i < trackDepth; i++) {
-        const randModule = TrackModules[Math.floor(Math.random() * TrackModules.length)];
+        let randIndex;
+        // Ensure the same module doesn't generate twice in a row
+        do {
+            randIndex = Math.floor(Math.random() * TrackModules.length);
+        } while (randIndex === lastModuleIndex);
+        
+        lastModuleIndex = randIndex;
+        const randModule = TrackModules[randIndex];
         randModule.create(engine.world, currentY, cx);
         currentY += SEG_HEIGHT;
     }
@@ -310,7 +391,6 @@ function setupRace(names) {
             const marble = p.bodyA.label === 'finish' ? p.bodyB : (p.bodyB.label === 'finish' ? p.bodyA : null);
             if (marble && !marble.isFinished) {
                 marble.isFinished = true;
-                // Calculate time based on current performance clock
                 marble.finishTime = ((performance.now() - startTime) / 1000).toFixed(2);
                 finishedMarbles.push(marble);
                 document.getElementById('resBtn').style.display = 'block';
@@ -328,7 +408,7 @@ function setupRace(names) {
             clearInterval(timer); 
             overlay.style.display = 'none'; 
             Composite.remove(engine.world, gate); 
-            startTime = performance.now(); // Record the exact start time
+            startTime = performance.now(); 
         }
         else { countDisplay.innerText = count; }
     }, 1000);
