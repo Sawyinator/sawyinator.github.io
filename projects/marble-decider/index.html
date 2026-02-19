@@ -133,7 +133,6 @@ const { Engine, Render, Runner, Bodies, Composite, Events, Constraint, Body } = 
 let engine, render, runner, marbles = [], finishedMarbles = [], finishLineY = 0;
 let camY = 0, autoResultsShown = false, startTime = null;
 
-// Restyled Guides
 const createGuides = (world, y, cx) => {
     const wallStyle = { isStatic: true, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 2 } };
     Composite.add(world, [
@@ -142,7 +141,6 @@ const createGuides = (world, y, cx) => {
     ]);
 };
 
-// Restyled Obstacles
 const TrackModules = [
     {
         name: "The Mixer",
@@ -312,6 +310,7 @@ function initiateRace(names) {
 }
 
 function setupRace(names) {
+    // Reset back to original iterations for performance
     engine = Engine.create({ positionIterations: 10, velocityIterations: 10 }); 
     render = Render.create({
         element: document.body, engine: engine,
@@ -332,10 +331,7 @@ function setupRace(names) {
         currentY += SEG_HEIGHT;
     }
 
-    // FIX 1: Add a buffer zone (400px) after the last module
     finishLineY = currentY + 400;
-    
-    // Restyled Structural Walls
     const wallWidth = 2000;
     const wallStyle = { isStatic: true, friction: 0.1, restitution: 0.3, render: { fillStyle: '#010a01', strokeStyle: '#14532d', lineWidth: 1 } };
     
@@ -344,7 +340,6 @@ function setupRace(names) {
         Bodies.rectangle(cx + 410 + (wallWidth/2), currentY/2 + 2500, wallWidth, currentY + 10000, wallStyle)
     ]);
 
-    // FIX 2: Create a checkered finish line pattern
     const checkerCanvas = document.createElement('canvas');
     const checkerCtx = checkerCanvas.getContext('2d');
     checkerCanvas.width = 40; checkerCanvas.height = 40;
@@ -354,20 +349,29 @@ function setupRace(names) {
 
     Composite.add(engine.world, [
         Bodies.rectangle(cx, finishLineY, 820, 120, { 
-            isStatic: true, 
-            isSensor: true, 
-            label: 'finish', 
+            isStatic: true, isSensor: true, label: 'finish', 
             render: { fillStyle: finishPattern, strokeStyle: '#64ff4e', lineWidth: 6 } 
         })
     ]);
 
-    // Restyled Gate
     const gate = Bodies.rectangle(cx, 180, 800, 80, { isStatic: true, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 5 } });
     Composite.add(engine.world, gate);
 
+    // GRID SPAWNING (Maintained for overlap prevention)
+    const marbleRadius = 15; 
+    const padding = 4;
+    const cellSize = (marbleRadius * 2) + padding;
+    const gateWidth = 780; 
+    const marblesPerRow = Math.floor(gateWidth / cellSize);
+
     marbles = names.map((n, i) => {
         const color = `hsl(${i * (360/names.length)}, 70%, 55%)`;
-        return Bodies.circle(cx - 150 + (i*42 % 300), 100, 20, { 
+        const row = Math.floor(i / marblesPerRow);
+        const col = i % marblesPerRow;
+        const startX = (cx - gateWidth / 2) + (col * cellSize) + (cellSize / 2);
+        const startY = 150 - (row * cellSize); 
+
+        return Bodies.circle(startX, startY, marbleRadius, { 
             restitution: 0.4, friction: 0.002, frictionAir: 0.005, label: n, 
             render: { fillStyle: color, textColor: color }, isFinished: false, finishTime: null
         });
@@ -393,8 +397,6 @@ function setupRace(names) {
     Events.on(engine, 'collisionStart', (e) => {
         e.pairs.forEach(p => {
             const marble = p.bodyA.label === 'finish' ? p.bodyB : (p.bodyB.label === 'finish' ? p.bodyA : null);
-            
-            // FIX 3: Filter collisions so only named marbles (not "Body") trigger the finish line
             if (marble && !marble.isFinished && marble.label && !marble.label.includes('Body')) {
                 marble.isFinished = true;
                 marble.finishTime = ((performance.now() - startTime) / 1000).toFixed(2);
@@ -418,6 +420,7 @@ function setupRace(names) {
     }, 1000);
 
     let lastTime = 0;
+    // OPTIMIZED DRAW LOOP (Maintained for framerate)
     function update(time) {
         if (time - lastTime >= (1000/60)) {
             Engine.update(engine, 1000/60);
@@ -428,13 +431,20 @@ function setupRace(names) {
             }
             Render.lookAt(render, { min: { x: cx - window.innerWidth/2, y: camY }, max: { x: cx + window.innerWidth/2, y: camY + window.innerHeight } });
             Render.world(render);
+            
             const ctx = render.context;
-            ctx.font = 'bold 20px "Segoe UI"'; ctx.textAlign = 'center';
+            ctx.font = 'bold 14px "Segoe UI"'; 
+            ctx.textAlign = 'center';
+
+            const minY = render.bounds.min.y - 50;
+            const maxY = render.bounds.max.y + 50;
+
             marbles.forEach(m => {
-                if(!m.isFinished) {
+                if(!m.isFinished && m.position.y > minY && m.position.y < maxY) {
                     const x = m.position.x - render.bounds.min.x;
                     const y = m.position.y - render.bounds.min.y;
-                    ctx.fillStyle = m.render.textColor; ctx.fillText(m.label, x, y - 35);
+                    ctx.fillStyle = m.render.textColor; 
+                    ctx.fillText(m.label, x, y - 25);
                 }
             });
             lastTime = time;
