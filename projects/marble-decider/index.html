@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Marble Decider</title>
+    <title>Marble Decider - Natural Pendulums</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -177,10 +177,10 @@ const TrackModules = [
                     angle: angle, chamfer: { radius: 20 }, render: { fillStyle: '#f43f5e', strokeStyle: '#fff', lineWidth: 3 } 
                 }));
             }
-            const spinner = Body.create({ parts: parts, isStatic: false });
+            const spinner = Body.create({ parts: parts, isStatic: false, frictionAir: 0 });
             const constraint = Constraint.create({ pointA: { x: cx, y: y + 500 }, bodyB: spinner, stiffness: 1, length: 0 });
             Composite.add(world, [spinner, constraint]);
-            Events.on(engine, 'beforeUpdate', () => Body.rotate(spinner, 0.04));
+            Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(spinner, 0.05));
         }
     },
     {
@@ -192,11 +192,11 @@ const TrackModules = [
             
             [cx - 300, cx + 300].forEach((xPos, i) => {
                 const gate = Bodies.rectangle(xPos, y + 750, 240, 70, { 
-                    render: { fillStyle: '#fcd34d' }, chamfer: { radius: 15 } 
+                    render: { fillStyle: '#fcd34d' }, chamfer: { radius: 15 }, frictionAir: 0
                 });
                 const cons = Constraint.create({ pointA: { x: xPos, y: y + 750 }, bodyB: gate, stiffness: 1, length: 0 });
                 Composite.add(world, [gate, cons]);
-                Events.on(engine, 'beforeUpdate', () => Body.rotate(gate, i === 0 ? 0.08 : -0.08));
+                Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(gate, i === 0 ? 0.08 : -0.08));
             });
         }
     },
@@ -206,11 +206,11 @@ const TrackModules = [
             createGuides(world, y, cx);
             [cx - 240, cx + 240].forEach((xPos, i) => {
                 const sat = Bodies.rectangle(xPos + (i === 0 ? 100 : -100), y + 500, 280, 80, { 
-                    render: { fillStyle: '#a855f7', strokeStyle: '#fff', lineWidth: 2 }, chamfer: { radius: 20 }
+                    render: { fillStyle: '#a855f7', strokeStyle: '#fff', lineWidth: 2 }, chamfer: { radius: 20 }, frictionAir: 0
                 });
                 const cons = Constraint.create({ pointA: { x: xPos, y: y + 500 }, bodyB: sat, stiffness: 1, length: 0 });
                 Composite.add(world, [sat, cons]);
-                Events.on(engine, 'beforeUpdate', () => Body.rotate(sat, i === 0 ? 0.15 : -0.15));
+                Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(sat, i === 0 ? 0.18 : -0.18));
             });
         }
     },
@@ -221,9 +221,9 @@ const TrackModules = [
                 const xPos = cx - 200 + (i * 400);
                 const weight = Bodies.rectangle(xPos, y + 600, 300, 100, { 
                     render: { fillStyle: '#10b981' }, chamfer: { radius: 30 }, 
-                    frictionAir: 0, // Removed air resistance so it keeps spinning easily
-                    restitution: 0.8,
-                    inertia: 5000 // Lowered inertia to make it spin more easily when hit on the side
+                    frictionAir: 0.01, // Increased air resistance as requested
+                    restitution: 0.9,
+                    inertia: 4000 
                 });
                 const pivot = Constraint.create({ 
                     pointA: { x: xPos, y: y + 150 }, 
@@ -233,6 +233,7 @@ const TrackModules = [
                     render: { strokeStyle: '#334155', lineWidth: 8 }
                 });
                 Composite.add(world, [weight, pivot]);
+                // Motor/Force logic removed here for natural physics
             }
         }
     },
@@ -251,10 +252,10 @@ const TrackModules = [
                         { angle: angle, chamfer: { radius: 20 }, render: { fillStyle: '#a855f7', strokeStyle: '#fff', lineWidth: 2 } }
                     ));
                 }
-                const spinner = Body.create({ parts: parts, isStatic: false });
+                const spinner = Body.create({ parts: parts, isStatic: false, frictionAir: 0 });
                 const constraint = Constraint.create({ pointA: { x: xPos, y: y + 450 }, bodyB: spinner, stiffness: 1, length: 0 });
                 Composite.add(world, [spinner, constraint]);
-                Events.on(engine, 'beforeUpdate', () => Body.rotate(spinner, idx === 0 ? 0.07 : -0.07));
+                Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(spinner, idx === 0 ? 0.1 : -0.1));
             });
         }
     },
