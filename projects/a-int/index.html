@@ -198,7 +198,31 @@
             transform: translateY(0);
             filter: brightness(0.9);
         }
-    </style>
+        .manual-input {
+    background: transparent;
+    border: 1px solid #444;
+    color: var(--accent);
+    font-weight: bold;
+    font-size: 1rem;
+    width: 50px;
+    border-radius: 4px;
+    text-align: center;
+    margin-left: 5px;
+    }
+
+    /* Hide the spin buttons for a cleaner look */
+    .manual-input::-webkit-inner-spin-button,
+    .manual-input::-webkit-outer-spin-button {
+     -webkit-appearance: none;
+     margin: 0;
+    }
+    #question-display {
+    /* ... existing styles ... */
+    word-wrap: break-word;
+    font-size: clamp(1.5rem, 8vw, 4rem); /* Shrinks as the number gets longer */
+    max-width: 100%;
+}
+</style>
 </head>
 <body>
 <a href="/" class="back-link">
@@ -244,7 +268,10 @@ Back to main website
         <h1>Arabic-Indic Number Trainer</h1>
         <div class="credit">By <span onclick="openProfile()">Sawyinator</span></div>
         <div class="controls">
-            <label id="menu-length-label">Digit Length: 4</label><br>
+            <label>Digit Length: </label>
+            <input type="number" id="menu-manual-len" class="manual-input" min="1" max="100" value="4" oninput="syncSliders(this.value)" 
+       onblur="syncSliders(this.value || 1)">
+             <br>
             <input type="range" id="menu-slider" min="1" max="16" value="4" oninput="syncLabels(this.value)" onchange="syncSliders(this.value)">
         </div>
         <button class="menu-btn" onclick="startMode('generator')">Free Practice</button>
@@ -321,8 +348,11 @@ Back to main website
 
     <div id="app-view" class="view-section hidden">
         <div id="practice-controls" class="controls">
-            <label id="app-length-label">Digit Length: 4</label><br>
-            <input type="range" id="app-slider" min="1" max="16" value="4" oninput="syncLabels(this.value)" onchange="syncSliders(this.value)">
+         <label>Digit Length: </label>
+         <input type="number" id="app-manual-len" class="manual-input" min="1" max="100" value="4" oninput="syncSliders(this.value)" 
+       onblur="syncSliders(this.value || 1)">
+         <br>
+         <input type="range" id="app-slider" min="1" max="16" value="4" oninput="syncLabels(this.value)" onchange="syncSliders(this.value)">
         </div>
         <div id="timer-bar-container" class="hidden"><div id="timer-bar"></div></div>
         <div id="question-display"></div>
@@ -652,16 +682,41 @@ document.addEventListener('keydown', function(event) {
         }
     }
 
-    function syncLabels(v) { document.getElementById('menu-length-label').innerText = `Digit Length: ${v}`; document.getElementById('app-length-label').innerText = `Digit Length: ${v}`; }
-    function syncSliders(v) { currentLen = parseInt(v); document.getElementById('menu-slider').value = v; document.getElementById('app-slider').value = v; quizInput.maxLength = currentLen; if(currentMode === 'generator') generate(); }
-    function toggleTheme() { document.body.classList.toggle('light-mode'); document.getElementById('theme-toggle').innerText = document.body.classList.contains('light-mode')?'☀️':'🌙'; }
-    function goBack() { if (history.length > 1) { history.pop(); display(history[history.length-1]); } }
+    function syncLabels(v) {
+    // Update the numerical input values
+    document.getElementById('menu-manual-len').value = v;
+    document.getElementById('app-manual-len').value = v;
+        }
+
+function syncSliders(v) {
+    // If the input is empty string, we let it stay empty so the user can type,
+    // but we treat the internal value as 1.
+    let val = v === "" ? "" : parseInt(v);
     
-    function loadSettings() {
-        const d = localStorage.getItem('allowed_digits'); if(d) allowedDigits = JSON.parse(d);
-        const l = localStorage.getItem('learning_script'); if(l) learningScript = l;
-        const b = localStorage.getItem('basis_script'); if(b) basisScript = b;
+    // Set the actual working length (defaulting to 1 if the box is empty)
+    currentLen = (val === "" || isNaN(val) || val < 1) ? 1 : val;
+
+    // Optional: Cap at 100 to prevent extreme lag
+    if (currentLen > 100) {
+        currentLen = 100;
+        val = 100;
     }
+
+    // Update both sliders (range sliders cannot handle empty/string, so use currentLen)
+    document.getElementById('menu-slider').value = currentLen;
+    document.getElementById('app-slider').value = currentLen;
+    
+    // Update both manual number inputs
+    // We use 'val' here so the box can actually show as empty while typing
+    document.getElementById('menu-manual-len').value = val;
+    document.getElementById('app-manual-len').value = val;
+
+    // Apply the length to the quiz input logic
+    quizInput.maxLength = currentLen; 
+    
+    // If in practice mode, refresh the number immediately
+    if(currentMode === 'generator') generate();
+}
 
     window.onload = () => { loadSettings(); initDropdowns(); };
 </script>
