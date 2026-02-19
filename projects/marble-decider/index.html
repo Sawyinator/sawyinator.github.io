@@ -119,11 +119,16 @@
 <div id="leaderboard">
     <div class="leader-row header-row"><span>Racer</span></div>
     <div id="leader-list"></div>
+    
+    <div id="recent-victors-container" style="display: none; margin-top: 20px; border-top: 1px solid var(--acc); padding-top: 10px;">
+        <div class="leader-row header-row"><span>Recent Victors</span><span style="text-align:right">Time</span></div>
+        <div id="recent-victors-list"></div>
+    </div>
 </div>
 
 <div id="controls">
     <button class="ui-btn results-btn" id="resBtn">FULL RESULTS</button>
-    <button class="ui-btn toggle-btn" id="toggleBoard">HIDE/SHOW LEADERBOARD</button>
+    <button class="ui-btn toggle-btn" id="toggleBoard">HIDE/SHOW LEADERBOARDS</button>
     <button class="ui-btn reset-btn" id="reloadBtn">BACK TO LOBBY</button>
 </div>
 
@@ -379,20 +384,43 @@ function setupRace(names) {
     Composite.add(engine.world, marbles);
 
     Events.on(engine, 'afterUpdate', () => {
-        const active = marbles.filter(m => !m.isFinished).sort((a, b) => b.position.y - a.position.y);
-        let html = '';
-        finishedMarbles.slice(0, 10).forEach((m, i) => {
-            html += `<div class="leader-row finished-row" style="color:${m.render.textColor}"><span>${i + 1}. ${m.label}</span><span style="text-align:right; font-size: 0.7rem; opacity: 0.8;">FINISH</span></div>`;
-        });
-        active.slice(0, 10 - finishedMarbles.length).forEach((m, i) => {
-            let gapDisplay = '-';
-            const marbleBehind = active[i + 1];
-            if (marbleBehind) gapDisplay = `+${((m.position.y - marbleBehind.position.y) / 50).toFixed(1)}m`;
-            html += `<div class="leader-row" style="color:${m.render.textColor}"><span>${finishedMarbles.length + i + 1}. ${m.label}</span><span style="text-align:right">${gapDisplay}</span></div>`;
-        });
-        document.getElementById('leader-list').innerHTML = html;
-        if (active.length === 0 && !autoResultsShown && marbles.length > 0) { autoResultsShown = true; showFullResults(); }
+    const active = marbles.filter(m => !m.isFinished).sort((a, b) => b.position.y - a.position.y);
+    
+    // 1. Update Live Leaderboard (Top 10 still racing)
+    let liveHtml = '';
+    active.slice(0, 10).forEach((m, i) => {
+        let gapDisplay = '-';
+        const marbleBehind = active[i + 1];
+        if (marbleBehind) gapDisplay = `+${((m.position.y - marbleBehind.position.y) / 50).toFixed(1)}m`;
+        liveHtml += `<div class="leader-row" style="color:${m.render.textColor}"><span>${finishedMarbles.length + i + 1}. ${m.label}</span><span style="text-align:right">${gapDisplay}</span></div>`;
     });
+    document.getElementById('leader-list').innerHTML = liveHtml;
+
+    // 2. Update Recent Victors (10 most recent)
+    if (finishedMarbles.length > 0) {
+        document.getElementById('recent-victors-container').style.display = 'block';
+        
+        // Get the 10 most recent (last items in finishedMarbles array, reversed)
+        const recent = [...finishedMarbles].reverse().slice(0, 10);
+        
+        let victorsHtml = '';
+        recent.forEach((m) => {
+            // Find overall rank
+            const rank = finishedMarbles.indexOf(m) + 1;
+            victorsHtml += `
+                <div class="leader-row finished-row" style="color:${m.render.textColor}; font-size: 0.75rem;">
+                    <span>#${rank} ${m.label}</span>
+                    <span style="text-align:right">${m.finishTime}s</span>
+                </div>`;
+        });
+        document.getElementById('recent-victors-list').innerHTML = victorsHtml;
+    }
+
+    if (active.length === 0 && !autoResultsShown && marbles.length > 0) { 
+        autoResultsShown = true; 
+        showFullResults(); 
+    }
+});
 
     Events.on(engine, 'collisionStart', (e) => {
         e.pairs.forEach(p => {
