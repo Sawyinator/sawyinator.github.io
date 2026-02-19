@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <link rel="icon" type="image/png" href="/assets/favicons/marble-decider-favicon.png">
@@ -26,12 +25,16 @@
     <meta property="twitter:title" content="Marble Decider">
     <meta property="twitter:description" content="Bascially just the wheel of names with a fancy way of deciding. Thought it was a fun idea.">
     <meta property="twitter:image" content="https://sawyinator.uk/assets/logos/marble-decider-logo.png">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <style>
     :root { 
         --bg: #010a01;          /* Deep dark green-black */
         --ui: #052e16;          /* Dark forest green for containers */
         --acc: #64ff4e;         /* Your primary bright green */
-        --acc-soft: #22c55e;    /* A slightly softer secondary green */
+        --gold: #fcd34d;        /* Restored Gold for results */
         --glass: rgba(5, 46, 22, 0.85); 
     }
 
@@ -39,110 +42,75 @@
         margin: 0; 
         overflow: hidden; 
         background: var(--bg); 
-        font-family: 'Segoe UI', 'Courier New', monospace; 
+        font-family: 'Segoe UI', sans-serif; 
         color: #dcfce7; 
     }
 
+    /* Back Home Button */
     .back-home {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        text-decoration: none;
-        color: var(--acc);
-        font-weight: bold;
-        background: var(--glass);
-        padding: 10px 20px;
-        border: 1px solid var(--acc);
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        box-shadow: 0 0 10px rgba(100, 255, 78, 0.2);
+        position: fixed; top: 20px; left: 20px;
+        text-decoration: none; color: var(--acc);
+        font-weight: bold; background: var(--glass);
+        padding: 10px 20px; border: 1px solid var(--acc);
+        border-radius: 8px; transition: all 0.3s ease;
     }
+    .back-home:hover { background: var(--acc); color: #052e16; }
 
-    .back-home:hover {
-        background: var(--acc);
-        color: #052e16;
-        box-shadow: 0 0 20px rgba(100, 255, 78, 0.5);
-    }
-
+    /* Lobby */
     #lobby {
         position: fixed; inset: 0; z-index: 500;
         background: radial-gradient(circle at center, #052e16 0%, #010a01 100%);
         display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-
     .lobby-box {
         background: var(--ui); padding: 40px; border: 1px solid var(--acc);
         border-radius: 20px; width: 400px; text-align: center;
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
     }
-
     textarea {
         width: 100%; height: 200px; background: #010a01; color: var(--acc);
         border: 1px solid #14532d; border-radius: 8px; padding: 10px; margin-bottom: 20px;
-        outline: none;
     }
-    
-    textarea:focus { border-color: var(--acc); }
-
     .start-btn {
         background: var(--acc); color: #052e16; border: none; padding: 15px 40px;
         font-size: 1.2rem; font-weight: 900; border-radius: 50px; cursor: pointer;
-        text-transform: uppercase; transition: transform 0.2s;
     }
-    
-    .start-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
 
+    /* Leaderboard - Mixed Green/Gold */
     #leaderboard {
         position: fixed; top: 20px; right: 20px; z-index: 100;
         background: var(--glass); padding: 15px; border: 1px solid var(--acc);
         border-radius: 12px; min-width: 280px; max-height: 80vh; overflow-y: auto; 
         backdrop-filter: blur(8px); display: none;
     }
-
-    .leader-row { 
-        display: grid; 
-        grid-template-columns: 1fr 80px; 
-        gap: 10px; 
-        margin-bottom: 8px; 
-        font-size: 0.85rem; 
-        font-weight: bold; 
-    }
-
-    .finished-row { 
-        border-left: 3px solid var(--acc); 
-        background: rgba(100, 255, 78, 0.1); 
-        padding-left: 5px; 
-        color: var(--acc);
-    }
-
+    .leader-row { display: grid; grid-template-columns: 1fr 80px; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; }
+    
+    /* Finished indicator remains Gold */
+    .finished-row { border-left: 3px solid var(--gold); background: rgba(252, 211, 77, 0.1); padding-left: 5px; color: var(--gold); }
     .header-row { font-size: 0.65rem; color: #4ade80; border-bottom: 1px solid #14532d; }
     
+    /* Results Modal - Fully Gold Theme */
     #results-modal {
         position: fixed; inset: 0; z-index: 600; background: rgba(1, 10, 1, 0.9);
         display: none; align-items: center; justify-content: center; padding: 20px;
     }
-
     .results-box {
-        background: var(--ui); border: 2px solid var(--acc); border-radius: 20px;
+        background: var(--ui); border: 2px solid var(--gold); border-radius: 20px;
         width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; padding: 30px;
+        box-shadow: 0 0 20px rgba(252, 211, 77, 0.2);
     }
+    .results-item { padding: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); }
 
-    .results-item { padding: 10px; border-bottom: 1px solid #14532d; display: flex; justify-content: space-between; font-weight: bold; }
-
+    /* Controls */
     #controls { position: fixed; bottom: 20px; right: 20px; z-index: 100; display: none; gap: 10px; }
-    
     .ui-btn { border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; }
-    
-    .reset-btn { background: #b91c1c; } /* Kept red for danger/reset */
+    .reset-btn { background: #ef4444; }
     .toggle-btn { background: #14532d; border: 1px solid var(--acc); color: var(--acc); }
-    .results-btn { background: var(--acc-soft); color: #052e16; display: none; }
+    
+    /* Results Button restored to Gold */
+    .results-btn { background: var(--gold); color: #020617; display: none; }
     
     #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 200; pointer-events: none; display: none; }
-    
-    #countdown { 
-        font-size: 15rem; font-weight: 900; color: var(--acc); 
-        text-shadow: 0 0 30px rgba(100, 255, 78, 0.6); 
-    }
+    #countdown { font-size: 15rem; font-weight: 900; color: var(--acc); text-shadow: 0 0 20px rgba(100, 255, 78, 0.5); }
 </style>
 </head>
 <body>
