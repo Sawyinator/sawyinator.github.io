@@ -7,8 +7,6 @@
     <meta name="description" content="A trainer to help with learning different numeral types such as Arabic-Indic and Devanagari.">
     <title>A-INT | Arabic-Indic Number Trainer</title>
     
-    <!-- Embed Behaviours -->
-    
     <meta name="title" content="Arabic Indic Number Trainer (A-INT)">
     <meta name="description" content="A trainer to help with learning different numeral types such as Arabic-Indic and Devanagari.">
 
@@ -19,70 +17,71 @@
     <meta property="og:image" content="https://sawyinator.uk/assets/logos/a-int-logo.png">
     <meta name="theme-color" content="#52368B">
 
-    <!-- Twitter Embed Behaviours -->
-    
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://sawyinator.uk/projects/a-int">
     <meta property="twitter:title" content="Arabic Indic Number Trainer (A-INT)">
     <meta property="twitter:description" content="A trainer to help with learning different numeral types such as Arabic-Indic and Devanagari.">
     <meta property="twitter:image" content="https://sawyinator.uk/assets/logos/a-int-logo.png">
     <style>
-        .back-link {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: var(--text);
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 8px 12px;
-    border-radius: 8px;
-    background: var(--secondary);
-    transition: 0.2s;
-    z-index: 100;
-    border: 1px solid #444;
-}
-
-.back-link svg {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
-}
-
-.back-link:hover {
-    filter: brightness(1.2);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    outline: 2px solid var(--text);
-}
-
-/* Ensure it doesn't overlap on very small screens */
-@media (max-width: 400px) {
-    .back-link {
-        font-size: 0.75rem;
-        padding: 6px 8px;
-    }
-}
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #3f51b5;
             --accent: #ff9800; --secondary: #424242; --input-bg: #2d2d2d; --danger: #f44336;
             --success: #4caf50; --warning: #ffeb3b; --overlay: rgba(0,0,0,0.8);
-            --grey-btn: #555555;
+            --grey-btn: #555555; --border: #444444; --table-header: #333333;
+            --inner-bg: rgba(0,0,0,0.2);
         }
         .light-mode {
             --bg: #f4f4f9; --card: #ffffff; --text: #333333; --primary: #007bff;
-            --accent: #f57c00; --secondary: #e0e0e0; --input-bg: #ffffff; --danger: #d32f2f;
+            --accent: #f57c00; --secondary: #e0e0e0; --input-bg: #fdfdfd; --danger: #d32f2f;
             --success: #2e7d32; --warning: #fbc02d; --overlay: rgba(0,0,0,0.4);
-            --grey-btn: #cccccc;
+            --grey-btn: #cccccc; --border: #dddddd; --table-header: #eeeeee;
+            --inner-bg: rgba(0,0,0,0.05);
         }
+
+        .back-link {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: var(--secondary);
+            transition: 0.2s;
+            z-index: 100;
+            border: 1px solid var(--border);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .back-link:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            outline: 2px solid var(--text);
+        }
+
+        @media (max-width: 400px) {
+            .back-link {
+                font-size: 0.75rem;
+                padding: 6px 8px;
+            }
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
             display: flex; align-items: center; justify-content: center;
             height: 100vh; margin: 0; background-color: var(--bg); color: var(--text);
-            transition: background 0.3s; overflow: hidden;
+            transition: background 0.3s, color 0.3s; overflow: hidden;
         }
         .container {
             text-align: center; background: var(--card); padding: 1.5rem;
@@ -107,8 +106,9 @@
         .modal {
             background: var(--card); padding: 2rem; border-radius: 16px;
             max-width: 400px; width: 85%; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            border: 1px solid #444; text-align: center;
-            transform: scale(0.85); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid var(--border); text-align: center;
+            transform: scale(0.85); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
+            color: var(--text);
         }
         #modal-overlay.active .modal, #profile-overlay.active .modal { transform: scale(1); }
 
@@ -128,7 +128,7 @@
         .profile-link { 
             background: var(--input-bg); color: var(--text); padding: 12px; 
             border-radius: 8px; text-decoration: none; font-weight: 600; 
-            border: 1px solid #444; transition: 0.2s;
+            border: 1px solid var(--border); transition: 0.2s;
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .profile-link svg { width: 20px; height: 20px; fill: currentColor; }
@@ -139,50 +139,50 @@
         .credit span { cursor: pointer; transition: color 0.2s; text-decoration: none; }
         .credit span:hover { color: var(--primary); text-decoration: underline; }
         
-        .key-container { background: rgba(0,0,0,0.2); border-radius: 8px; margin-top: 10px; padding: 10px; border: 1px solid #444; }
+        .key-container { background: var(--inner-bg); border-radius: 8px; margin-top: 10px; padding: 10px; border: 1px solid var(--border); }
         .key-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .key-item { display: flex; flex-direction: column; font-size: 0.8rem; border-right: 1px solid #333; }
+        .key-item { display: flex; flex-direction: column; font-size: 0.8rem; border-right: 1px solid var(--border); }
         .key-item:last-child { border-right: none; }
         .key-sym { font-size: 1.3rem; color: var(--accent); font-weight: bold; }
         .key-val { color: #888; }
         .toggle-link { color: var(--primary); cursor: pointer; font-size: 0.85rem; text-decoration: underline; display: block; margin-top: 5px; }
 
-        .table-wrapper { max-height: 300px; overflow-y: auto; border-radius: 10px; background: rgba(0,0,0,0.2); border: 1px solid #333; margin-top: 10px; }
+        .table-wrapper { max-height: 300px; overflow-y: auto; border-radius: 10px; background: var(--inner-bg); border: 1px solid var(--border); margin-top: 10px; }
         .score-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        .score-table th { position: sticky; top: 0; background: #333; padding: 10px 5px; color: #aaa; text-transform: uppercase; font-size: 0.65rem; z-index: 10; }
-        .score-table td { padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .col-len { font-weight: bold; background: rgba(0,0,0,0.3); width: 60px; }
-        .score-table tr:hover { background: rgba(255, 255, 255, 0.05); }
+        .score-table th { position: sticky; top: 0; background: var(--table-header); padding: 10px 5px; color: #aaa; text-transform: uppercase; font-size: 0.65rem; z-index: 10; }
+        .score-table td { padding: 8px 5px; border-bottom: 1px solid var(--border); }
+        .col-len { font-weight: bold; background: var(--inner-bg); width: 60px; }
+        .score-table tr:hover { background: rgba(128, 128, 128, 0.1); }
 
-        #question-display { font-size: 4rem; margin: 0.5rem 0; min-height: 1.2em; font-weight: 500; }
+        #question-display { font-size: 4rem; margin: 0.5rem 0; min-height: 1.2em; font-weight: 500; word-wrap: break-word; font-size: clamp(1.5rem, 8vw, 4rem); max-width: 100%; }
         #answer-display { font-size: 2rem; color: var(--accent); margin-bottom: 1rem; min-height: 1.2em; font-weight: bold; }
         
         .time-row { display: flex; gap: 5px; margin: 10px 0 20px 0; }
         .time-btn { flex: 1; padding: 10px; font-size: 0.9rem; background: var(--grey-btn); color: white; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
         .time-btn.active { background: var(--primary); }
         
-        .controls { background: var(--input-bg); padding: 12px; border-radius: 10px; margin-bottom: 1rem; }
+        .controls { background: var(--input-bg); padding: 12px; border-radius: 10px; margin-bottom: 1rem; border: 1px solid var(--border); }
         .digit-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; }
-        .digit-item { display: flex; flex-direction: column; align-items: center; background: var(--secondary); padding: 8px; border-radius: 8px; cursor: pointer; }
+        .digit-item { display: flex; flex-direction: column; align-items: center; background: var(--secondary); padding: 8px; border-radius: 8px; cursor: pointer; color: var(--text); }
         .digit-item input { margin-top: 4px; transform: scale(1.1); }
         
         .setting-group { margin-bottom: 12px; text-align: left; }
-        .setting-label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 0.8rem; color: #bbb; }
-        select { width: 100%; padding: 10px; background: var(--secondary); color: var(--text); border: 1px solid #444; border-radius: 8px; font-size: 0.95rem; }
+        .setting-label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 0.8rem; color: #888; }
+        select { width: 100%; padding: 10px; background: var(--secondary); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; outline: none; }
 
         input[type=range] { width: 100%; cursor: pointer; }
-        input[type=text] { background: var(--input-bg); border: 2px solid #444; color: var(--text); padding: 12px; border-radius: 8px; font-size: 1.5rem; text-align: center; width: 80%; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; }
+        input[type=text] { background: var(--input-bg); border: 2px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-size: 1.5rem; text-align: center; width: 80%; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; }
         
         .shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--danger) !important; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
         
-        #timer-bar-container { width: 100%; height: 8px; background: #333; margin-bottom: 1rem; border-radius: 4px; overflow: hidden; }
+        #timer-bar-container { width: 100%; height: 8px; background: var(--secondary); margin-bottom: 1rem; border-radius: 4px; overflow: hidden; }
         #timer-bar { width: 100%; height: 100%; background: var(--success); transition: width 0.1s linear, background-color 0.3s ease; }
         
         .btn-group { display: flex; gap: 10px; justify-content: center; }
         button { padding: 12px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; border: none; border-radius: 8px; transition: 0.2s; }
         .primary-btn { background-color: var(--primary); color: white; flex: 2; }
-        .primary-btn:disabled { background-color: #333 !important; color: #666; }
+        .primary-btn:disabled { background-color: var(--secondary) !important; color: #888; }
         .secondary-btn { background-color: var(--secondary); color: var(--text); flex: 1; }
         .danger-btn { background-color: var(--danger); color: white; }
         .menu-btn { background-color: var(--primary); color: white; width: 100%; margin-bottom: 8px; padding: 14px; }
@@ -199,30 +199,28 @@
             filter: brightness(0.9);
         }
         .manual-input {
-    background: transparent;
-    border: 1px solid #444;
-    color: var(--accent);
-    font-weight: bold;
-    font-size: 1rem;
-    width: 50px;
-    border-radius: 4px;
-    text-align: center;
-    margin-left: 5px;
-    }
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 1rem;
+            width: 50px;
+            border-radius: 4px;
+            text-align: center;
+            margin-left: 5px;
+        }
 
-    /* Hide the spin buttons for a cleaner look */
-    .manual-input::-webkit-inner-spin-button,
-    .manual-input::-webkit-outer-spin-button {
-     -webkit-appearance: none;
-     margin: 0;
-    }
-    #question-display {
-    /* ... existing styles ... */
-    word-wrap: break-word;
-    font-size: clamp(1.5rem, 8vw, 4rem); /* Shrinks as the number gets longer */
-    max-width: 100%;
-}
-</style>
+        .manual-input::-webkit-inner-spin-button,
+        .manual-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Scrollbar Styling for Light Mode */
+        .container::-webkit-scrollbar, .table-wrapper::-webkit-scrollbar { width: 8px; }
+        .container::-webkit-scrollbar-track, .table-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .container::-webkit-scrollbar-thumb, .table-wrapper::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+    </style>
 </head>
 <body>
 <a href="/" class="back-link">
@@ -371,10 +369,29 @@ Back to main website
 </div>
 
 <script>
-    
+    function toggleTheme() {
+        const body = document.body;
+        const toggle = document.getElementById('theme-toggle');
+        body.classList.toggle('light-mode');
+        const isLight = body.classList.contains('light-mode');
+        toggle.innerText = isLight ? "☀️" : "🌙";
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+
+    function loadSettings() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            document.getElementById('theme-toggle').innerText = "☀️";
+        }
+        
+        allowedDigits = JSON.parse(localStorage.getItem('allowed_digits')) || [0,1,2,3,4,5,6,7,8,9];
+        learningScript = localStorage.getItem('learning_script') || 'arabic-indic';
+        basisScript = localStorage.getItem('basis_script') || 'western-arabic';
+    }
+
 // Enter key, Shake, and numerals only within quiz
 document.addEventListener('keydown', function(event) {
-    // 1. Handle ENTER key
     if (event.key === 'Enter') {
         const actionBtn = document.getElementById('main-action-btn');
         if (actionBtn && !actionBtn.disabled) {
@@ -384,7 +401,6 @@ document.addEventListener('keydown', function(event) {
         return;
     }
 
-    // 2. Handle quiz-input specifically
     if (event.target && event.target.id === 'quiz-input') {
         const input = event.target;
         const isChar = event.key.length === 1;
@@ -393,15 +409,12 @@ document.addEventListener('keydown', function(event) {
 
         if (bypassKeys.includes(event.key)) return;
 
-        // NEW: Check if the key is NOT a number (0-9)
-        // If it's a character but not a digit, block it and shake
         if (isChar && !isModifier && !/^\d$/.test(event.key)) {
             event.preventDefault();
             triggerShake();
             return;
         }
 
-        // Logic: if limit reached and trying to type more numbers
         if (input.value.length >= input.maxLength && isChar && !isModifier) {
             event.preventDefault();
             if (typeof triggerShake === "function") {
@@ -417,13 +430,13 @@ document.addEventListener('keydown', function(event) {
 'devanagari':      { name: 'Devanagari', digits: ['०','१','२','३','४','५','६','७','८','९'] },
 'bangla':          { name: 'Bangla', digits: ['০','১','২','৩','৪','৫','৬','৭','৮','৯'] },
 'burmese':         { name: 'Burmese', digits: ['၀','၁','၂','၃','၄','၅','၆','၇','၈','၉'] },
-'gujarati':        { name: 'Gujarati', digits: ['૦','૧','૨','૩','૪','૫','૬','૭','૮','૯'] },
+'gujarati':        { name: 'Gujarati', digits: ['૦','૧','૨','૩','૪','٥','৬','٧','٨','૯'] },
 'gurmukhi':        { name: 'Gurmukhi', digits: ['੦','੧','੨','੩','੪','੫','੬','੭','੮','੯'] },
 'kannada':         { name: 'Kannada', digits: ['೦','೧','೨','೩','೪','೫','೬','೭','೮','೯'] },
-'khmer':           { name: 'Khmer', digits: ['០','១','២','៣','៤','៥','៦','៧','៨','៩'] },
+'khmer':           { name: 'Khmer', digits: ['០','១','២','३','৪','৫','৬','৭','৮','৯'] },
 'malayalam':       { name: 'Malayalam', digits: ['൦','൧','൨','൩','൪','൫','൬','൭','൮','൯'] },
-'meitei':          { name: 'Meitei', digits: ['꯰','꯱','꯲','꯳','꯴','꯵','꯶','꯷','꯸','꯹'] },
-'odia':            { name: 'Odia', digits: ['୦','୧','୨','୩','୪','୫','୬','୭','୮','୯'] },
+'meitei':          { name: 'Meitei', digits: ['꯰','꯱','꯲','꯳','꯴','꯵','꯶','꯸','꯹'] },
+'odia':            { name: 'Odia', digits: ['୦','୧','୨','୩','୪','৫','୬','୭','୮','୯'] },
 'ol-chiki':        { name: 'Ol Chiki', digits: ['᱐','᱑','᱒','᱓','᱔','᱕','᱖','᱗','᱘','᱙'] },
 'telugu':          { name: 'Telugu', digits: ['౦','౧','౨','౩','౪','౫','౬','౭','౮','౯'] }
     };
@@ -476,7 +489,7 @@ document.addEventListener('keydown', function(event) {
             let row = `<tr><td class="col-len">${i}</td>`;
             [1, 5, 10, 20].forEach(t => {
                 const s = localStorage.getItem(`best_len${i}_time${t}`) || 0;
-                const displayColor = s > 0 ? timeColors[t] : '#444';
+                const displayColor = s > 0 ? timeColors[t] : '#888';
                 row += `<td style="color:${displayColor}; font-weight:${s > 0 ? 'bold' : 'normal'}">${s == 0 ? '-' : s}</td>`;
             });
             tbody.innerHTML += row + '</tr>';
@@ -548,7 +561,6 @@ document.addEventListener('keydown', function(event) {
         }); 
     }
 
-    // --- NEW: Wipe All Data Function ---
     function wipeAllLocalStorage() {
         openModal("Factory Reset?", "This will permanently delete ALL settings, high scores, and preferences. The app will reload.", () => {
             localStorage.clear();
@@ -683,40 +695,23 @@ document.addEventListener('keydown', function(event) {
     }
 
     function syncLabels(v) {
-    // Update the numerical input values
-    document.getElementById('menu-manual-len').value = v;
-    document.getElementById('app-manual-len').value = v;
-        }
-
-function syncSliders(v) {
-    // If the input is empty string, we let it stay empty so the user can type,
-    // but we treat the internal value as 1.
-    let val = v === "" ? "" : parseInt(v);
-    
-    // Set the actual working length (defaulting to 1 if the box is empty)
-    currentLen = (val === "" || isNaN(val) || val < 1) ? 1 : val;
-
-    // Optional: Cap at 100 to prevent extreme lag
-    if (currentLen > 100) {
-        currentLen = 100;
-        val = 100;
+        document.getElementById('menu-manual-len').value = v;
+        document.getElementById('app-manual-len').value = v;
     }
 
-    // Update both sliders (range sliders cannot handle empty/string, so use currentLen)
-    document.getElementById('menu-slider').value = currentLen;
-    document.getElementById('app-slider').value = currentLen;
-    
-    // Update both manual number inputs
-    // We use 'val' here so the box can actually show as empty while typing
-    document.getElementById('menu-manual-len').value = val;
-    document.getElementById('app-manual-len').value = val;
+    function syncSliders(v) {
+        let val = v === "" ? "" : parseInt(v);
+        currentLen = (val === "" || isNaN(val) || val < 1) ? 1 : val;
+        if (currentLen > 100) { currentLen = 100; val = 100; }
+        document.getElementById('menu-slider').value = currentLen;
+        document.getElementById('app-slider').value = currentLen;
+        document.getElementById('menu-manual-len').value = val;
+        document.getElementById('app-manual-len').value = val;
+        quizInput.maxLength = currentLen; 
+        if(currentMode === 'generator') generate();
+    }
 
-    // Apply the length to the quiz input logic
-    quizInput.maxLength = currentLen; 
-    
-    // If in practice mode, refresh the number immediately
-    if(currentMode === 'generator') generate();
-}
+    function goBack() { showMenu(); }
 
     window.onload = () => { loadSettings(); initDropdowns(); };
 </script>
