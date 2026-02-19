@@ -332,16 +332,33 @@ function setupRace(names) {
         currentY += SEG_HEIGHT;
     }
 
-    finishLineY = currentY;
+    // FIX 1: Add a buffer zone (400px) after the last module
+    finishLineY = currentY + 400;
     
-    // Restyled Structural Walls and Finish Line
+    // Restyled Structural Walls
     const wallWidth = 2000;
     const wallStyle = { isStatic: true, friction: 0.1, restitution: 0.3, render: { fillStyle: '#010a01', strokeStyle: '#14532d', lineWidth: 1 } };
     
     Composite.add(engine.world, [
-        Bodies.rectangle(cx - 410 - (wallWidth/2), currentY/2, wallWidth, currentY + 5000, wallStyle),
-        Bodies.rectangle(cx + 410 + (wallWidth/2), currentY/2, wallWidth, currentY + 5000, wallStyle),
-        Bodies.rectangle(cx, finishLineY, 820, 160, { isStatic: true, isSensor: true, label: 'finish', render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 10 } })
+        Bodies.rectangle(cx - 410 - (wallWidth/2), currentY/2 + 2500, wallWidth, currentY + 10000, wallStyle),
+        Bodies.rectangle(cx + 410 + (wallWidth/2), currentY/2 + 2500, wallWidth, currentY + 10000, wallStyle)
+    ]);
+
+    // FIX 2: Create a checkered finish line pattern
+    const checkerCanvas = document.createElement('canvas');
+    const checkerCtx = checkerCanvas.getContext('2d');
+    checkerCanvas.width = 40; checkerCanvas.height = 40;
+    checkerCtx.fillStyle = '#052e16'; checkerCtx.fillRect(0, 0, 40, 40);
+    checkerCtx.fillStyle = '#64ff4e'; checkerCtx.fillRect(0, 0, 20, 20); checkerCtx.fillRect(20, 20, 20, 20);
+    const finishPattern = checkerCtx.createPattern(checkerCanvas, 'repeat');
+
+    Composite.add(engine.world, [
+        Bodies.rectangle(cx, finishLineY, 820, 120, { 
+            isStatic: true, 
+            isSensor: true, 
+            label: 'finish', 
+            render: { fillStyle: finishPattern, strokeStyle: '#64ff4e', lineWidth: 6 } 
+        })
     ]);
 
     // Restyled Gate
@@ -376,7 +393,9 @@ function setupRace(names) {
     Events.on(engine, 'collisionStart', (e) => {
         e.pairs.forEach(p => {
             const marble = p.bodyA.label === 'finish' ? p.bodyB : (p.bodyB.label === 'finish' ? p.bodyA : null);
-            if (marble && !marble.isFinished) {
+            
+            // FIX 3: Filter collisions so only named marbles (not "Body") trigger the finish line
+            if (marble && !marble.isFinished && marble.label && !marble.label.includes('Body')) {
                 marble.isFinished = true;
                 marble.finishTime = ((performance.now() - startTime) / 1000).toFixed(2);
                 finishedMarbles.push(marble);
