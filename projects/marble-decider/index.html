@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Marble Decider - Refined Track</title>
+    <title>Marble Decider - High Spin Physics</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -220,12 +220,15 @@ const TrackModules = [
             for(let i = 0; i < 2; i++) {
                 const xPos = cx - 200 + (i * 400);
                 const weight = Bodies.rectangle(xPos, y + 600, 300, 100, { 
-                    render: { fillStyle: '#10b981' }, chamfer: { radius: 30 }, frictionAir: 0
+                    render: { fillStyle: '#10b981' }, chamfer: { radius: 30 }, 
+                    frictionAir: 0, // Removed air resistance so it keeps spinning easily
+                    restitution: 0.8,
+                    inertia: 5000 // Lowered inertia to make it spin more easily when hit on the side
                 });
                 const pivot = Constraint.create({ 
                     pointA: { x: xPos, y: y + 150 }, 
                     bodyB: weight, 
-                    stiffness: 0.05, 
+                    stiffness: 0.01,
                     length: 400,
                     render: { strokeStyle: '#334155', lineWidth: 8 }
                 });
@@ -320,7 +323,6 @@ function setupRace(names) {
 
     for(let i = 0; i < trackDepth; i++) {
         let randIndex;
-        // Ensure the same module doesn't generate twice in a row
         do {
             randIndex = Math.floor(Math.random() * TrackModules.length);
         } while (randIndex === lastModuleIndex);
