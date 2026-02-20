@@ -300,47 +300,55 @@ const TrackModules = [
                 Composite.add(world, Bodies.circle(cx + pos.x, y + pos.y, 55, bumperStyle));
             });
         }
-    }
+    },
     {
-    name: "50/50",
+    name: "50 50",
     create: (world, y, cx) => {
-        const wallStyle = { isStatic: true, chamfer: { radius: 20 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 6 } };
-        
-        // 1. The Funnel Walls
-        // Positioned to drop everything exactly onto the moving triangle
+        const wallStyle = { isStatic: true, chamfer: { radius: 15 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } };
+        const zigzagStyle = { isStatic: true, chamfer: { radius: 10 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } };
+
+        // 1. Flattened Funnel
         Composite.add(world, [
-            Bodies.rectangle(cx - 280, y + 200, 500, 80, { ...wallStyle, angle: 0.7 }),
-            Bodies.rectangle(cx + 280, y + 200, 500, 80, { ...wallStyle, angle: -0.7 })
+            Bodies.rectangle(cx - 280, y + 120, 500, 60, { ...wallStyle, angle: 0.4 }),
+            Bodies.rectangle(cx + 280, y + 120, 500, 60, { ...wallStyle, angle: -0.4 })
         ]);
 
-        // 2. The Moving Triangle (The Divider)
-        // A 3-sided polygon (triangle) pointing upwards
-        const divider = Bodies.polygon(cx, y + 550, 3, 80, {
+        // 2. The Flipped Divider
+        const divider = Bodies.polygon(cx, y + 260, 3, 60, {
             isStatic: true,
-            restitution: 0.5,
-            angle: -Math.PI / 2, // Rotate to point upward
+            angle: Math.PI / 2, 
             render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }
         });
-        
         Composite.add(world, divider);
 
-        // 3. Movement Logic
         Events.on(engine, 'beforeUpdate', (event) => {
             const time = event.timestamp;
-            const amplitude = 150; // Distance it travels from center
-            const speed = 0.003;   // Speed of oscillation
-            
-            const newX = cx + Math.sin(time * speed) * amplitude;
-            
-            Body.setPosition(divider, { x: newX, y: y + 550 });
+            const newX = cx + Math.sin(time * 0.003) * 70;
+            Body.setPosition(divider, { x: newX, y: y + 260 });
         });
 
-        // 4. Visual Path Dividers (Optional but helpful)
-        // Static bars at the bottom to clearly separate the two paths
-        const floorStyle = { isStatic: true, render: { fillStyle: '#111', strokeStyle: '#64ff4e', lineWidth: 2 } };
-        Composite.add(world, [
-            Bodies.rectangle(cx, y + 800, 10, 200, floorStyle) 
-        ]);
+        // 3. Wide Central Path Divider (60px wide)
+        const dividerHeight = 630;
+        Composite.add(world, Bodies.rectangle(cx, y + 590, 60, dividerHeight, wallStyle));
+
+        // 4. THE PUNISHMENT (Flatter Left Path Zig-Zag)
+        const rampWidth = 340; 
+        for (let i = 0; i < 4; i++) {
+            const rollsRight = (i % 2 === 1); 
+            // Reduced vertical spacing (110 instead of 130) because ramps are flatter
+            const py = y + 400 + (i * 110);
+            
+            // Adjusted xOffset to keep the "gap" between the ramp end and the walls consistent
+            const xOffset = rollsRight ? -250 : -170;
+            
+            Composite.add(world, Bodies.rectangle(cx + xOffset, py, rampWidth, 30, { 
+                ...zigzagStyle, 
+                angle: rollsRight ? 0.15 : -0.15 // Steepness reduced from 0.4 to 0.15
+            }));
+        }
+
+        // 5. THE REWARD (Right Path)
+        // Remains clear for a clean drop
     }
 }
 ];
@@ -489,7 +497,7 @@ function setupRace(names) {
         const marblesInThisRow = Math.min(marblesPerRow, names.length - (row * marblesPerRow));
         const rowWidth = (marblesInThisRow - 1) * cellSize;
         const startX = cx - (rowWidth / 2) + (col * cellSize), startY = 150 - (row * cellSize); 
-        return Bodies.circle(startX, startY, marbleRadius, { restitution: 0.4, friction: 0.002, frictionAir: 0.005, label: n, render: { fillStyle: color, textColor: color }, isFinished: false, finishTime: null });
+        return Bodies.circle(startX, startY, marbleRadius, { restitution: 0.4, friction: 0, frictionAir: 0.005, label: n, render: { fillStyle: color, textColor: color }, isFinished: false, finishTime: null });
     });
     Composite.add(engine.world, marbles);
 
