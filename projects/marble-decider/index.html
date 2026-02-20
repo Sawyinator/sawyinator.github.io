@@ -52,6 +52,14 @@
     }
     .back-home:hover { background: var(--acc); color: #052e16; }
 
+    /* Module Browser Toggle */
+    .module-browser-btn {
+        position: fixed; top: 20px; right: 20px;
+        background: var(--ui); color: var(--acc);
+        border: 1px solid var(--acc); padding: 10px 20px;
+        border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 550;
+    }
+
     #lobby {
         position: fixed; inset: 0; z-index: 500;
         background: radial-gradient(circle at center, #052e16 0%, #010a01 100%);
@@ -68,6 +76,41 @@
     .start-btn {
         background: var(--acc); color: #052e16; border: none; padding: 15px 40px;
         font-size: 1.2rem; font-weight: 900; border-radius: 50px; cursor: pointer;
+    }
+
+    /* MODULE BROWSER UI */
+    #module-overlay {
+        position: fixed; inset: 0; z-index: 1000;
+        background: var(--bg); display: none;
+        flex-direction: column; padding: 40px; overflow-y: auto;
+    }
+    .module-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px; margin-top: 20px;
+    }
+    .module-card {
+        background: var(--ui); border: 1px solid #14532d; padding: 15px; border-radius: 12px;
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .module-card.enabled { border-color: var(--acc); box-shadow: 0 0 10px rgba(100, 255, 78, 0.2); }
+    .module-card h3 { margin: 0; color: var(--acc); font-size: 1rem; }
+    .module-actions { display: flex; gap: 5px; margin-top: auto; }
+    .mod-btn { flex: 1; padding: 5px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+    .mod-toggle { background: #14532d; color: white; }
+    .mod-toggle.on { background: var(--acc); color: #052e16; }
+    .mod-edit { background: var(--gold); }
+    .mod-del { background: var(--danger); color: white; }
+
+    /* CODE EDITOR */
+    #editor-modal {
+        position: fixed; inset: 0; z-index: 1100; background: rgba(0,0,0,0.9);
+        display: none; align-items: center; justify-content: center;
+    }
+    .editor-box {
+        background: var(--ui); width: 90%; max-width: 800px; padding: 20px; border-radius: 15px;
+    }
+    #moduleCodeInput {
+        width: 100%; height: 300px; font-family: monospace; background: #000; color: #64ff4e; margin-top: 10px;
     }
 
     #leaderboard {
@@ -107,12 +150,41 @@
 
 <div id="lobby">
     <a href="https://sawyinator.uk" class="back-home">← Back to main website</a>
+    <button class="module-browser-btn" onclick="openModuleBrowser()">MODULE BROWSER</button>
     <div class="lobby-box">
         <h1 style="color:var(--acc)">MARBLE DECIDER</h1>
         <textarea id="nameInput" placeholder="Enter Names">Alpha&#10;Beta&#10;Gamma&#10;Delta&#10;Epsilon&#10;Zeta&#10;Eta&#10;Theta&#10;Iota&#10;Kappa</textarea>
         <div style="display: flex; gap: 10px; flex-direction: column;">
             <button class="start-btn" id="startBtn">START RACE</button>
             <button class="ui-btn toggle-btn" id="shuffleBtn" style="padding: 12px; border-radius: 50px;">SHUFFLE NAMES</button>
+        </div>
+    </div>
+</div>
+
+<div id="module-overlay">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="color: var(--acc); margin: 0;">MODULE BROWSER</h1>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+            <a href="creator/" class="ui-btn creator-link-btn">MODULE CREATOR</a>
+            
+            <button class="ui-btn toggle-btn" onclick="addCustomModule()">+ NEW CUSTOM MODULE</button>
+            <button class="ui-btn toggle-btn" onclick="importModules()">IMPORT JSON</button>
+            <button class="ui-btn toggle-btn" onclick="exportModules()">EXPORT JSON</button>
+            <button class="ui-btn reset-btn" onclick="closeModuleBrowser()">CLOSE</button>
+        </div>
+    </div>
+    <p>Select at least 2 modules to be used in the race generation.</p>
+    <div class="module-grid" id="module-grid"></div>
+</div>
+
+<div id="editor-modal">
+    <div class="editor-box">
+        <h2 id="editor-title" style="color: var(--acc);">Edit Module</h2>
+        <input type="text" id="moduleNameInput" placeholder="Module Name" style="width: 100%; padding: 10px; background: #000; color: white; border: 1px solid var(--acc);">
+        <textarea id="moduleCodeInput" placeholder="create: (world, y, cx) => { ... }"></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="ui-btn toggle-btn" style="flex: 1;" onclick="saveModule()">SAVE</button>
+            <button class="ui-btn reset-btn" style="flex: 1;" onclick="document.getElementById('editor-modal').style.display='none'">CANCEL</button>
         </div>
     </div>
 </div>
@@ -168,8 +240,8 @@ const createGuides = (world, y, cx) => {
     ]);
 };
 
-const TrackModules = [
-    
+// --- BUILT-IN MODULES ---
+const DefaultModules = [
     {
         name: "tri-blade spinner",
         create: (world, y, cx) => {
@@ -190,29 +262,16 @@ const TrackModules = [
     {
          name: "moving diamond splitter",
          create: (world, y, cx) => {
-         const wallStyle = { 
-            isStatic: true,
-            render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } 
-            };
+         const wallStyle = { isStatic: true, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } };
          const splitter = Bodies.polygon(cx, y + 450, 4, 180, { ...wallStyle, angle: Math.PI / 4 });
          Composite.add(world, splitter);
-
          Events.on(engine, 'beforeUpdate', (event) => {
             const time = event.timestamp;
-            const amplitude = 200;       // How far left/right it travels
-            const speed = 0.002;         // How fast it moves
-            
-            const newX = cx + Math.sin(time * speed) * amplitude;
-            
+            const newX = cx + Math.sin(time * 0.002) * 200;
             Body.setPosition(splitter, { x: newX, y: y + 450 });
          });
-         
         [cx - 300, cx + 300].forEach((xPos, i) => {
-            const gate = Bodies.rectangle(xPos, y + 750, 240, 70, { 
-                render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, 
-                chamfer: { radius: 15 }, 
-                frictionAir: 0
-            });
+            const gate = Bodies.rectangle(xPos, y + 750, 240, 70, { render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 15 }, frictionAir: 0 });
                  const cons = Constraint.create({ pointA: { x: xPos, y: y + 750 }, bodyB: gate, stiffness: 1, length: 0 });
                  Composite.add(world, [gate, cons]);
                  Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(gate, i === 0 ? 0.08 : -0.08));
@@ -224,9 +283,7 @@ const TrackModules = [
         create: (world, y, cx) => {
             createGuides(world, y, cx);
             [cx - 240, cx + 240].forEach((xPos, i) => {
-                const sat = Bodies.rectangle(xPos + (i === 0 ? 100 : -100), y + 500, 280, 80, { 
-                    render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 20 }, frictionAir: 0
-                });
+                const sat = Bodies.rectangle(xPos + (i === 0 ? 100 : -100), y + 500, 280, 80, { render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 20 }, frictionAir: 0 });
                 const cons = Constraint.create({ pointA: { x: xPos, y: y + 500 }, bodyB: sat, stiffness: 1, length: 0 });
                 Composite.add(world, [sat, cons]);
                 Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(sat, i === 0 ? 0.18 : -0.18));
@@ -238,14 +295,8 @@ const TrackModules = [
         create: (world, y, cx) => {
             for(let i = 0; i < 2; i++) {
                 const xPos = cx - 200 + (i * 400);
-                const weight = Bodies.rectangle(xPos, y + 600, 300, 100, { 
-                    render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 30 }, 
-                    frictionAir: 0.02, restitution: 0.7, inertia: 7500 
-                });
-                const pivot = Constraint.create({ 
-                    pointA: { x: xPos, y: y + 150 }, bodyB: weight, stiffness: 0.01, length: 400,
-                    render: { strokeStyle: '#64ff4e', lineWidth: 4 }
-                });
+                const weight = Bodies.rectangle(xPos, y + 600, 300, 100, { render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 30 }, frictionAir: 0.02, restitution: 0.7, inertia: 7500 });
+                const pivot = Constraint.create({ pointA: { x: xPos, y: y + 150 }, bodyB: weight, stiffness: 0.01, length: 400, render: { strokeStyle: '#64ff4e', lineWidth: 4 } });
                 Composite.add(world, [weight, pivot]);
             }
         }
@@ -258,10 +309,7 @@ const TrackModules = [
                 for(let i = 0; i < 8; i++) {
                     const angle = (i / 8) * Math.PI * 2;
                     if (i === 0) continue; 
-                    parts.push(Bodies.rectangle(
-                        xPos + Math.cos(angle) * 140, y + 450 + Math.sin(angle) * 140, 100, 45, 
-                        { angle: angle, chamfer: { radius: 20 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 3 } }
-                    ));
+                    parts.push(Bodies.rectangle(xPos + Math.cos(angle) * 140, y + 450 + Math.sin(angle) * 140, 100, 45, { angle: angle, chamfer: { radius: 20 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 3 } }));
                 }
                 const spinner = Body.create({ parts: parts, isStatic: false, frictionAir: 0 });
                 const constraint = Constraint.create({ pointA: { x: xPos, y: y + 450 }, bodyB: spinner, stiffness: 1, length: 0 });
@@ -306,54 +354,205 @@ const TrackModules = [
     create: (world, y, cx) => {
         const wallStyle = { isStatic: true, chamfer: { radius: 15 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } };
         const zigzagStyle = { isStatic: true, chamfer: { radius: 10 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } };
-
-        // 1. Flattened Funnel
         Composite.add(world, [
             Bodies.rectangle(cx - 280, y + 120, 500, 60, { ...wallStyle, angle: 0.4 }),
             Bodies.rectangle(cx + 280, y + 120, 500, 60, { ...wallStyle, angle: -0.4 })
         ]);
-
-        // 2. The Flipped Divider
-        const divider = Bodies.polygon(cx, y + 260, 3, 60, {
-            isStatic: true,
-            angle: Math.PI / 2, 
-            render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }
-        });
+        const divider = Bodies.polygon(cx, y + 260, 3, 60, { isStatic: true, angle: Math.PI / 2, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } });
         Composite.add(world, divider);
-
         Events.on(engine, 'beforeUpdate', (event) => {
             const time = event.timestamp;
             const newX = cx + Math.sin(time * 0.003) * 70;
             Body.setPosition(divider, { x: newX, y: y + 260 });
         });
-
-        // 3. Wide Central Path Divider (60px wide)
         const dividerHeight = 630;
         Composite.add(world, Bodies.rectangle(cx, y + 590, 60, dividerHeight, wallStyle));
-
-        // 4. THE PUNISHMENT (Flatter Left Path Zig-Zag)
         const rampWidth = 340; 
         for (let i = 0; i < 4; i++) {
             const rollsRight = (i % 2 === 1); 
-            // Reduced vertical spacing (110 instead of 130) because ramps are flatter
             const py = y + 400 + (i * 110);
-            
-            // Adjusted xOffset to keep the "gap" between the ramp end and the walls consistent
             const xOffset = rollsRight ? -250 : -170;
-            
-            Composite.add(world, Bodies.rectangle(cx + xOffset, py, rampWidth, 30, { 
-                ...zigzagStyle, 
-                angle: rollsRight ? 0.15 : -0.15 // Steepness reduced from 0.4 to 0.15
-            }));
+            Composite.add(world, Bodies.rectangle(cx + xOffset, py, rampWidth, 30, { ...zigzagStyle, angle: rollsRight ? 0.15 : -0.15 }));
         }
-
-        // 5. THE REWARD (Right Path)
-        // Remains clear for a clean drop
     }
 }
 ];
 
+// --- MODULE SYSTEM LOGIC ---
+let customModules = [];
+let enabledModules = []; // List of names
+let editingIndex = -1;
+
+function loadModuleData() {
+    const savedCustom = localStorage.getItem('marbleCustomModules');
+    if (savedCustom) customModules = JSON.parse(savedCustom);
+    
+    const savedEnabled = localStorage.getItem('marbleEnabledModules');
+    if (savedEnabled) {
+        enabledModules = JSON.parse(savedEnabled);
+    } else {
+        // Default to all built-ins enabled
+        enabledModules = DefaultModules.map(m => m.name);
+    }
+}
+
+function saveModuleData() {
+    localStorage.setItem('marbleCustomModules', JSON.stringify(customModules));
+    localStorage.setItem('marbleEnabledModules', JSON.stringify(enabledModules));
+}
+
+function openModuleBrowser() {
+    document.getElementById('module-overlay').style.display = 'flex';
+    renderModuleGrid();
+}
+
+function closeModuleBrowser() {
+    if (enabledModules.length < 2) {
+        alert("Please enable at least 2 modules!");
+        return;
+    }
+    document.getElementById('module-overlay').style.display = 'none';
+}
+
+function renderModuleGrid() {
+    const grid = document.getElementById('module-grid');
+    grid.innerHTML = '';
+
+    // Render Built-ins
+    DefaultModules.forEach(m => {
+        const isEnabled = enabledModules.includes(m.name);
+        const card = document.createElement('div');
+        card.className = `module-card ${isEnabled ? 'enabled' : ''}`;
+        card.innerHTML = `
+            <h3>${m.name} <small>(Built-in)</small></h3>
+            <div class="module-actions">
+                <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${m.name}')">${isEnabled ? 'ENABLED' : 'DISABLED'}</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+
+    // Render Custom
+    customModules.forEach((m, idx) => {
+        const isEnabled = enabledModules.includes(m.name);
+        const card = document.createElement('div');
+        card.className = `module-card ${isEnabled ? 'enabled' : ''}`;
+        card.innerHTML = `
+            <h3>${m.name}</h3>
+            <div class="module-actions">
+                <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${m.name}')">${isEnabled ? 'ENABLED' : 'DISABLED'}</button>
+                <button class="mod-btn mod-edit" onclick="editCustomModule(${idx})">EDIT</button>
+                <button class="mod-btn mod-del" onclick="deleteCustomModule(${idx})">DEL</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function toggleModule(name) {
+    if (enabledModules.includes(name)) {
+        if (enabledModules.length <= 2) {
+            alert("Minimum 2 modules required!");
+            return;
+        }
+        enabledModules = enabledModules.filter(n => n !== name);
+    } else {
+        enabledModules.push(name);
+    }
+    saveModuleData();
+    renderModuleGrid();
+}
+
+function addCustomModule() {
+    editingIndex = -1;
+    document.getElementById('editor-title').innerText = "New Custom Module";
+    document.getElementById('moduleNameInput').value = "My Custom Module " + (customModules.length + 1);
+    document.getElementById('moduleCodeInput').value = `create: (world, y, cx) => {
+    const rectangle_1 = Bodies.rectangle(cx + (-111), y + 216, 200, 60, { isStatic: true, friction: 2, restitution: 0.4, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: 0.000 });
+    Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(rectangle_1, { x: cx + (-111) + Math.sin(e.timestamp * 0.003) * 20, y: y + 216 }); });
+    Composite.add(world, rectangle_1);
+}`;
+    document.getElementById('editor-modal').style.display = 'flex';
+}
+
+function editCustomModule(idx) {
+    editingIndex = idx;
+    const m = customModules[idx];
+    document.getElementById('editor-title').innerText = "Edit Module";
+    document.getElementById('moduleNameInput').value = m.name;
+    document.getElementById('moduleCodeInput').value = m.code;
+    document.getElementById('editor-modal').style.display = 'flex';
+}
+
+function saveModule() {
+    const name = document.getElementById('moduleNameInput').value;
+    const code = document.getElementById('moduleCodeInput').value;
+    
+    if (editingIndex === -1) {
+        customModules.push({ name, code });
+        enabledModules.push(name);
+    } else {
+        const oldName = customModules[editingIndex].name;
+        enabledModules = enabledModules.map(n => n === oldName ? name : n);
+        customModules[editingIndex] = { name, code };
+    }
+    saveModuleData();
+    document.getElementById('editor-modal').style.display = 'none';
+    renderModuleGrid();
+}
+
+function deleteCustomModule(idx) {
+    const name = customModules[idx].name;
+    enabledModules = enabledModules.filter(n => n !== name);
+    customModules.splice(idx, 1);
+    saveModuleData();
+    renderModuleGrid();
+}
+
+function exportModules() {
+    const data = JSON.stringify({ custom: customModules, enabled: enabledModules });
+    const blob = new Blob([data], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'marble_modules.json';
+    a.click();
+}
+
+function importModules() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = event => {
+            const data = JSON.parse(event.target.result);
+            customModules = data.custom || [];
+            enabledModules = data.enabled || [];
+            saveModuleData();
+            renderModuleGrid();
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+// Helper to turn strings into executable functions safely-ish
+function getModuleLogic(m) {
+    if (m.create) return m.create; 
+    try {
+        // Extract the function body from the string "create: (world, y, cx) => { ... }"
+        const codeClean = m.code.substring(m.code.indexOf('=>') + 2).trim();
+        const body = codeClean.startsWith('{') ? codeClean.slice(1, -1) : codeClean;
+        return new Function('world', 'y', 'cx', body);
+    } catch (e) {
+        console.error("Failed to parse module: " + m.name, e);
+        return () => {}; 
+    }
+}
+
 window.onload = function() {
+    loadModuleData();
     const nameBox = document.getElementById('nameInput');
     const startBtn = document.getElementById('startBtn');
     const shuffleBtn = document.getElementById('shuffleBtn');
@@ -383,7 +582,6 @@ window.onload = function() {
     document.getElementById('closeResults').onclick = () => document.getElementById('results-modal').style.display='none';
     document.getElementById('resBtn').onclick = showFullResults;
 
-    // REMOVE VICTOR LOGIC
     document.getElementById('removeVictorBtn').onclick = () => {
         document.getElementById('victorNameDisplay').innerText = winnerName;
         document.getElementById('confirm-modal').style.display = 'flex';
@@ -392,23 +590,14 @@ window.onload = function() {
     document.getElementById('cancelRemove').onclick = () => document.getElementById('confirm-modal').style.display = 'none';
 
     document.getElementById('confirmRemove').onclick = () => {
-        // 1. Get current names and remove the winner
         let currentNames = nameBox.value.split('\n').map(n => n.trim()).filter(n => n !== "" && n !== winnerName);
-        
-        // 2. Shuffle the survivors
         for (let i = currentNames.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [currentNames[i], currentNames[j]] = [currentNames[j], currentNames[i]];
         }
-        
-        // 3. Update Textbox and Storage
         nameBox.value = currentNames.join('\n');
         localStorage.setItem('marbleRacerNames', nameBox.value);
-
-        // 4. Hide Modal
         document.getElementById('confirm-modal').style.display = 'none';
-
-        // 5. Cleanup current world and start new race immediately
         cleanupWorld();
         initiateRace(currentNames);
     };
@@ -421,12 +610,8 @@ function cleanupWorld() {
         render.canvas.remove();
         render.canvas = null;
         render.context = null;
-        render.textures = {};
     }
-    if (engine) {
-        Engine.clear(engine);
-    }
-    // Reset variables
+    if (engine) Engine.clear(engine);
     marbles = [];
     finishedMarbles = [];
     autoResultsShown = false;
@@ -456,13 +641,21 @@ function setupRace(names) {
     const SEG_HEIGHT = 900;
     const trackDepth = 12; 
     let currentY = 400;
-    let lastModuleIndex = -1;
+    let lastModuleName = "";
+
+    // FILTER ENABLED MODULES
+    const pool = [
+        ...DefaultModules.filter(m => enabledModules.includes(m.name)),
+        ...customModules.filter(m => enabledModules.includes(m.name))
+    ];
 
     for(let i = 0; i < trackDepth; i++) {
-        let randIndex;
-        do { randIndex = Math.floor(Math.random() * TrackModules.length); } while (randIndex === lastModuleIndex);
-        lastModuleIndex = randIndex;
-        TrackModules[randIndex].create(engine.world, currentY, cx);
+        let selected;
+        do { selected = pool[Math.floor(Math.random() * pool.length)]; } while (selected.name === lastModuleName && pool.length > 1);
+        lastModuleName = selected.name;
+        
+        const logic = getModuleLogic(selected);
+        logic(engine.world, currentY, cx);
         currentY += SEG_HEIGHT;
     }
 
