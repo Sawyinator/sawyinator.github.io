@@ -169,15 +169,180 @@ const createGuides = (world, y, cx) => {
 };
 
 const TrackModules = [
-    { name: "The Mixer", create: (world, y, cx) => { createGuides(world, y, cx); const parts = []; for(let i = 0; i < 3; i++) { const angle = (i / 3) * Math.PI * 2; parts.push(Bodies.rectangle(cx + Math.cos(angle) * 120, y + 500 + Math.sin(angle) * 120, 320, 80, { angle: angle, chamfer: { radius: 20 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } })); } const spinner = Body.create({ parts: parts, isStatic: false, frictionAir: 0 }); const constraint = Constraint.create({ pointA: { x: cx, y: y + 500 }, bodyB: spinner, stiffness: 1, length: 0 }); Composite.add(world, [spinner, constraint]); Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(spinner, 0.05)); } },
-    { name: "The Great Tightrope", create: (world, y, cx) => { const wallStyle = { isStatic: true, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } }; const splitter = Bodies.polygon(cx, y + 450, 4, 180, { ...wallStyle, angle: Math.PI / 4 }); Composite.add(world, splitter); [cx - 300, cx + 300].forEach((xPos, i) => { const gate = Bodies.rectangle(xPos, y + 750, 240, 70, { render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 15 }, frictionAir: 0 }); const cons = Constraint.create({ pointA: { x: xPos, y: y + 750 }, bodyB: gate, stiffness: 1, length: 0 }); Composite.add(world, [gate, cons]); Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(gate, i === 0 ? 0.08 : -0.08)); }); } },
-    { name: "Centripetal Slingshot", create: (world, y, cx) => { createGuides(world, y, cx); [cx - 240, cx + 240].forEach((xPos, i) => { const sat = Bodies.rectangle(xPos + (i === 0 ? 100 : -100), y + 500, 280, 80, { render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 20 }, frictionAir: 0 }); const cons = Constraint.create({ pointA: { x: xPos, y: y + 500 }, bodyB: sat, stiffness: 1, length: 0 }); Composite.add(world, [sat, cons]); Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(sat, i === 0 ? 0.18 : -0.18)); }); } },
-    { name: "Heavy Pendulum Squeeze", create: (world, y, cx) => { for(let i = 0; i < 2; i++) { const xPos = cx - 200 + (i * 400); const weight = Bodies.rectangle(xPos, y + 600, 300, 100, { render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 30 }, frictionAir: 0.02, restitution: 0.7, inertia: 7500 }); const pivot = Constraint.create({ pointA: { x: xPos, y: y + 150 }, bodyB: weight, stiffness: 0.01, length: 400, render: { strokeStyle: '#64ff4e', lineWidth: 4 } }); Composite.add(world, [weight, pivot]); } } },
-    { name: "Double Cyclone", create: (world, y, cx) => { [cx - 180, cx + 180].forEach((xPos, idx) => { const parts = []; for(let i = 0; i < 8; i++) { const angle = (i / 8) * Math.PI * 2; if (i === 0) continue; parts.push(Bodies.rectangle(xPos + Math.cos(angle) * 140, y + 450 + Math.sin(angle) * 140, 100, 45, { angle: angle, chamfer: { radius: 20 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 3 } })); } const spinner = Body.create({ parts: parts, isStatic: false, frictionAir: 0 }); const constraint = Constraint.create({ pointA: { x: xPos, y: y + 450 }, bodyB: spinner, stiffness: 1, length: 0 }); Composite.add(world, [spinner, constraint]); Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(spinner, idx === 0 ? 0.1 : -0.1)); }); } },
-    { name: "Zig-Zag Plunge", create: (world, y, cx) => { const stepStyle = { isStatic: true, chamfer: { radius: 40 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 5 } }; for (let i = 0; i < 5; i++) { const isLeft = i % 2 === 0; Composite.add(world, Bodies.rectangle(isLeft ? cx - 350 : cx + 350, y + (i * 180), 750, 100, { ...stepStyle, angle: isLeft ? 0.5 : -0.5 })); } } },
-    { name: "Deep Funnel", create: (world, y, cx) => { const wallStyle = { isStatic: true, chamfer: { radius: 30 }, restitution: 0.2, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 8 } }; Composite.add(world, [Bodies.rectangle(cx - 320, y + 250, 550, 110, { ...wallStyle, angle: 0.75 }), Bodies.rectangle(cx + 320, y + 250, 550, 110, { ...wallStyle, angle: -0.75 }), Bodies.circle(cx, y + 550, 80, { isStatic: true, restitution: 0.3, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } })]); } },
-    { name: "Gravity Well", create: (world, y, cx) => { const wallStyle = { isStatic: true, chamfer: { radius: 25 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 6 } }; Composite.add(world, [Bodies.rectangle(cx - 250, y + 300, 500, 80, { ...wallStyle, angle: 0.8 }), Bodies.rectangle(cx + 250, y + 300, 500, 80, { ...wallStyle, angle: -0.8 }), Bodies.polygon(cx, y + 650, 3, 70, { isStatic: true, restitution: 0.8, angle: Math.PI, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } })]); } },
-    { name: "Bumper Gauntlet", create: (world, y, cx) => { const bumperStyle = { isStatic: true, restitution: 1.1, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } }; const positions = [{x: -160, y: 150}, {x: 160, y: 150}, {x: 0, y: 400}, {x: -160, y: 650}, {x: 160, y: 650}]; positions.forEach(pos => { Composite.add(world, Bodies.circle(cx + pos.x, y + pos.y, 55, bumperStyle)); }); } }
+    
+    {
+        name: "tri-blade spinner",
+        create: (world, y, cx) => {
+            createGuides(world, y, cx);
+            const parts = [];
+            for(let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2;
+                parts.push(Bodies.rectangle(cx + Math.cos(angle) * 120, y + 500 + Math.sin(angle) * 120, 320, 80, { 
+                    angle: angle, chamfer: { radius: 20 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } 
+                }));
+            }
+            const spinner = Body.create({ parts: parts, isStatic: false, frictionAir: 0 });
+            const constraint = Constraint.create({ pointA: { x: cx, y: y + 500 }, bodyB: spinner, stiffness: 1, length: 0 });
+            Composite.add(world, [spinner, constraint]);
+            Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(spinner, 0.05));
+        }
+    },
+    {
+         name: "moving diamond splitter",
+         create: (world, y, cx) => {
+         const wallStyle = { 
+            isStatic: true,
+            render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } 
+            };
+         const splitter = Bodies.polygon(cx, y + 450, 4, 180, { ...wallStyle, angle: Math.PI / 4 });
+         Composite.add(world, splitter);
+
+         Events.on(engine, 'beforeUpdate', (event) => {
+            const time = event.timestamp;
+            const amplitude = 200;       // How far left/right it travels
+            const speed = 0.002;         // How fast it moves
+            
+            const newX = cx + Math.sin(time * speed) * amplitude;
+            
+            Body.setPosition(splitter, { x: newX, y: y + 450 });
+         });
+         
+        [cx - 300, cx + 300].forEach((xPos, i) => {
+            const gate = Bodies.rectangle(xPos, y + 750, 240, 70, { 
+                render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, 
+                chamfer: { radius: 15 }, 
+                frictionAir: 0
+            });
+                 const cons = Constraint.create({ pointA: { x: xPos, y: y + 750 }, bodyB: gate, stiffness: 1, length: 0 });
+                 Composite.add(world, [gate, cons]);
+                 Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(gate, i === 0 ? 0.08 : -0.08));
+            });
+        }
+    },
+    {
+        name: "dual spinners",
+        create: (world, y, cx) => {
+            createGuides(world, y, cx);
+            [cx - 240, cx + 240].forEach((xPos, i) => {
+                const sat = Bodies.rectangle(xPos + (i === 0 ? 100 : -100), y + 500, 280, 80, { 
+                    render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 20 }, frictionAir: 0
+                });
+                const cons = Constraint.create({ pointA: { x: xPos, y: y + 500 }, bodyB: sat, stiffness: 1, length: 0 });
+                Composite.add(world, [sat, cons]);
+                Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(sat, i === 0 ? 0.18 : -0.18));
+            });
+        }
+    },
+    {
+        name: "hanging rectangles",
+        create: (world, y, cx) => {
+            for(let i = 0; i < 2; i++) {
+                const xPos = cx - 200 + (i * 400);
+                const weight = Bodies.rectangle(xPos, y + 600, 300, 100, { 
+                    render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, chamfer: { radius: 30 }, 
+                    frictionAir: 0.02, restitution: 0.7, inertia: 7500 
+                });
+                const pivot = Constraint.create({ 
+                    pointA: { x: xPos, y: y + 150 }, bodyB: weight, stiffness: 0.01, length: 400,
+                    render: { strokeStyle: '#64ff4e', lineWidth: 4 }
+                });
+                Composite.add(world, [weight, pivot]);
+            }
+        }
+    },
+    {
+        name: "grinder",
+        create: (world, y, cx) => {
+            [cx - 180, cx + 180].forEach((xPos, idx) => {
+                const parts = [];
+                for(let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    if (i === 0) continue; 
+                    parts.push(Bodies.rectangle(
+                        xPos + Math.cos(angle) * 140, y + 450 + Math.sin(angle) * 140, 100, 45, 
+                        { angle: angle, chamfer: { radius: 20 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 3 } }
+                    ));
+                }
+                const spinner = Body.create({ parts: parts, isStatic: false, frictionAir: 0 });
+                const constraint = Constraint.create({ pointA: { x: xPos, y: y + 450 }, bodyB: spinner, stiffness: 1, length: 0 });
+                Composite.add(world, [spinner, constraint]);
+                Events.on(engine, 'beforeUpdate', () => Body.setAngularVelocity(spinner, idx === 0 ? 0.1 : -0.1));
+            });
+        }
+    },
+    {
+        name: "zigzags",
+        create: (world, y, cx) => {
+            const stepStyle = { isStatic: true, chamfer: { radius: 40 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 5 } };
+            for (let i = 0; i < 5; i++) {
+                const isLeft = i % 2 === 0;
+                Composite.add(world, Bodies.rectangle(isLeft ? cx - 350 : cx + 350, y + (i * 180), 750, 100, { ...stepStyle, angle: isLeft ? 0.5 : -0.5 }));
+            }
+        }
+    },
+    {
+        name: "funnel",
+        create: (world, y, cx) => {
+            const wallStyle = { isStatic: true, chamfer: { radius: 30 }, restitution: 0.2, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 8 } };
+            Composite.add(world, [
+                Bodies.rectangle(cx - 320, y + 250, 550, 110, { ...wallStyle, angle: 0.75 }),
+                Bodies.rectangle(cx + 320, y + 250, 550, 110, { ...wallStyle, angle: -0.75 }),
+                Bodies.circle(cx, y + 550, 80, { isStatic: true, restitution: 0.3, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } })
+            ]);
+        }
+    },
+    {
+        name: "plinko",
+        create: (world, y, cx) => {
+            const bumperStyle = { isStatic: true, restitution: 1.1, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 } };
+            const positions = [{x: -160, y: 150}, {x: 160, y: 150}, {x: 0, y: 400}, {x: -160, y: 650}, {x: 160, y: 650}];
+            positions.forEach(pos => {
+                Composite.add(world, Bodies.circle(cx + pos.x, y + pos.y, 55, bumperStyle));
+            });
+        }
+    }
+    {
+    name: "50/50",
+    create: (world, y, cx) => {
+        const wallStyle = { isStatic: true, chamfer: { radius: 20 }, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 6 } };
+        
+        // 1. The Funnel Walls
+        // Positioned to drop everything exactly onto the moving triangle
+        Composite.add(world, [
+            Bodies.rectangle(cx - 280, y + 200, 500, 80, { ...wallStyle, angle: 0.7 }),
+            Bodies.rectangle(cx + 280, y + 200, 500, 80, { ...wallStyle, angle: -0.7 })
+        ]);
+
+        // 2. The Moving Triangle (The Divider)
+        // A 3-sided polygon (triangle) pointing upwards
+        const divider = Bodies.polygon(cx, y + 550, 3, 80, {
+            isStatic: true,
+            restitution: 0.5,
+            angle: -Math.PI / 2, // Rotate to point upward
+            render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }
+        });
+        
+        Composite.add(world, divider);
+
+        // 3. Movement Logic
+        Events.on(engine, 'beforeUpdate', (event) => {
+            const time = event.timestamp;
+            const amplitude = 150; // Distance it travels from center
+            const speed = 0.003;   // Speed of oscillation
+            
+            const newX = cx + Math.sin(time * speed) * amplitude;
+            
+            Body.setPosition(divider, { x: newX, y: y + 550 });
+        });
+
+        // 4. Visual Path Dividers (Optional but helpful)
+        // Static bars at the bottom to clearly separate the two paths
+        const floorStyle = { isStatic: true, render: { fillStyle: '#111', strokeStyle: '#64ff4e', lineWidth: 2 } };
+        Composite.add(world, [
+            Bodies.rectangle(cx, y + 800, 10, 200, floorStyle) 
+        ]);
+    }
+}
 ];
 
 window.onload = function() {
