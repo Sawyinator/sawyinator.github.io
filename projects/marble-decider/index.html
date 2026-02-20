@@ -180,7 +180,6 @@
 <div id="editor-modal">
     <div class="editor-box">
         <h2 id="editor-title" style="color: var(--acc);">Edit Module</h2>
-        <input type="text" id="moduleNameInput" placeholder="Module Name" style="width: 100%; padding: 10px; background: #000; color: white; border: 1px solid var(--acc);">
         <textarea id="moduleCodeInput" placeholder="create: (world, y, cx) => { ... }"></textarea>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="ui-btn toggle-btn" style="flex: 1;" onclick="saveModule()">SAVE</button>
@@ -417,6 +416,32 @@ function closeModuleBrowser() {
 function renderModuleGrid() {
     const grid = document.getElementById('module-grid');
     grid.innerHTML = '';
+
+    // Render Built-ins (Name is fixed)
+    DefaultModules.forEach(m => {
+        const isEnabled = enabledModules.includes(m.name);
+        // ... (existing built-in card code) ...
+    });
+
+    // Render Custom
+    customModules.forEach((m, idx) => {
+        const currentName = getNameFromCode(m.code);
+        const isEnabled = enabledModules.includes(currentName);
+        
+        const card = document.createElement('div');
+        card.className = `module-card ${isEnabled ? 'enabled' : ''}`;
+        card.innerHTML = `
+            <h3>${currentName}</h3>
+            <div class="module-actions">
+                <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${currentName}')">${isEnabled ? 'ENABLED' : 'DISABLED'}</button>
+                <button class="mod-btn mod-edit" style="background:#3b82f6; color:white;" onclick="renameModule(${idx})">RENAME</button>
+                <button class="mod-btn mod-edit" onclick="editCustomModule(${idx})">EDIT CODE</button>
+                <button class="mod-btn mod-del" onclick="deleteCustomModule(${idx})">DEL</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
 
     // Render Built-ins
     DefaultModules.forEach(m => {
@@ -787,6 +812,33 @@ function showFullResults() {
         <div class="results-item" style="color:${m.render.textColor}"><span>#${i+1} ${m.label}</span><span>${m.isFinished ? m.finishTime + 's' : 'DNF'}</span></div>
     `).join('');
     document.getElementById('results-modal').style.display = 'flex';
+}
+// Extracts the name from the code string
+function getNameFromCode(code) {
+    const match = code.match(/name:\s*["'`](.*?)["'`]/);
+    return match ? match[1] : "Unnamed Module";
+}
+
+// Replaces the name in the code string with a new one
+function updateNameInCode(code, newName) {
+    return code.replace(/(name:\s*["'`](.*?)(["'`],?))/, `name: "${newName}"$3`);
+}
+function renameModule(idx) {
+    const oldCode = customModules[idx].code;
+    const oldName = getNameFromCode(oldCode);
+    const newName = prompt("Enter new name for the module:", oldName);
+    
+    if (newName && newName !== oldName) {
+        // Update the code string
+        const newCode = updateNameInCode(oldCode, newName);
+        customModules[idx].code = newCode;
+        
+        // Update the enabled list so it doesn't get "unselected"
+        enabledModules = enabledModules.map(n => n === oldName ? newName : n);
+        
+        saveModuleData();
+        renderModuleGrid();
+    }
 }
 </script>
 </body>
