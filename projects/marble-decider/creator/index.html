@@ -37,7 +37,7 @@
 
 <div id="sidebar-left">
     <button onclick="window.location.href='/projects/marble-decider/'" 
-            style="background: transparent; border-color: #333; margin-bottom: 20px; color: #888;">
+            style="background: transparent; border-color: #333; margin-bottom: 20px; color: #888; text-align: left; padding-left: 10px;">
         ← BACK
     </button>
 
@@ -299,26 +299,45 @@
     });
 
     function generateCode() {
-        let code = `    {\n        name: "copied module",\n        create: (world, y, cx) => {\n`;
-        shapes.forEach(s => {
-            const relX = `cx + (${s.x - CX})`;
-            const relY = `y + ${s.y}`;
-            const radAngle = (s.angle * (Math.PI/180)).toFixed(3);
-            const style = `{ isStatic: ${s.isStatic}, friction: ${s.friction}, restitution: ${s.bouncy}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
-            
-            if(s.type === 'rectangle') code += `            const ${s.name} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
-            else if(s.type === 'circle') code += `            const ${s.name} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
-            else if(s.type === 'triangle') code += `            const ${s.name} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
-            
-            if(s.behavior === 'rotate') code += `            Events.on(engine, 'beforeUpdate', () => { Body.setAngle(${s.name}, ${s.name}.angle + ${s.speed}); });\n`;
-            else if(s.behavior === 'oscillate') code += `            Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(${s.name}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} }); });\n`;
-            code += `            Composite.add(world, ${s.name});\n`;
-        });
-        code += `        }\n    },`;
-        navigator.clipboard.writeText(code).then(() => {
-            const t = document.getElementById('toast'); t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500);
-        });
-    }
+    // Start with the specific structure you requested
+    let code = `{\n    name: "${selectedShape ? selectedShape.name : 'Custom Module'}",\n    create: (world, y, cx, engine) => {\n`;
+    
+    shapes.forEach(s => {
+        const relX = `cx + (${s.x - CX})`;
+        // Subtracting CY and assuming the module starts at 0 internally
+        const relY = `y + ${s.y}`; 
+        const radAngle = (s.angle * (Math.PI/180)).toFixed(3);
+        
+        // Define the body
+        const style = `{ isStatic: ${s.isStatic}, friction: ${s.friction}, restitution: ${s.bouncy}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
+        
+        if(s.type === 'rectangle') {
+            code += `        const ${s.name} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
+        } else if(s.type === 'circle') {
+            code += `        const ${s.name} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
+        } else if(s.type === 'triangle') {
+            code += `        const ${s.name} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
+        }
+        
+        // Add Logic using engine (Behavior)
+        if(s.behavior === 'rotate') {
+            code += `        Events.on(engine, 'beforeUpdate', () => {\n            Body.setAngle(${s.name}, ${s.name}.angle + ${s.speed});\n        });\n`;
+        } else if(s.behavior === 'oscillate') {
+            code += `        Events.on(engine, 'beforeUpdate', (e) => {\n            Body.setPosition(${s.name}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} });\n        });\n`;
+        }
+
+        // Add to world
+        code += `        Composite.add(world, ${s.name});\n\n`;
+    });
+
+    code += `    }\n}`;
+
+    navigator.clipboard.writeText(code).then(() => {
+        const t = document.getElementById('toast');
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 1500);
+    });
+}
     rebuildWorld();
 </script>
 </body>

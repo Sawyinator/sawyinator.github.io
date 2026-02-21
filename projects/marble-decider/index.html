@@ -375,7 +375,7 @@ const DefaultModules = [
             const xOffset = rollsRight ? -250 : -170;
             Composite.add(world, Bodies.rectangle(cx + xOffset, py, rampWidth, 30, { ...zigzagStyle, angle: rollsRight ? 0.15 : -0.15 }));
         }
-    }
+    },
 }
 ];
 
@@ -536,17 +536,19 @@ function getModuleLogic(m) {
     try {
         let codeToEval = m.code.trim();
         
-        // If the user pasted the whole { name: "...", create: (...) => { ... } }
-        // We need to wrap it in parentheses to eval it as an object
+        // Handle full object strings { name: "...", create: ... }
         if (codeToEval.startsWith('{')) {
+            // We use eval to turn the string into a real object
             const moduleObj = eval(`(${codeToEval})`);
             return moduleObj.create;
         }
         
-        // If the user only pasted the function (world, y, cx) => { ... }
+        // Handle raw function strings (world, y, cx) => { ... }
         const codeClean = codeToEval.substring(codeToEval.indexOf('=>') + 2).trim();
         const body = codeClean.startsWith('{') ? codeClean.slice(1, -1) : codeClean;
-        return new Function('world', 'y', 'cx', body);
+        
+        // IMPORTANT: Added 'engine' to the constructor so custom code can access it
+        return new Function('world', 'y', 'cx', 'engine', body);
     } catch (e) {
         console.error("Failed to parse module: " + m.name, e);
         return () => {}; 
@@ -687,7 +689,7 @@ function setupRace(names) {
         lastModuleName = selected.name;
         
         const logic = getModuleLogic(selected);
-        logic(engine.world, currentY, cx);
+        logic(engine.world, currentY, cx, engine);
         currentY += SEG_HEIGHT;
     }
 
