@@ -1,410 +1,778 @@
 <!DOCTYPE html>
 <html lang="en">
 <link rel="icon" type="image/png" href="/assets/favicons/marble-decider-favicon.png">
+
 <head>
     <meta charset="UTF-8">
     <title>Module Creator | MD</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
-        body { background: #0a0a0a; color: #64ff4e; font-family: 'Segoe UI', sans-serif; display: flex; margin: 0; height: 100vh; overflow: hidden; }
-        #sidebar-left { width: 300px; background: #111; border-right: 2px solid #052e16; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; z-index: 10; }
-        #sidebar-right { width: 250px; background: #111; border-left: 2px solid #052e16; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; z-index: 10; }
-        #canvas-container { flex-grow: 1; position: relative; background: radial-gradient(circle, #052e16 0%, #000 100%); overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        canvas { background: transparent; cursor: crosshair; display: block; }
-        h2 { margin-top: 0; color: #64ff4e; text-transform: uppercase; letter-spacing: 2px; font-size: 1.1em; border-bottom: 1px solid #052e16; padding-bottom: 10px; }
-        .tool-group { margin-bottom: 20px; }
-        button { background: #052e16; color: #64ff4e; border: 1px solid #64ff4e; padding: 8px; cursor: pointer; margin: 5px 0; width: 100%; transition: 0.2s; font-weight: bold; font-size: 12px; }
-        button:hover { background: #64ff4e; color: #052e16; }
-        .sim-active { background: #ef4444 !important; color: white !important; border-color: white !important; }
-        label { display: block; font-size: 10px; margin-top: 10px; opacity: 0.8; text-transform: uppercase; }
-        input, select { width: 100%; background: #000; border: 1px solid #052e16; color: #64ff4e; padding: 8px; margin-top: 5px; box-sizing: border-box; font-size: 12px; }
-        .coord-row { display: flex; gap: 10px; }
-        .object-list { list-style: none; padding: 0; margin: 0; }
-        .object-item { display: flex; align-items: center; background: #000; border: 1px solid #052e16; margin-bottom: 5px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
-        .object-item:hover { border-color: #64ff4e; }
-        .object-item.selected { background: #052e16; border-color: #64ff4e; }
-        .object-name { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .mini-btn { width: 22px; height: 22px; padding: 0; font-size: 10px; }
-        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #64ff4e; color: #052e16; padding: 10px 20px; font-weight: bold; border-radius: 5px; z-index: 1000; display: none; }
-        .section-header { color: #888; font-size: 9px; margin-top: 15px; border-top: 1px solid #222; padding-top: 5px; }
-        .sim-legend { margin: 10px 0; padding: 8px; background: #000; border: 1px dashed #052e16; font-size: 10px; color: #888; line-height: 1.5; }
-        .sim-legend strong { color: #64ff4e; }
+        body {
+            background: #0a0a0a;
+            color: #64ff4e;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #sidebar-left {
+            width: 300px;
+            background: #111;
+            border-right: 2px solid #052e16;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        #sidebar-right {
+            width: 250px;
+            background: #111;
+            border-left: 2px solid #052e16;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background: radial-gradient(circle, #052e16 0%, #000 100%);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            background: transparent;
+            cursor: crosshair;
+            display: block;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #64ff4e;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1em;
+            border-bottom: 1px solid #052e16;
+            padding-bottom: 10px;
+        }
+
+        .tool-group {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #052e16;
+            color: #64ff4e;
+            border: 1px solid #64ff4e;
+            padding: 8px;
+            cursor: pointer;
+            margin: 5px 0;
+            width: 100%;
+            transition: 0.2s;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: #64ff4e;
+            color: #052e16;
+        }
+
+        .sim-active {
+            background: #ef4444 !important;
+            color: white !important;
+            border-color: white !important;
+        }
+
+        label {
+            display: block;
+            font-size: 10px;
+            margin-top: 10px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        input,
+        select {
+            width: 100%;
+            background: #000;
+            border: 1px solid #052e16;
+            color: #64ff4e;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            font-size: 12px;
+        }
+
+        .coord-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .object-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .object-item {
+            display: flex;
+            align-items: center;
+            background: #000;
+            border: 1px solid #052e16;
+            margin-bottom: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .object-item:hover {
+            border-color: #64ff4e;
+        }
+
+        .object-item.selected {
+            background: #052e16;
+            border-color: #64ff4e;
+        }
+
+        .object-name {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mini-btn {
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            font-size: 10px;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #64ff4e;
+            color: #052e16;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .section-header {
+            color: #888;
+            font-size: 9px;
+            margin-top: 15px;
+            border-top: 1px solid #222;
+            padding-top: 5px;
+        }
+
+        .sim-legend {
+            margin: 10px 0;
+            padding: 8px;
+            background: #000;
+            border: 1px dashed #052e16;
+            font-size: 10px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .sim-legend strong {
+            color: #64ff4e;
+        }
     </style>
 </head>
+
 <body>
 
-<div id="sidebar-left">
-    <button onclick="window.location.href='/projects/marble-decider/'" 
-            style="background: transparent; border-color: #333; margin-bottom: 20px; color: #888; text-align: left; padding-left: 10px;">
-        ← BACK
-    </button>
+    <div id="sidebar-left">
+        <button onclick="window.location.href='/projects/marble-decider/'" style="background: transparent; border-color: #333; margin-bottom: 20px; color: #888; text-align: left; padding-left: 10px;">
+            ← BACK
+        </button>
 
-    <h2>Tools</h2>
-    <div class="tool-group">
-        <button onclick="addShape('rectangle')">+ Rectangle</button>
-        <button onclick="addShape('circle')">+ Circle</button>
-        <button onclick="addShape('triangle')">+ Triangle</button>
-    </div>
-
-    <div id="inspector" style="display:none;">
-        <h2>Inspector</h2>
-        <label>Name</label>
-        <input type="text" id="prop-name" oninput="updateSelected()">
-        
-        <div class="section-header">TRANSFORM</div>
-        <div class="coord-row">
-            <div><label>Rel X</label><input type="number" id="prop-x" oninput="updateSelected()"></div>
-            <div><label>Rel Y</label><input type="number" id="prop-y" oninput="updateSelected()"></div>
+        <h2>Tools</h2>
+        <div class="tool-group">
+            <button onclick="addShape('rectangle')">+ Rectangle</button>
+            <button onclick="addShape('circle')">+ Circle</button>
+            <button onclick="addShape('triangle')">+ Triangle</button>
         </div>
-        <div class="coord-row">
-            <div style="flex:1;"><label>W / Rad</label><input type="number" id="prop-w" oninput="updateSelected()"></div>
-            <div style="flex:1;"><label>Height</label><input type="number" id="prop-h" oninput="updateSelected()"></div>
-        </div>
-        <label>Rotation (Deg)</label>
-        <input type="number" id="prop-angle" oninput="updateSelected()">
 
-        <div class="section-header">PHYSICS</div>
-        <div class="coord-row">
-            <div style="flex:1;"><label title="Bounciness (0-1)">Bouncy</label><input type="number" step="0.1" id="prop-bouncy" oninput="updateSelected()"></div>
-            <div style="flex:1;"><label title="Friction (0-1)">Friction</label><input type="number" step="0.01" id="prop-friction" oninput="updateSelected()"></div>
-        </div>
-        <label>Body Type</label>
-        <select id="prop-isStatic" onchange="updateSelected()">
-            <option value="true">Fixed (Static)</option>
-            <option value="false">Loose (Physics)</option>
-        </select>
+        <div id="inspector" style="display:none;">
+            <h2>Inspector</h2>
+            <label>Name</label>
+            <input type="text" id="prop-name" oninput="updateSelected()">
 
-        <div class="section-header">BEHAVIOR</div>
-        <select id="prop-behavior" onchange="updateSelected()">
-            <option value="static">No Movement</option>
-            <option value="rotate">Constant Rotate</option>
-            <option value="oscillate">Oscillate X</option>
-        </select>
-        <label>Speed / Amp</label>
-        <input type="number" step="0.01" id="prop-speed" oninput="updateSelected()">
-    </div>
-
-    <div style="margin-top:auto;">
-        <div id="sim-controls-area" style="display:none;">
-            <div class="sim-legend">
-                <strong>[SIM MODE ACTIVE]</strong><br>
-                Press <strong>S</strong>: Spawn Marble<br>
-                Press <strong>C</strong>: Clear Marbles
+            <div class="section-header">TRANSFORM</div>
+            <div class="coord-row">
+                <div><label>Rel X</label><input type="number" id="prop-x" oninput="updateSelected()"></div>
+                <div><label>Rel Y</label><input type="number" id="prop-y" oninput="updateSelected()"></div>
             </div>
-            <button onclick="clearMarbles()" style="background: #333; border-color: #555;">CLEAR ALL MARBLES</button>
+            <div class="coord-row">
+                <div style="flex:1;"><label>W / Rad</label><input type="number" id="prop-w" oninput="updateSelected()"></div>
+                <div style="flex:1;"><label>Height</label><input type="number" id="prop-h" oninput="updateSelected()"></div>
+            </div>
+            <label>Rotation (Deg)</label>
+            <input type="number" id="prop-angle" oninput="updateSelected()">
+
+            <div class="section-header">PHYSICS</div>
+            <div class="coord-row">
+                <div style="flex:1;"><label title="Bounciness (0-1)">Bouncy</label><input type="number" step="0.1" id="prop-bouncy" oninput="updateSelected()"></div>
+                <div style="flex:1;"><label title="Friction (0-1)">Friction</label><input type="number" step="0.01" id="prop-friction" oninput="updateSelected()"></div>
+            </div>
+            <label>Body Type</label>
+            <select id="prop-isStatic" onchange="updateSelected()">
+                <option value="true">Fixed (Static)</option>
+                <option value="false">Loose (Physics)</option>
+            </select>
+
+            <div class="section-header">BEHAVIOR</div>
+            <select id="prop-behavior" onchange="updateSelected()">
+                <option value="static">No Movement</option>
+                <option value="rotate">Constant Rotate</option>
+                <option value="oscillate">Oscillate X</option>
+            </select>
+            <label>Speed / Amp</label>
+            <input type="number" step="0.01" id="prop-speed" oninput="updateSelected()">
         </div>
-        
-        <button onclick="toggleSim()" id="sim-btn" style="background: #1e40af;">START SIMULATION</button>
-        <button onclick="generateCode()" style="background:#64ff4e; color:#052e16;">COPY CODE</button>
+
+        <div style="margin-top:auto;">
+            <div id="sim-controls-area" style="display:none;">
+                <div class="sim-legend">
+                    <strong>[SIM MODE ACTIVE]</strong><br>
+                    Press <strong>S</strong>: Spawn Marble<br>
+                    Press <strong>C</strong>: Clear Marbles
+                </div>
+                <button onclick="clearMarbles()" style="background: #333; border-color: #555;">CLEAR ALL MARBLES</button>
+            </div>
+            <div style="margin-top: 10px; display: flex; gap: 5px;">
+            </div>
+
+            <div id="import-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; padding:50px; box-sizing:border-box;">
+                <h2 style="color:#64ff4e;">Paste Module Code</h2>
+                <textarea id="import-area" style="width:100%; height:70%; background:#111; color:#64ff4e; border:1px solid #052e16; font-family:monospace; padding:15px;"></textarea>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button onclick="processImport()" style="background:#64ff4e; color:#052e16;">LOAD MODULE</button>
+                    <button onclick="document.getElementById('import-overlay').style.display='none'" style="background:#333;">CANCEL</button>
+                </div>
+            </div>
+            <button onclick="toggleSim()" id="sim-btn" style="background: #1e40af;">START SIMULATION</button>
+            <button onclick="generateCode()" style="background:#64ff4e; color:#052e16;">COPY CODE</button>
+            <button onclick="showImportPrompt()" style="background:#333; color:#64ff4e; border-color:#64ff4e;">IMPORT</button>
+        </div>
     </div>
-</div>
 
-<div id="canvas-container"></div>
+    <div id="canvas-container"></div>
 
-<div id="sidebar-right">
-    <h2>Object Browser</h2>
-    <div id="object-browser-list" class="object-list"></div>
-</div>
+    <div id="sidebar-right">
+        <h2>Object Browser</h2>
+        <div id="object-browser-list" class="object-list"></div>
+    </div>
 
-<div id="toast">CODE COPIED!</div>
+    <div id="toast">CODE COPIED!</div>
 
-<script>
-    const { Engine, Render, Runner, Bodies, Composite, Body, Events } = Matter;
-    const engine = Engine.create();
-    
-    // Spec Constants
-    const MARBLE_RADIUS = 20;
-    const MOD_WIDTH = 820, MOD_HEIGHT = 900;
-    
-    // Initial dynamic sizing
-    let canvasW = document.getElementById('canvas-container').clientWidth;
-    let canvasH = document.getElementById('canvas-container').clientHeight;
-    let CX = canvasW / 2, CY = canvasH / 2;
-    
-    const render = Render.create({
-        element: document.getElementById('canvas-container'),
-        engine: engine,
-        options: { 
-            width: canvasW, 
-            height: canvasH, 
-            wireframes: false, 
-            background: 'transparent' 
-        }
-    });
+    <script>
+        const {
+            Engine,
+            Render,
+            Runner,
+            Bodies,
+            Composite,
+            Body,
+            Events
+        } = Matter;
+        const engine = Engine.create();
 
-    Render.run(render);
-    const runner = Runner.create();
-const fps = 60;
-const interval = 1000 / fps;
-let then = performance.now();
+        // Spec Constants
+        const MARBLE_RADIUS = 20;
+        const MOD_WIDTH = 820,
+            MOD_HEIGHT = 900;
 
-function loop(now) {
-    requestAnimationFrame(loop);
-    
-    const elapsed = now - then;
-    
-    // Only update if enough time has passed for the next frame
-    if (elapsed > interval) {
-        // Adjust 'then' to handle potential drift
-        then = now - (elapsed % interval);
-        
-        // Update the engine and the renderer
-        Runner.tick(runner, engine, now);
-        Render.world(render);
-    }
-}
+        // Initial dynamic sizing
+        let canvasW = document.getElementById('canvas-container').clientWidth;
+        let canvasH = document.getElementById('canvas-container').clientHeight;
+        let CX = canvasW / 2,
+            CY = canvasH / 2;
 
-// Start the custom loop
-requestAnimationFrame(loop);
-
-    let shapes = [], marbles = [], selectedShape = null, isSimulating = false, mousePos = { x: 0, y: 0 };
-    engine.gravity.y = 0;
-
-    // Handle Window Resize
-    window.addEventListener('resize', () => {
-        const container = document.getElementById('canvas-container');
-        canvasW = container.clientWidth;
-        canvasH = container.clientHeight;
-        
-        const oldCX = CX;
-        const oldCY = CY;
-        CX = canvasW / 2;
-        CY = canvasH / 2;
-
-        // Reposition shapes relative to new center
-        shapes.forEach(s => {
-            s.x = (s.x - oldCX) + CX;
-            s.y = (s.y - oldCY) + CY;
-        });
-
-        render.canvas.width = canvasW;
-        render.canvas.height = canvasH;
-        render.options.width = canvasW;
-        render.options.height = canvasH;
-        
-        rebuildWorld();
-    });
-
-    Events.on(engine, 'beforeUpdate', (event) => {
-        if (!isSimulating) return;
-        const time = event.timestamp;
-        Composite.allBodies(engine.world).forEach(body => {
-            if (body.behaviorData && body.behaviorData.behavior !== 'static') {
-                const s = body.behaviorData;
-                if (s.behavior === 'rotate') Body.setAngle(body, body.angle + s.speed);
-                else if (s.behavior === 'oscillate') {
-                    const newX = s.origX + Math.sin(time * 0.003) * (s.speed * 100);
-                    Body.setPosition(body, { x: newX, y: s.origY });
-                }
+        const render = Render.create({
+            element: document.getElementById('canvas-container'),
+            engine: engine,
+            options: {
+                width: canvasW,
+                height: canvasH,
+                wireframes: false,
+                background: 'transparent'
             }
         });
-    });
 
-    Events.on(render, 'afterRender', () => {
-        const ctx = render.context;
-        const left = CX - MOD_WIDTH/2;
-        const right = CX + MOD_WIDTH/2;
-        const top = CY - MOD_HEIGHT/2;
-        const bottom = CY + MOD_HEIGHT/2;
+        Render.run(render);
+        const runner = Runner.create();
+        const fps = 60;
+        const interval = 1000 / fps;
+        let then = performance.now();
 
-        ctx.strokeStyle = '#64ff4e';
-        ctx.setLineDash([5, 5]);
-        ctx.lineWidth = 1.5;
-        ctx.globalAlpha = 0.4;
+        function loop(now) {
+            requestAnimationFrame(loop);
 
-        ctx.strokeRect(left, top, MOD_WIDTH, MOD_HEIGHT);
+            const elapsed = now - then;
 
-        ctx.globalAlpha = 0.2;
-        ctx.beginPath();
-        ctx.moveTo(CX, top); ctx.lineTo(CX, bottom);
-        ctx.moveTo(left, CY); ctx.lineTo(right, CY);
-        ctx.stroke();
-        
-        ctx.setLineDash([]); 
-        ctx.globalAlpha = 1.0;
-    });
+            // Only update if enough time has passed for the next frame
+            if (elapsed > interval) {
+                // Adjust 'then' to handle potential drift
+                then = now - (elapsed % interval);
 
-    function addShape(type) {
-        if (isSimulating) return;
-        const newShape = {
-            id: Date.now(), type, x: CX, y: CY, w: type === 'circle' ? 60 : 200, h: 60,
-            angle: 0, behavior: 'static', speed: 0.05, name: type + "_" + (shapes.length + 1),
-            bouncy: 0.4, friction: 0, isStatic: true
-        };
-        shapes.push(newShape);
-        rebuildWorld();
-        selectShape(newShape.id);
-    }
-
-    function rebuildWorld() {
-        const currentMarbles = [...marbles];
-        Composite.clear(engine.world);
-        
-        if (isSimulating) {
-            const left = CX - MOD_WIDTH/2;
-            const right = CX + MOD_WIDTH/2;
-            const top = CY - MOD_HEIGHT/2;
-            const bottom = CY + MOD_HEIGHT/2;
-            Composite.add(engine.world, [
-                Bodies.rectangle(left - 5, CY, 10, MOD_HEIGHT, { isStatic: true, render: { fillStyle: '#052e16' } }),
-                Bodies.rectangle(right + 5, CY, 10, MOD_HEIGHT, { isStatic: true, render: { fillStyle: '#052e16' } })
-            ]);
+                // Update the engine and the renderer
+                Runner.tick(runner, engine, now);
+                Render.world(render);
+            }
         }
 
-        shapes.forEach(s => {
-            const opts = {
-                isStatic: s.isStatic,
-                friction: s.friction,
-                restitution: s.bouncy,
-                render: { 
-                    fillStyle: selectedShape?.id === s.id ? '#1e40af' : '#052e16', 
-                    strokeStyle: '#64ff4e', lineWidth: 4 
-                },
-                angle: s.angle * (Math.PI/180)
+        // Start the custom loop
+        requestAnimationFrame(loop);
+
+        let shapes = [],
+            marbles = [],
+            selectedShape = null,
+            isSimulating = false,
+            mousePos = {
+                x: 0,
+                y: 0
             };
-            let body;
-            if(s.type === 'rectangle') body = Bodies.rectangle(s.x, s.y, s.w, s.h, { ...opts, chamfer: {radius: 15} });
-            if(s.type === 'circle') body = Bodies.circle(s.x, s.y, s.w, opts);
-            if(s.type === 'triangle') body = Bodies.polygon(s.x, s.y, 3, s.w, opts);
-            
-            body.behaviorData = { ...s, origX: s.x, origY: s.y };
-            Composite.add(engine.world, body);
-        });
+        engine.gravity.y = 0;
 
-        currentMarbles.forEach(m => Composite.add(engine.world, m));
-        marbles = currentMarbles;
-        updateBrowser();
-    }
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvas-container');
+            canvasW = container.clientWidth;
+            canvasH = container.clientHeight;
 
-    function updateBrowser() {
-        const list = document.getElementById('object-browser-list');
-        list.innerHTML = '';
-        [...shapes].reverse().forEach((s) => {
-            const div = document.createElement('div');
-            div.className = `object-item ${selectedShape?.id === s.id ? 'selected' : ''}`;
-            div.onclick = () => selectShape(s.id);
-            div.innerHTML = `<div class="object-name">${s.name}</div><button class="mini-btn" onclick="deleteShape(${s.id}); event.stopPropagation()">X</button>`;
-            list.appendChild(div);
-        });
-    }
+            const oldCX = CX;
+            const oldCY = CY;
+            CX = canvasW / 2;
+            CY = canvasH / 2;
 
-    function selectShape(id) {
-        selectedShape = shapes.find(s => s.id === id);
-        document.getElementById('inspector').style.display = 'block';
-        updateInspectorInputs();
-        rebuildWorld();
-    }
-
-    function updateInspectorInputs() {
-        if (!selectedShape) return;
-        document.getElementById('prop-name').value = selectedShape.name;
-        document.getElementById('prop-x').value = Math.round(selectedShape.x - CX);
-        document.getElementById('prop-y').value = Math.round(selectedShape.y - CY);
-        document.getElementById('prop-w').value = selectedShape.w;
-        document.getElementById('prop-h').value = selectedShape.h;
-        document.getElementById('prop-angle').value = selectedShape.angle;
-        document.getElementById('prop-bouncy').value = selectedShape.bouncy;
-        document.getElementById('prop-friction').value = selectedShape.friction;
-        document.getElementById('prop-isStatic').value = selectedShape.isStatic.toString();
-        document.getElementById('prop-behavior').value = selectedShape.behavior;
-        document.getElementById('prop-speed').value = selectedShape.speed;
-    }
-
-    function updateSelected() {
-        if(!selectedShape) return;
-        selectedShape.name = document.getElementById('prop-name').value;
-        selectedShape.x = (parseInt(document.getElementById('prop-x').value)||0) + CX;
-        selectedShape.y = (parseInt(document.getElementById('prop-y').value)||0) + CY;
-        selectedShape.w = parseInt(document.getElementById('prop-w').value)||1;
-        selectedShape.h = parseInt(document.getElementById('prop-h').value)||1;
-        selectedShape.angle = parseInt(document.getElementById('prop-angle').value)||0;
-        selectedShape.bouncy = parseFloat(document.getElementById('prop-bouncy').value)||0;
-        selectedShape.friction = parseFloat(document.getElementById('prop-friction').value)||0;
-        selectedShape.isStatic = document.getElementById('prop-isStatic').value === "true";
-        selectedShape.behavior = document.getElementById('prop-behavior').value;
-        selectedShape.speed = parseFloat(document.getElementById('prop-speed').value)||0;
-        rebuildWorld();
-    }
-
-    function deleteShape(id) {
-        shapes = shapes.filter(s => s.id !== id);
-        if (selectedShape?.id === id) { selectedShape = null; document.getElementById('inspector').style.display = 'none'; }
-        rebuildWorld();
-    }
-
-    function clearMarbles() {
-        marbles.forEach(m => Composite.remove(engine.world, m));
-        marbles = [];
-    }
-
-    function toggleSim() {
-        isSimulating = !isSimulating;
-        engine.gravity.y = isSimulating ? 1.5 : 0;
-        document.getElementById('sim-btn').innerText = isSimulating ? "STOP SIMULATION" : "START SIMULATION";
-        document.getElementById('sim-btn').classList.toggle('sim-active');
-        document.getElementById('sim-controls-area').style.display = isSimulating ? 'block' : 'none';
-        
-        if (!isSimulating) clearMarbles();
-        rebuildWorld();
-    }
-
-    render.canvas.addEventListener('mousedown', (e) => {
-        if (isSimulating) return;
-        const rect = render.canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-        const clicked = [...shapes].reverse().find(s => Math.abs(s.x - mx) < 50 && Math.abs(s.y - my) < 50);
-        if(clicked) { selectShape(clicked.id); isDragging = true; }
-        else { selectedShape = null; document.getElementById('inspector').style.display = 'none'; rebuildWorld(); }
-    });
-
-    let isDragging = false;
-    render.canvas.addEventListener('mousemove', (e) => {
-        const rect = render.canvas.getBoundingClientRect();
-        mousePos.x = e.clientX - rect.left; mousePos.y = e.clientY - rect.top;
-        if (isDragging && selectedShape && !isSimulating) {
-            selectedShape.x = Math.round(mousePos.x); selectedShape.y = Math.round(mousePos.y);
-            rebuildWorld(); updateInspectorInputs();
-        }
-    });
-    window.addEventListener('mouseup', () => isDragging = false);
-
-    window.addEventListener('keydown', (e) => {
-        if (!isSimulating) return;
-        if (e.key.toLowerCase() === 's') {
-            const m = Bodies.circle(mousePos.x, mousePos.y, MARBLE_RADIUS, {
-                restitution: 0.5, friction: 0.001, frictionAir: 0.01,
-                render: { fillStyle: `hsl(${Math.random()*360}, 80%, 60%)` }
+            // Reposition shapes relative to new center
+            shapes.forEach(s => {
+                s.x = (s.x - oldCX) + CX;
+                s.y = (s.y - oldCY) + CY;
             });
-            marbles.push(m); Composite.add(engine.world, m);
+
+            render.canvas.width = canvasW;
+            render.canvas.height = canvasH;
+            render.options.width = canvasW;
+            render.options.height = canvasH;
+
+            rebuildWorld();
+        });
+
+        Events.on(engine, 'beforeUpdate', (event) => {
+            if (!isSimulating) return;
+            const time = event.timestamp;
+            Composite.allBodies(engine.world).forEach(body => {
+                if (body.behaviorData && body.behaviorData.behavior !== 'static') {
+                    const s = body.behaviorData;
+                    if (s.behavior === 'rotate') Body.setAngle(body, body.angle + s.speed);
+                    else if (s.behavior === 'oscillate') {
+                        const newX = s.origX + Math.sin(time * 0.003) * (s.speed * 100);
+                        Body.setPosition(body, {
+                            x: newX,
+                            y: s.origY
+                        });
+                    }
+                }
+            });
+        });
+
+        Events.on(render, 'afterRender', () => {
+            const ctx = render.context;
+            const left = CX - MOD_WIDTH / 2;
+            const right = CX + MOD_WIDTH / 2;
+            const top = CY - MOD_HEIGHT / 2;
+            const bottom = CY + MOD_HEIGHT / 2;
+
+            ctx.strokeStyle = '#64ff4e';
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.4;
+
+            ctx.strokeRect(left, top, MOD_WIDTH, MOD_HEIGHT);
+
+            ctx.globalAlpha = 0.2;
+            ctx.beginPath();
+            ctx.moveTo(CX, top);
+            ctx.lineTo(CX, bottom);
+            ctx.moveTo(left, CY);
+            ctx.lineTo(right, CY);
+            ctx.stroke();
+
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1.0;
+        });
+
+        function addShape(type) {
+            if (isSimulating) return;
+            const newShape = {
+                id: Date.now(),
+                type,
+                x: CX,
+                y: CY,
+                w: type === 'circle' ? 60 : 200,
+                h: 60,
+                angle: 0,
+                behavior: 'static',
+                speed: 0.05,
+                name: type + "_" + (shapes.length + 1),
+                bouncy: 0.4,
+                friction: 0,
+                isStatic: true
+            };
+            shapes.push(newShape);
+            rebuildWorld();
+            selectShape(newShape.id);
         }
-        if (e.key.toLowerCase() === 'c') clearMarbles();
-    });
 
-    function generateCode() {
-        let code = `{\n    name: "${selectedShape ? selectedShape.name : 'Custom Module'}",\n    create: (world, y, cx, engine) => {\n`;
-        shapes.forEach(s => {
-            const relX = `cx + (${Math.round(s.x - CX)})`;
-            const relY = `y + (${Math.round(s.y - CY)} + 450)`; 
-            const radAngle = (s.angle * (Math.PI/180)).toFixed(3);
-            const style = `{ isStatic: ${s.isStatic}, friction: ${s.friction}, restitution: ${s.bouncy}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
-            
-            if(s.type === 'rectangle') code += `        const ${s.name} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
-            else if(s.type === 'circle') code += `        const ${s.name} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
-            else if(s.type === 'triangle') code += `        const ${s.name} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
-            
-            if(s.behavior === 'rotate') code += `        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(${s.name}, ${s.name}.angle + ${s.speed}); });\n`;
-            else if(s.behavior === 'oscillate') code += `        Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(${s.name}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} }); });\n`;
-            code += `        Composite.add(world, ${s.name});\n\n`;
+        function rebuildWorld() {
+            const currentMarbles = [...marbles];
+            Composite.clear(engine.world);
+
+            if (isSimulating) {
+                const left = CX - MOD_WIDTH / 2;
+                const right = CX + MOD_WIDTH / 2;
+                const top = CY - MOD_HEIGHT / 2;
+                const bottom = CY + MOD_HEIGHT / 2;
+                Composite.add(engine.world, [
+                    Bodies.rectangle(left - 5, CY, 10, MOD_HEIGHT, {
+                        isStatic: true,
+                        render: {
+                            fillStyle: '#052e16'
+                        }
+                    }),
+                    Bodies.rectangle(right + 5, CY, 10, MOD_HEIGHT, {
+                        isStatic: true,
+                        render: {
+                            fillStyle: '#052e16'
+                        }
+                    })
+                ]);
+            }
+
+            shapes.forEach(s => {
+                const opts = {
+                    isStatic: s.isStatic,
+                    friction: s.friction,
+                    restitution: s.bouncy,
+                    render: {
+                        fillStyle: selectedShape?.id === s.id ? '#1e40af' : '#052e16',
+                        strokeStyle: '#64ff4e',
+                        lineWidth: 4
+                    },
+                    angle: s.angle * (Math.PI / 180)
+                };
+                let body;
+                if (s.type === 'rectangle') body = Bodies.rectangle(s.x, s.y, s.w, s.h, {
+                    ...opts,
+                    chamfer: {
+                        radius: 15
+                    }
+                });
+                if (s.type === 'circle') body = Bodies.circle(s.x, s.y, s.w, opts);
+                if (s.type === 'triangle') body = Bodies.polygon(s.x, s.y, 3, s.w, opts);
+
+                body.behaviorData = {
+                    ...s,
+                    origX: s.x,
+                    origY: s.y
+                };
+                Composite.add(engine.world, body);
+            });
+
+            currentMarbles.forEach(m => Composite.add(engine.world, m));
+            marbles = currentMarbles;
+            updateBrowser();
+        }
+
+        function updateBrowser() {
+            const list = document.getElementById('object-browser-list');
+            list.innerHTML = '';
+            [...shapes].reverse().forEach((s) => {
+                const div = document.createElement('div');
+                div.className = `object-item ${selectedShape?.id === s.id ? 'selected' : ''}`;
+                div.onclick = () => selectShape(s.id);
+                div.innerHTML = `<div class="object-name">${s.name}</div><button class="mini-btn" onclick="deleteShape(${s.id}); event.stopPropagation()">X</button>`;
+                list.appendChild(div);
+            });
+        }
+
+        function selectShape(id) {
+            selectedShape = shapes.find(s => s.id === id);
+            document.getElementById('inspector').style.display = 'block';
+            updateInspectorInputs();
+            rebuildWorld();
+        }
+
+        function updateInspectorInputs() {
+            if (!selectedShape) return;
+            document.getElementById('prop-name').value = selectedShape.name;
+            document.getElementById('prop-x').value = Math.round(selectedShape.x - CX);
+            document.getElementById('prop-y').value = Math.round(selectedShape.y - CY);
+            document.getElementById('prop-w').value = selectedShape.w;
+            document.getElementById('prop-h').value = selectedShape.h;
+            document.getElementById('prop-angle').value = selectedShape.angle;
+            document.getElementById('prop-bouncy').value = selectedShape.bouncy;
+            document.getElementById('prop-friction').value = selectedShape.friction;
+            document.getElementById('prop-isStatic').value = selectedShape.isStatic.toString();
+            document.getElementById('prop-behavior').value = selectedShape.behavior;
+            document.getElementById('prop-speed').value = selectedShape.speed;
+        }
+
+        function updateSelected() {
+            if (!selectedShape) return;
+            selectedShape.name = document.getElementById('prop-name').value;
+            selectedShape.x = (parseInt(document.getElementById('prop-x').value) || 0) + CX;
+            selectedShape.y = (parseInt(document.getElementById('prop-y').value) || 0) + CY;
+            selectedShape.w = parseInt(document.getElementById('prop-w').value) || 1;
+            selectedShape.h = parseInt(document.getElementById('prop-h').value) || 1;
+            selectedShape.angle = parseInt(document.getElementById('prop-angle').value) || 0;
+            selectedShape.bouncy = parseFloat(document.getElementById('prop-bouncy').value) || 0;
+            selectedShape.friction = parseFloat(document.getElementById('prop-friction').value) || 0;
+            selectedShape.isStatic = document.getElementById('prop-isStatic').value === "true";
+            selectedShape.behavior = document.getElementById('prop-behavior').value;
+            selectedShape.speed = parseFloat(document.getElementById('prop-speed').value) || 0;
+            rebuildWorld();
+        }
+
+        function deleteShape(id) {
+            shapes = shapes.filter(s => s.id !== id);
+            if (selectedShape?.id === id) {
+                selectedShape = null;
+                document.getElementById('inspector').style.display = 'none';
+            }
+            rebuildWorld();
+        }
+
+        function clearMarbles() {
+            marbles.forEach(m => Composite.remove(engine.world, m));
+            marbles = [];
+        }
+
+        function toggleSim() {
+            isSimulating = !isSimulating;
+            engine.gravity.y = isSimulating ? 1.5 : 0;
+            document.getElementById('sim-btn').innerText = isSimulating ? "STOP SIMULATION" : "START SIMULATION";
+            document.getElementById('sim-btn').classList.toggle('sim-active');
+            document.getElementById('sim-controls-area').style.display = isSimulating ? 'block' : 'none';
+
+            if (!isSimulating) clearMarbles();
+            rebuildWorld();
+        }
+
+        render.canvas.addEventListener('mousedown', (e) => {
+            if (isSimulating) return;
+            const rect = render.canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left,
+                my = e.clientY - rect.top;
+            const clicked = [...shapes].reverse().find(s => Math.abs(s.x - mx) < 50 && Math.abs(s.y - my) < 50);
+            if (clicked) {
+                selectShape(clicked.id);
+                isDragging = true;
+            } else {
+                selectedShape = null;
+                document.getElementById('inspector').style.display = 'none';
+                rebuildWorld();
+            }
         });
-        code += `    }\n}`;
-        navigator.clipboard.writeText(code).then(() => {
+
+        let isDragging = false;
+        render.canvas.addEventListener('mousemove', (e) => {
+            const rect = render.canvas.getBoundingClientRect();
+            mousePos.x = e.clientX - rect.left;
+            mousePos.y = e.clientY - rect.top;
+            if (isDragging && selectedShape && !isSimulating) {
+                selectedShape.x = Math.round(mousePos.x);
+                selectedShape.y = Math.round(mousePos.y);
+                rebuildWorld();
+                updateInspectorInputs();
+            }
+        });
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        window.addEventListener('keydown', (e) => {
+            if (!isSimulating) return;
+            if (e.key.toLowerCase() === 's') {
+                const m = Bodies.circle(mousePos.x, mousePos.y, MARBLE_RADIUS, {
+                    restitution: 0.5,
+                    friction: 0.001,
+                    frictionAir: 0.01,
+                    render: {
+                        fillStyle: `hsl(${Math.random()*360}, 80%, 60%)`
+                    }
+                });
+                marbles.push(m);
+                Composite.add(engine.world, m);
+            }
+            if (e.key.toLowerCase() === 'c') clearMarbles();
+        });
+
+        function generateCode() {
+            let code = `{\n    name: "${selectedShape ? selectedShape.name : 'Custom Module'}",\n    create: (world, y, cx, engine) => {\n`;
+            shapes.forEach(s => {
+                const relX = `cx + (${Math.round(s.x - CX)})`;
+                const relY = `y + (${Math.round(s.y - CY)} + 450)`;
+                const radAngle = (s.angle * (Math.PI / 180)).toFixed(3);
+
+                // FIX: Added 'label: "${s.name}"' and 'originalRadius: ${s.w}' to the style string
+                const style = `{ label: '${s.name}', originalRadius: ${s.w}, isStatic: ${s.isStatic}, friction: ${s.friction}, restitution: ${s.bouncy}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
+
+                if (s.type === 'rectangle') code += `        const ${s.name} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
+                else if (s.type === 'circle') code += `        const ${s.name} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
+                else if (s.type === 'triangle') code += `        const ${s.name} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
+
+                if (s.behavior === 'rotate') code += `        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(${s.name}, ${s.name}.angle + ${s.speed}); });\n`;
+                else if (s.behavior === 'oscillate') code += `        Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(${s.name}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} }); });\n`;
+                code += `        Composite.add(world, ${s.name});\n\n`;
+            });
+            code += `    }\n}`;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast("CODE COPIED!");
+            });
+        }
+
+        function showImportPrompt() {
+            document.getElementById('import-overlay').style.display = 'block';
+            document.getElementById('import-area').value = '';
+        }
+
+        async function processImport() {
+            let rawInput = document.getElementById('import-area').value.trim();
+
+            try {
+                // 1. Clean the input string
+                // If the user included "const module = ..." at the start, we remove it to get just the { }
+                const sanitizedInput = rawInput
+                    .replace(/^const\s+\w+\s*=\s*/, '') // Remove leading variable assignment if present
+                    .replace(/;$/, ''); // Remove trailing semicolon
+
+                // 2. Evaluate the object
+                // We wrap it in parentheses to force JS to treat the {} as an object literal
+                let moduleObj;
+                try {
+                    moduleObj = eval(`(${sanitizedInput})`);
+                } catch (e) {
+                    throw new Error("Syntax error in pasted code. Please ensure you copied the entire { ... } block.");
+                }
+
+                if (!moduleObj || typeof moduleObj.create !== 'function') {
+                    throw new Error("Invalid module format. Missing 'create' function.");
+                }
+
+                // 3. Setup Mock World for Capture
+                const capturedBodies = [];
+                const originalAdd = Composite.add;
+                Composite.add = (world, body) => {
+                    if (Array.isArray(body)) capturedBodies.push(...body);
+                    else capturedBodies.push(body);
+                };
+
+                // 4. Run the creator
+                // We pass the required parameters CX and CY to match current canvas center
+                moduleObj.create({
+                    bodies: []
+                }, CY - 450, CX, engine);
+                Composite.add = originalAdd; // Restore original Matter function
+
+                // 5. Convert Matter bodies to Editor shapes
+                shapes = capturedBodies.map(body => {
+                    // Determine type
+                    let type = 'rectangle';
+                    if (body.circleRadius) type = 'circle';
+                    else if (body.vertices.length === 3) type = 'triangle';
+
+                    // FIX: Pull the name from body.label (which we just added to generateCode)
+                    const bodyName = (body.label && !body.label.includes('Body')) ?
+                        body.label : (type + "_" + Math.floor(Math.random() * 1000));
+
+                    const shapeData = {
+                        id: Date.now() + Math.random(),
+                        name: bodyName,
+                        type: type,
+                        x: body.position.x,
+                        y: body.position.y,
+                        // Using originalRadius or circleRadius prevents growth issues
+                        w: body.circleRadius || body.originalRadius || calculateWidth(body),
+                        h: type === 'rectangle' ? calculateHeight(body) : (type === 'circle' ? body.circleRadius : 0),
+                        angle: Math.round(body.angle * (180 / Math.PI)),
+                        isStatic: body.isStatic,
+                        friction: body.friction,
+                        bouncy: body.restitution,
+                        behavior: 'static',
+                        speed: 0.05
+                    };
+
+                    // Behavior Detection
+                    const searchName = shapeData.name;
+                    const normalizedText = sanitizedInput.replace(/\s+/g, ' ');
+
+                    if (normalizedText.includes(`Body.setAngle(${searchName}`)) {
+                        shapeData.behavior = 'rotate';
+                        const speedMatch = normalizedText.match(new RegExp(`${searchName}\\.angle\\s*\\+\\s*([0-9.]+)`));
+                        if (speedMatch) shapeData.speed = parseFloat(speedMatch[1]);
+                    } else if (normalizedText.includes(`Body.setPosition(${searchName}`)) {
+                        shapeData.behavior = 'oscillate';
+                        const ampMatch = normalizedText.match(new RegExp(`Math.sin\\(.*?\\)\\s*\\*\\s*([0-9.]+)`));
+                        if (ampMatch) shapeData.speed = parseFloat(ampMatch[1]) / 100;
+                    }
+
+                    return shapeData;
+                });
+                // Refresh UI
+                rebuildWorld();
+                document.getElementById('import-overlay').style.display = 'none';
+                showToast("MODULE IMPORTED!");
+
+            } catch (e) {
+                console.error("Import Error:", e);
+                alert("Import Error: " + e.message);
+            }
+        }
+
+        // Helper Dimension Calculators
+        function calculateWidth(body) {
+            const xs = body.vertices.map(v => v.x);
+            return Math.max(...xs) - Math.min(...xs);
+        }
+
+        function calculateHeight(body) {
+            const ys = body.vertices.map(v => v.y);
+            return Math.max(...ys) - Math.min(...ys);
+        }
+
+        // Utility to reuse the toast
+        function showToast(msg) {
             const t = document.getElementById('toast');
+            t.innerText = msg;
             t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 1500);
-        });
-    }
+            setTimeout(() => {
+                t.style.display = 'none';
+                t.innerText = "CODE COPIED!";
+            }, 1500);
+        }
 
-    rebuildWorld();
-</script>
+        rebuildWorld();
+    </script>
 </body>
+
 </html>
