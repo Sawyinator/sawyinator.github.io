@@ -180,7 +180,9 @@
 <div id="editor-modal">
     <div class="editor-box">
         <h2 id="editor-title" style="color: var(--acc);">Edit Module</h2>
-        <textarea id="moduleCodeInput" placeholder="create: (world, y, cx) => { ... }"></textarea>
+        <input type="text" id="moduleNameInput" placeholder="Module Name" style="width: 100%; padding: 10px; background: #000; color: var(--acc); border: 1px solid #14532d; border-radius: 8px; box-sizing: border-box;">
+        
+        <textarea id="moduleCodeInput" placeholder="Add custom module code here"></textarea>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="ui-btn toggle-btn" style="flex: 1;" onclick="saveModule()">SAVE</button>
             <button class="ui-btn reset-btn" style="flex: 1;" onclick="document.getElementById('editor-modal').style.display='none'">CANCEL</button>
@@ -472,12 +474,13 @@ function toggleModule(name) {
 function addCustomModule() {
     editingIndex = -1;
     document.getElementById('editor-title').innerText = "New Custom Module";
-    document.getElementById('moduleNameInput').value = "My Custom Module " + (customModules.length + 1);
-    document.getElementById('moduleCodeInput').value = `create: (world, y, cx) => {
-    const rectangle_1 = Bodies.rectangle(cx + (-111), y + 216, 200, 60, { isStatic: true, friction: 2, restitution: 0.4, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: 0.000 });
-    Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(rectangle_1, { x: cx + (-111) + Math.sin(e.timestamp * 0.003) * 20, y: y + 216 }); });
-    Composite.add(world, rectangle_1);
-}`;
+    
+    // This clears the Name input field entirely
+    document.getElementById('moduleNameInput').value = "";
+    
+    // This clears the Code textarea entirely
+    document.getElementById('moduleCodeInput').value = "";
+    
     document.getElementById('editor-modal').style.display = 'flex';
 }
 
@@ -491,9 +494,15 @@ function editCustomModule(idx) {
 }
 
 function saveModule() {
-    const name = document.getElementById('moduleNameInput').value;
-    const code = document.getElementById('moduleCodeInput').value;
+    const name = document.getElementById('moduleNameInput').value.trim();
+    const code = document.getElementById('moduleCodeInput').value.trim();
     
+    // Basic check to prevent saving empty modules
+    if (!name || !code) {
+        alert("Please enter both a name and some code!");
+        return;
+    }
+
     if (editingIndex === -1) {
         customModules.push({ name, code });
         enabledModules.push(name);
@@ -502,6 +511,7 @@ function saveModule() {
         enabledModules = enabledModules.map(n => n === oldName ? name : n);
         customModules[editingIndex] = { name, code };
     }
+    
     saveModuleData();
     document.getElementById('editor-modal').style.display = 'none';
     renderModuleGrid();
