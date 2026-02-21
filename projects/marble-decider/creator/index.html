@@ -7,10 +7,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         body { background: #0a0a0a; color: #64ff4e; font-family: 'Segoe UI', sans-serif; display: flex; margin: 0; height: 100vh; overflow: hidden; }
-        #sidebar-left { width: 300px; background: #111; border-right: 2px solid #052e16; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        #sidebar-right { width: 250px; background: #111; border-left: 2px solid #052e16; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        #canvas-container { flex-grow: 1; position: relative; background: radial-gradient(circle, #052e16 0%, #000 100%); display: flex; justify-content: center; align-items: flex-start; padding: 20px; overflow-y: auto; }
-        canvas { border: 1px solid #052e16; box-shadow: 0 0 20px rgba(100, 255, 78, 0.2); cursor: crosshair; }
+        #sidebar-left { width: 300px; background: #111; border-right: 2px solid #052e16; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; z-index: 10; }
+        #sidebar-right { width: 250px; background: #111; border-left: 2px solid #052e16; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; z-index: 10; }
+        #canvas-container { flex-grow: 1; position: relative; background: radial-gradient(circle, #052e16 0%, #000 100%); overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        canvas { background: transparent; cursor: crosshair; display: block; }
         h2 { margin-top: 0; color: #64ff4e; text-transform: uppercase; letter-spacing: 2px; font-size: 1.1em; border-bottom: 1px solid #052e16; padding-bottom: 10px; }
         .tool-group { margin-bottom: 20px; }
         button { background: #052e16; color: #64ff4e; border: 1px solid #64ff4e; padding: 8px; cursor: pointer; margin: 5px 0; width: 100%; transition: 0.2s; font-weight: bold; font-size: 12px; }
@@ -27,8 +27,6 @@
         .mini-btn { width: 22px; height: 22px; padding: 0; font-size: 10px; }
         #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #64ff4e; color: #052e16; padding: 10px 20px; font-weight: bold; border-radius: 5px; z-index: 1000; display: none; }
         .section-header { color: #888; font-size: 9px; margin-top: 15px; border-top: 1px solid #222; padding-top: 5px; }
-        
-        /* Simulation Legend Styling */
         .sim-legend { margin: 10px 0; padding: 8px; background: #000; border: 1px dashed #052e16; font-size: 10px; color: #888; line-height: 1.5; }
         .sim-legend strong { color: #64ff4e; }
     </style>
@@ -55,8 +53,8 @@
         
         <div class="section-header">TRANSFORM</div>
         <div class="coord-row">
-            <div><label>X</label><input type="number" id="prop-x" oninput="updateSelected()"></div>
-            <div><label>Y</label><input type="number" id="prop-y" oninput="updateSelected()"></div>
+            <div><label>Rel X</label><input type="number" id="prop-x" oninput="updateSelected()"></div>
+            <div><label>Rel Y</label><input type="number" id="prop-y" oninput="updateSelected()"></div>
         </div>
         <div class="coord-row">
             <div style="flex:1;"><label>W / Rad</label><input type="number" id="prop-w" oninput="updateSelected()"></div>
@@ -116,12 +114,22 @@
     
     // Spec Constants
     const MARBLE_RADIUS = 20;
-    const MOD_WIDTH = 800, MOD_HEIGHT = 900, CX = 400, CY = 450;
+    const MOD_WIDTH = 820, MOD_HEIGHT = 900;
+    
+    // Initial dynamic sizing
+    let canvasW = document.getElementById('canvas-container').clientWidth;
+    let canvasH = document.getElementById('canvas-container').clientHeight;
+    let CX = canvasW / 2, CY = canvasH / 2;
     
     const render = Render.create({
         element: document.getElementById('canvas-container'),
         engine: engine,
-        options: { width: MOD_WIDTH, height: MOD_HEIGHT, wireframes: false, background: 'transparent' }
+        options: { 
+            width: canvasW, 
+            height: canvasH, 
+            wireframes: false, 
+            background: 'transparent' 
+        }
     });
 
     Render.run(render);
@@ -130,7 +138,31 @@
     let shapes = [], marbles = [], selectedShape = null, isSimulating = false, mousePos = { x: 0, y: 0 };
     engine.gravity.y = 0;
 
-    // Movement logic for static bodies
+    // Handle Window Resize
+    window.addEventListener('resize', () => {
+        const container = document.getElementById('canvas-container');
+        canvasW = container.clientWidth;
+        canvasH = container.clientHeight;
+        
+        const oldCX = CX;
+        const oldCY = CY;
+        CX = canvasW / 2;
+        CY = canvasH / 2;
+
+        // Reposition shapes relative to new center
+        shapes.forEach(s => {
+            s.x = (s.x - oldCX) + CX;
+            s.y = (s.y - oldCY) + CY;
+        });
+
+        render.canvas.width = canvasW;
+        render.canvas.height = canvasH;
+        render.options.width = canvasW;
+        render.options.height = canvasH;
+        
+        rebuildWorld();
+    });
+
     Events.on(engine, 'beforeUpdate', (event) => {
         if (!isSimulating) return;
         const time = event.timestamp;
@@ -144,6 +176,30 @@
                 }
             }
         });
+    });
+
+    Events.on(render, 'afterRender', () => {
+        const ctx = render.context;
+        const left = CX - MOD_WIDTH/2;
+        const right = CX + MOD_WIDTH/2;
+        const top = CY - MOD_HEIGHT/2;
+        const bottom = CY + MOD_HEIGHT/2;
+
+        ctx.strokeStyle = '#64ff4e';
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.4;
+
+        ctx.strokeRect(left, top, MOD_WIDTH, MOD_HEIGHT);
+
+        ctx.globalAlpha = 0.2;
+        ctx.beginPath();
+        ctx.moveTo(CX, top); ctx.lineTo(CX, bottom);
+        ctx.moveTo(left, CY); ctx.lineTo(right, CY);
+        ctx.stroke();
+        
+        ctx.setLineDash([]); 
+        ctx.globalAlpha = 1.0;
     });
 
     function addShape(type) {
@@ -162,11 +218,16 @@
         const currentMarbles = [...marbles];
         Composite.clear(engine.world);
         
-        // Walls
-        Composite.add(engine.world, [
-            Bodies.rectangle(5, CY, 10, MOD_HEIGHT, { isStatic: true, render: { fillStyle: '#052e16' } }),
-            Bodies.rectangle(MOD_WIDTH - 5, CY, 10, MOD_HEIGHT, { isStatic: true, render: { fillStyle: '#052e16' } })
-        ]);
+        if (isSimulating) {
+            const left = CX - MOD_WIDTH/2;
+            const right = CX + MOD_WIDTH/2;
+            const top = CY - MOD_HEIGHT/2;
+            const bottom = CY + MOD_HEIGHT/2;
+            Composite.add(engine.world, [
+                Bodies.rectangle(left - 5, CY, 10, MOD_HEIGHT, { isStatic: true, render: { fillStyle: '#052e16' } }),
+                Bodies.rectangle(right + 5, CY, 10, MOD_HEIGHT, { isStatic: true, render: { fillStyle: '#052e16' } })
+            ]);
+        }
 
         shapes.forEach(s => {
             const opts = {
@@ -215,8 +276,8 @@
     function updateInspectorInputs() {
         if (!selectedShape) return;
         document.getElementById('prop-name').value = selectedShape.name;
-        document.getElementById('prop-x').value = selectedShape.x - CX;
-        document.getElementById('prop-y').value = selectedShape.y - CY;
+        document.getElementById('prop-x').value = Math.round(selectedShape.x - CX);
+        document.getElementById('prop-y').value = Math.round(selectedShape.y - CY);
         document.getElementById('prop-w').value = selectedShape.w;
         document.getElementById('prop-h').value = selectedShape.h;
         document.getElementById('prop-angle').value = selectedShape.angle;
@@ -265,7 +326,6 @@
         rebuildWorld();
     }
 
-    // Input & Interaction
     render.canvas.addEventListener('mousedown', (e) => {
         if (isSimulating) return;
         const rect = render.canvas.getBoundingClientRect();
@@ -299,45 +359,29 @@
     });
 
     function generateCode() {
-    // Start with the specific structure you requested
-    let code = `{\n    name: "${selectedShape ? selectedShape.name : 'Custom Module'}",\n    create: (world, y, cx, engine) => {\n`;
-    
-    shapes.forEach(s => {
-        const relX = `cx + (${s.x - CX})`;
-        // Subtracting CY and assuming the module starts at 0 internally
-        const relY = `y + ${s.y}`; 
-        const radAngle = (s.angle * (Math.PI/180)).toFixed(3);
-        
-        // Define the body
-        const style = `{ isStatic: ${s.isStatic}, friction: ${s.friction}, restitution: ${s.bouncy}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
-        
-        if(s.type === 'rectangle') {
-            code += `        const ${s.name} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
-        } else if(s.type === 'circle') {
-            code += `        const ${s.name} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
-        } else if(s.type === 'triangle') {
-            code += `        const ${s.name} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
-        }
-        
-        // Add Logic using engine (Behavior)
-        if(s.behavior === 'rotate') {
-            code += `        Events.on(engine, 'beforeUpdate', () => {\n            Body.setAngle(${s.name}, ${s.name}.angle + ${s.speed});\n        });\n`;
-        } else if(s.behavior === 'oscillate') {
-            code += `        Events.on(engine, 'beforeUpdate', (e) => {\n            Body.setPosition(${s.name}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} });\n        });\n`;
-        }
+        let code = `{\n    name: "${selectedShape ? selectedShape.name : 'Custom Module'}",\n    create: (world, y, cx, engine) => {\n`;
+        shapes.forEach(s => {
+            const relX = `cx + (${Math.round(s.x - CX)})`;
+            const relY = `y + (${Math.round(s.y - CY)} + 450)`; 
+            const radAngle = (s.angle * (Math.PI/180)).toFixed(3);
+            const style = `{ isStatic: ${s.isStatic}, friction: ${s.friction}, restitution: ${s.bouncy}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
+            
+            if(s.type === 'rectangle') code += `        const ${s.name} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
+            else if(s.type === 'circle') code += `        const ${s.name} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
+            else if(s.type === 'triangle') code += `        const ${s.name} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
+            
+            if(s.behavior === 'rotate') code += `        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(${s.name}, ${s.name}.angle + ${s.speed}); });\n`;
+            else if(s.behavior === 'oscillate') code += `        Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(${s.name}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} }); });\n`;
+            code += `        Composite.add(world, ${s.name});\n\n`;
+        });
+        code += `    }\n}`;
+        navigator.clipboard.writeText(code).then(() => {
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 1500);
+        });
+    }
 
-        // Add to world
-        code += `        Composite.add(world, ${s.name});\n\n`;
-    });
-
-    code += `    }\n}`;
-
-    navigator.clipboard.writeText(code).then(() => {
-        const t = document.getElementById('toast');
-        t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 1500);
-    });
-}
     rebuildWorld();
 </script>
 </body>
