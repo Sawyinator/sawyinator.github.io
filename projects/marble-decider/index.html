@@ -417,13 +417,23 @@ function renderModuleGrid() {
     const grid = document.getElementById('module-grid');
     grid.innerHTML = '';
 
-    // Render Built-ins (Name is fixed)
+    // 1. Render Built-in Modules
     DefaultModules.forEach(m => {
         const isEnabled = enabledModules.includes(m.name);
-        // ... (existing built-in card code) ...
+        const card = document.createElement('div');
+        card.className = `module-card ${isEnabled ? 'enabled' : ''}`;
+        card.innerHTML = `
+            <h3>${m.name} <small>(Built-in)</small></h3>
+            <div class="module-actions">
+                <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${m.name}')">
+                    ${isEnabled ? 'ENABLED' : 'DISABLED'}
+                </button>
+            </div>
+        `;
+        grid.appendChild(card);
     });
 
-    // Render Custom
+    // 2. Render Custom Modules
     customModules.forEach((m, idx) => {
         const currentName = getNameFromCode(m.code);
         const isEnabled = enabledModules.includes(currentName);
@@ -433,7 +443,9 @@ function renderModuleGrid() {
         card.innerHTML = `
             <h3>${currentName}</h3>
             <div class="module-actions">
-                <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${currentName}')">${isEnabled ? 'ENABLED' : 'DISABLED'}</button>
+                <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${currentName}')">
+                    ${isEnabled ? 'ENABLED' : 'DISABLED'}
+                </button>
                 <button class="mod-btn mod-edit" style="background:#3b82f6; color:white;" onclick="renameModule(${idx})">RENAME</button>
                 <button class="mod-btn mod-edit" onclick="editCustomModule(${idx})">EDIT CODE</button>
                 <button class="mod-btn mod-del" onclick="deleteCustomModule(${idx})">DEL</button>
@@ -441,38 +453,7 @@ function renderModuleGrid() {
         `;
         grid.appendChild(card);
     });
-}
-
-    // Render Built-ins
-    DefaultModules.forEach(m => {
-        const isEnabled = enabledModules.includes(m.name);
-        const card = document.createElement('div');
-        card.className = `module-card ${isEnabled ? 'enabled' : ''}`;
-        card.innerHTML = `
-            <h3>${m.name} <small>(Built-in)</small></h3>
-            <div class="module-actions">
-                <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${m.name}')">${isEnabled ? 'ENABLED' : 'DISABLED'}</button>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-
-    // Render Custom
-    customModules.forEach((m, idx) => {
-        const isEnabled = enabledModules.includes(m.name);
-        const card = document.createElement('div');
-        card.className = `module-card ${isEnabled ? 'enabled' : ''}`;
-        card.innerHTML = `
-            <h3>${m.name}</h3>
-            <div class="module-actions">
-                <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${m.name}')">${isEnabled ? 'ENABLED' : 'DISABLED'}</button>
-                <button class="mod-btn mod-edit" onclick="editCustomModule(${idx})">EDIT</button>
-                <button class="mod-btn mod-del" onclick="deleteCustomModule(${idx})">DEL</button>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-}
+} // This is the ONLY closing brace needed for the whole function
 
 function toggleModule(name) {
     if (enabledModules.includes(name)) {
