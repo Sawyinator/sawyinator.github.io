@@ -299,7 +299,7 @@
     });
 
     function generateCode() {
-        let code = `    {\n        name: "Pro Module",\n        create: (world, y, cx) => {\n`;
+        let code = `    {\n        name: "copied module",\n        create: (world, y, cx) => {\n`;
         shapes.forEach(s => {
             const relX = `cx + (${s.x - CX})`;
             const relY = `y + ${s.y}`;

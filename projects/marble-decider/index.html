@@ -493,30 +493,6 @@ function editCustomModule(idx) {
     document.getElementById('editor-modal').style.display = 'flex';
 }
 
-function saveModule() {
-    const name = document.getElementById('moduleNameInput').value.trim();
-    const code = document.getElementById('moduleCodeInput').value.trim();
-    
-    // Basic check to prevent saving empty modules
-    if (!name || !code) {
-        alert("Please enter both a name and some code!");
-        return;
-    }
-
-    if (editingIndex === -1) {
-        customModules.push({ name, code });
-        enabledModules.push(name);
-    } else {
-        const oldName = customModules[editingIndex].name;
-        enabledModules = enabledModules.map(n => n === oldName ? name : n);
-        customModules[editingIndex] = { name, code };
-    }
-    
-    saveModuleData();
-    document.getElementById('editor-modal').style.display = 'none';
-    renderModuleGrid();
-}
-
 function deleteCustomModule(idx) {
     const name = customModules[idx].name;
     enabledModules = enabledModules.filter(n => n !== name);
@@ -554,17 +530,57 @@ function importModules() {
 }
 
 // Helper to turn strings into executable functions safely-ish
+// Updated helper to handle both raw code and object-style strings
 function getModuleLogic(m) {
     if (m.create) return m.create; 
     try {
-        // Extract the function body from the string "create: (world, y, cx) => { ... }"
-        const codeClean = m.code.substring(m.code.indexOf('=>') + 2).trim();
+        let codeToEval = m.code.trim();
+        
+        // If the user pasted the whole { name: "...", create: (...) => { ... } }
+        // We need to wrap it in parentheses to eval it as an object
+        if (codeToEval.startsWith('{')) {
+            const moduleObj = eval(`(${codeToEval})`);
+            return moduleObj.create;
+        }
+        
+        // If the user only pasted the function (world, y, cx) => { ... }
+        const codeClean = codeToEval.substring(codeToEval.indexOf('=>') + 2).trim();
         const body = codeClean.startsWith('{') ? codeClean.slice(1, -1) : codeClean;
         return new Function('world', 'y', 'cx', body);
     } catch (e) {
         console.error("Failed to parse module: " + m.name, e);
         return () => {}; 
     }
+}
+
+// Updated saveModule to automatically extract the name if you paste the whole object
+function saveModule() {
+    let name = document.getElementById('moduleNameInput').value.trim();
+    const code = document.getElementById('moduleCodeInput').value.trim();
+    
+    // Check if the user pasted a full object and try to extract the name automatically
+    if (!name && code.includes('name:')) {
+        const match = code.match(/name:\s*["'`](.*?)["'`]/);
+        if (match) name = match[1];
+    }
+
+    if (!name || !code) {
+        alert("Please enter a name (or ensure the code contains a 'name' property)!");
+        return;
+    }
+
+    if (editingIndex === -1) {
+        customModules.push({ name, code });
+        enabledModules.push(name);
+    } else {
+        const oldName = customModules[editingIndex].name;
+        enabledModules = enabledModules.map(n => n === oldName ? name : n);
+        customModules[editingIndex] = { name, code };
+    }
+    
+    saveModuleData();
+    document.getElementById('editor-modal').style.display = 'none';
+    renderModuleGrid();
 }
 
 window.onload = function() {
