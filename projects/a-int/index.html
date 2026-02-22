@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <link rel="icon" type="image/png" href="/assets/favicons/a-int-favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A trainer to help with learning different numeral types such as Arabic-Indic and Devanagari.">
     <title>A-INT | Arabic-Indic Number Trainer</title>
-    
+
     <meta name="title" content="Arabic Indic Number Trainer (A-INT)">
     <meta name="description" content="A trainer to help with learning different numeral types such as Arabic-Indic and Devanagari.">
 
@@ -24,18 +25,39 @@
     <meta property="twitter:image" content="https://sawyinator.uk/assets/logos/a-int-logo.png">
     <style>
         :root {
-            --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #3f51b5;
-            --accent: #ff9800; --secondary: #424242; --input-bg: #2d2d2d; --danger: #f44336;
-            --success: #4caf50; --warning: #ffeb3b; --overlay: rgba(0,0,0,0.8);
-            --grey-btn: #555555; --border: #444444; --table-header: #333333;
-            --inner-bg: rgba(0,0,0,0.2);
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e0e0e0;
+            --primary: #3f51b5;
+            --accent: #ff9800;
+            --secondary: #424242;
+            --input-bg: #2d2d2d;
+            --danger: #f44336;
+            --success: #4caf50;
+            --warning: #ffeb3b;
+            --overlay: rgba(0, 0, 0, 0.8);
+            --grey-btn: #555555;
+            --border: #444444;
+            --table-header: #333333;
+            --inner-bg: rgba(0, 0, 0, 0.2);
         }
+
         .light-mode {
-            --bg: #f4f4f9; --card: #ffffff; --text: #333333; --primary: #007bff;
-            --accent: #f57c00; --secondary: #e0e0e0; --input-bg: #fdfdfd; --danger: #d32f2f;
-            --success: #2e7d32; --warning: #fbc02d; --overlay: rgba(0,0,0,0.4);
-            --grey-btn: #cccccc; --border: #dddddd; --table-header: #eeeeee;
-            --inner-bg: rgba(0,0,0,0.05);
+            --bg: #f4f4f9;
+            --card: #ffffff;
+            --text: #333333;
+            --primary: #007bff;
+            --accent: #f57c00;
+            --secondary: #e0e0e0;
+            --input-bg: #fdfdfd;
+            --danger: #d32f2f;
+            --success: #2e7d32;
+            --warning: #fbc02d;
+            --overlay: rgba(0, 0, 0, 0.4);
+            --grey-btn: #cccccc;
+            --border: #dddddd;
+            --table-header: #eeeeee;
+            --inner-bg: rgba(0, 0, 0, 0.05);
         }
 
         .back-link {
@@ -66,7 +88,7 @@
         .back-link:hover {
             filter: brightness(1.2);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             outline: 2px solid var(--text);
         }
 
@@ -79,125 +101,507 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-            display: flex; align-items: center; justify-content: center;
-            height: 100vh; margin: 0; background-color: var(--bg); color: var(--text);
-            transition: background 0.3s, color 0.3s; overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+            overflow: hidden;
         }
+
         .container {
-            text-align: center; background: var(--card); padding: 1.5rem;
-            border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            width: 95%; max-width: 600px; position: relative;
-            max-height: 95vh; overflow-y: auto;
+            text-align: center;
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 95%;
+            max-width: 600px;
+            position: relative;
+            max-height: 95vh;
+            overflow-y: auto;
         }
-        .hidden { display: none !important; }
-        #theme-toggle { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 1.5rem; user-select: none; z-index: 20; }
-        
-        .view-section { animation: slideFadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
-        @keyframes slideFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #theme-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            user-select: none;
+            z-index: 20;
+        }
+
+        .view-section {
+            animation: slideFadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+
+        @keyframes slideFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         /* MODALS */
-        #modal-overlay, #profile-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--overlay); display: flex; align-items: center;
-            justify-content: center; z-index: 1000; backdrop-filter: blur(4px);
-            opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+        #modal-overlay,
+        #profile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--overlay);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
         }
-        #modal-overlay.active, #profile-overlay.active { opacity: 1; pointer-events: auto; }
+
+        #modal-overlay.active,
+        #profile-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .modal {
-            background: var(--card); padding: 2rem; border-radius: 16px;
-            max-width: 400px; width: 85%; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            border: 1px solid var(--border); text-align: center;
-            transform: scale(0.85); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 85%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            text-align: center;
+            transform: scale(0.85);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
             color: var(--text);
         }
-        #modal-overlay.active .modal, #profile-overlay.active .modal { transform: scale(1); }
 
-        .profile-pic { 
-            width: 90px; height: 90px; border-radius: 50%; 
-            background: var(--secondary); margin: 0 auto 15px; 
-            display: flex; align-items: center; justify-content: center; 
+        #modal-overlay.active .modal,
+        #profile-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .profile-pic {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--secondary);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border: 3px solid var(--secondary);
             overflow: hidden;
         }
-        .profile-pic img { 
-            width: 100%; height: 100%; 
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             display: block;
         }
-        .profile-links { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .profile-link { 
-            background: var(--input-bg); color: var(--text); padding: 12px; 
-            border-radius: 8px; text-decoration: none; font-weight: 600; 
-            border: 1px solid var(--border); transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+
+        .profile-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
         }
-        .profile-link svg { width: 20px; height: 20px; fill: currentColor; }
-        .profile-link:hover { background: var(--secondary); border-color: var(--primary); transform: translateY(-2px); }
 
-        h1 { margin-bottom: 0; font-size: 1.8rem; }
-        .credit { font-size: 0.75rem; color: #777; margin-top: 4px; margin-bottom: 20px; font-weight: normal; letter-spacing: 0.5px; }
-        .credit span { cursor: pointer; transition: color 0.2s; text-decoration: none; }
-        .credit span:hover { color: var(--primary); text-decoration: underline; }
-        
-        .key-container { background: var(--inner-bg); border-radius: 8px; margin-top: 10px; padding: 10px; border: 1px solid var(--border); }
-        .key-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .key-item { display: flex; flex-direction: column; font-size: 0.8rem; border-right: 1px solid var(--border); }
-        .key-item:last-child { border-right: none; }
-        .key-sym { font-size: 1.3rem; color: var(--accent); font-weight: bold; }
-        .key-val { color: #888; }
-        .toggle-link { color: var(--primary); cursor: pointer; font-size: 0.85rem; text-decoration: underline; display: block; margin-top: 5px; }
+        .profile-link {
+            background: var(--input-bg);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
 
-        .table-wrapper { max-height: 300px; overflow-y: auto; border-radius: 10px; background: var(--inner-bg); border: 1px solid var(--border); margin-top: 10px; }
-        .score-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        .score-table th { position: sticky; top: 0; background: var(--table-header); padding: 10px 5px; color: #aaa; text-transform: uppercase; font-size: 0.65rem; z-index: 10; }
-        .score-table td { padding: 8px 5px; border-bottom: 1px solid var(--border); }
-        .col-len { font-weight: bold; background: var(--inner-bg); width: 60px; }
-        .score-table tr:hover { background: rgba(128, 128, 128, 0.1); }
+        .profile-link svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
 
-        #question-display { font-size: 4rem; margin: 0.5rem 0; min-height: 1.2em; font-weight: 500; word-wrap: break-word; font-size: clamp(1.5rem, 8vw, 4rem); max-width: 100%; }
-        #answer-display { font-size: 2rem; color: var(--accent); margin-bottom: 1rem; min-height: 1.2em; font-weight: bold; }
-        
-        .time-row { display: flex; gap: 5px; margin: 10px 0 20px 0; }
-        .time-btn { flex: 1; padding: 10px; font-size: 0.9rem; background: var(--grey-btn); color: white; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
-        .time-btn.active { background: var(--primary); }
-        
-        .controls { background: var(--input-bg); padding: 12px; border-radius: 10px; margin-bottom: 1rem; border: 1px solid var(--border); }
-        .digit-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; }
-        .digit-item { display: flex; flex-direction: column; align-items: center; background: var(--secondary); padding: 8px; border-radius: 8px; cursor: pointer; color: var(--text); }
-        .digit-item input { margin-top: 4px; transform: scale(1.1); }
-        
-        .setting-group { margin-bottom: 12px; text-align: left; }
-        .setting-label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 0.8rem; color: #888; }
-        select { width: 100%; padding: 10px; background: var(--secondary); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; outline: none; }
+        .profile-link:hover {
+            background: var(--secondary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
 
-        input[type=range] { width: 100%; cursor: pointer; }
-        input[type=text] { background: var(--input-bg); border: 2px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-size: 1.5rem; text-align: center; width: 80%; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; }
-        
-        .shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--danger) !important; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-        
-        #timer-bar-container { width: 100%; height: 8px; background: var(--secondary); margin-bottom: 1rem; border-radius: 4px; overflow: hidden; }
-        #timer-bar { width: 100%; height: 100%; background: var(--success); transition: width 0.1s linear, background-color 0.3s ease; }
-        
-        .btn-group { display: flex; gap: 10px; justify-content: center; }
-        button { padding: 12px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; border: none; border-radius: 8px; transition: 0.2s; }
-        .primary-btn { background-color: var(--primary); color: white; flex: 2; }
-        .primary-btn:disabled { background-color: var(--secondary) !important; color: #888; }
-        .secondary-btn { background-color: var(--secondary); color: var(--text); flex: 1; }
-        .danger-btn { background-color: var(--danger); color: white; }
-        .menu-btn { background-color: var(--primary); color: white; width: 100%; margin-bottom: 8px; padding: 14px; }
-        #feedback { font-weight: bold; margin-bottom: 0.5rem; height: 1.2em; font-size: 1.1rem; }
-        .correct { color: var(--success); } .incorrect { color: var(--danger); }
-        .primary-btn:hover, .secondary-btn:hover, .danger-btn:hover, .menu-btn:hover, .time-btn:hover {
+        h1 {
+            margin-bottom: 0;
+            font-size: 1.8rem;
+        }
+
+        .credit {
+            font-size: 0.75rem;
+            color: #777;
+            margin-top: 4px;
+            margin-bottom: 20px;
+            font-weight: normal;
+            letter-spacing: 0.5px;
+        }
+
+        .credit span {
+            cursor: pointer;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+
+        .credit span:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .key-container {
+            background: var(--inner-bg);
+            border-radius: 8px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .key-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .key-item {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.8rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .key-item:last-child {
+            border-right: none;
+        }
+
+        .key-sym {
+            font-size: 1.3rem;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .key-val {
+            color: #888;
+        }
+
+        .toggle-link {
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: underline;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .table-wrapper {
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 10px;
+            background: var(--inner-bg);
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .score-table th {
+            position: sticky;
+            top: 0;
+            background: var(--table-header);
+            padding: 10px 5px;
+            color: #aaa;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            z-index: 10;
+        }
+
+        .score-table td {
+            padding: 8px 5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .col-len {
+            font-weight: bold;
+            background: var(--inner-bg);
+            width: 60px;
+        }
+
+        .score-table tr:hover {
+            background: rgba(128, 128, 128, 0.1);
+        }
+
+        #question-display {
+            font-size: 4rem;
+            margin: 0.5rem 0;
+            min-height: 1.2em;
+            font-weight: 500;
+            word-wrap: break-word;
+            font-size: clamp(1.5rem, 8vw, 4rem);
+            max-width: 100%;
+        }
+
+        #answer-display {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            min-height: 1.2em;
+            font-weight: bold;
+        }
+
+        .time-row {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0 20px 0;
+        }
+
+        .time-btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+            background: var(--grey-btn);
+            color: white;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .time-btn.active {
+            background: var(--primary);
+        }
+
+        .controls {
+            background: var(--input-bg);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .digit-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .digit-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--secondary);
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .digit-item input {
+            margin-top: 4px;
+            transform: scale(1.1);
+        }
+
+        .setting-group {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .setting-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            background: var(--secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        input[type=text] {
+            background: var(--input-bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            text-align: center;
+            width: 80%;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .shake {
+            animation: shake 0.3s cubic-bezier(.36, .07, .19, .97) both;
+            border-color: var(--danger) !important;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        #timer-bar-container {
+            width: 100%;
+            height: 8px;
+            background: var(--secondary);
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #timer-bar {
+            width: 100%;
+            height: 100%;
+            background: var(--success);
+            transition: width 0.1s linear, background-color 0.3s ease;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .primary-btn {
+            background-color: var(--primary);
+            color: white;
+            flex: 2;
+        }
+
+        .primary-btn:disabled {
+            background-color: var(--secondary) !important;
+            color: #888;
+        }
+
+        .secondary-btn {
+            background-color: var(--secondary);
+            color: var(--text);
+            flex: 1;
+        }
+
+        .danger-btn {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .menu-btn {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 14px;
+        }
+
+        #feedback {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            height: 1.2em;
+            font-size: 1.1rem;
+        }
+
+        .correct {
+            color: var(--success);
+        }
+
+        .incorrect {
+            color: var(--danger);
+        }
+
+        .primary-btn:hover,
+        .secondary-btn:hover,
+        .danger-btn:hover,
+        .menu-btn:hover,
+        .time-btn:hover {
             filter: brightness(1.2);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             outline: 2px solid var(--text);
         }
-        .primary-btn:active, .secondary-btn:active, .danger-btn:active, .menu-btn:active {
+
+        .primary-btn:active,
+        .secondary-btn:active,
+        .danger-btn:active,
+        .menu-btn:active {
             transform: translateY(0);
             filter: brightness(0.9);
         }
+
         .manual-input {
             background: transparent;
             border: 1px solid var(--border);
@@ -217,504 +621,689 @@
         }
 
         /* Scrollbar Styling for Light Mode */
-        .container::-webkit-scrollbar, .table-wrapper::-webkit-scrollbar { width: 8px; }
-        .container::-webkit-scrollbar-track, .table-wrapper::-webkit-scrollbar-track { background: transparent; }
-        .container::-webkit-scrollbar-thumb, .table-wrapper::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+        .container::-webkit-scrollbar,
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .container::-webkit-scrollbar-track,
+        .table-wrapper::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .container::-webkit-scrollbar-thumb,
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: 10px;
+        }
     </style>
 </head>
+
 <body>
-<a href="/" class="back-link">
-<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-Back to main website
-</a>
+    <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+        </svg>
+        Back to main website
+    </a>
 
-<div id="theme-toggle" onclick="toggleTheme()">🌙</div>
+    <div id="theme-toggle" onclick="toggleTheme()">🌙</div>
 
-<div id="modal-overlay"><div class="modal"><h3 id="modal-title"></h3><p id="modal-text"></p><div style="display:flex; gap:10px;"><button class="secondary-btn" style="flex:1" onclick="closeModal()">Back</button><button id="modal-confirm-btn" class="danger-btn" style="flex:1">Confirm</button></div></div></div>
-
-<div id="profile-overlay" onclick="closeProfile(event)">
-    <div class="modal" onclick="event.stopPropagation()">
-        <div class="profile-pic" id="profile-img-container">
-            <img src="https://github.com/Sawyinator.png" alt="Sawyinator" onerror="this.parentElement.style.display='none';">
-        </div>
-        <h2 style="margin-bottom:5px;">Sawyinator</h2>
-        <p style="margin-top:0; font-size:0.9rem; color:#888;">silly guy</p>
-        <p style="font-size:0.9rem; margin-bottom:20px; line-height: 1.4;">
-            I built A-INT to practice arabic-indic numbers and thought it would be a useful thing to make public. I ended up deciding that this could help many more people than just me so i gave support for a load of number types. Hope you enjoy foo.
-        </p>
-        
-        <div class="profile-links">
-            <a href="https://github.com/Sawyinator" target="_blank" class="profile-link">
-                <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                GitHub
-            </a>
-            <a href="https://github.com/Sawyinator/A-INT" target="_blank" class="profile-link">
-                <svg viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.833z"/></svg>
-                A-INT Repository
-            </a>
-            <a href="https://youtube.com/@sawyinator" target="_blank" class="profile-link">
-                <svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                YouTube
-            </a>
-        </div>
-        <button class="secondary-btn" style="width:100%; margin-top:20px;" onclick="closeProfile()">Close</button>
-    </div>
-</div>
-
-<div class="container">
-    <div id="main-menu" class="view-section">
-        <h1>Arabic-Indic Number Trainer</h1>
-        <div class="credit">By <span onclick="openProfile()">Sawyinator</span></div>
-        <div class="controls">
-            <label>Digit Length: </label>
-            <input type="number" id="menu-manual-len" class="manual-input" min="1" max="100" value="4" oninput="syncSliders(this.value)" 
-       onblur="syncSliders(this.value || 1)">
-             <br>
-            <input type="range" id="menu-slider" min="1" max="16" value="4" oninput="syncLabels(this.value)" onchange="syncSliders(this.value)">
-        </div>
-        <button class="menu-btn" onclick="startMode('generator')">Free Practice</button>
-        <button id="quiz-start-btn" class="menu-btn" onclick="startMode('quiz')">Quiz Mode (10s)</button>
-        <div class="time-row">
-            <button class="time-btn" data-time="1" onclick="setTimeLimit(1)">1</button>
-            <button class="time-btn" data-time="5" onclick="setTimeLimit(5)">5</button>
-            <button class="time-btn active" data-time="10" onclick="setTimeLimit(10)">10</button>
-            <button class="time-btn" data-time="20" onclick="setTimeLimit(20)">20</button>
-        </div>
-        <button class="menu-btn" onclick="showLeaderboard()">Best Scores</button>
-        <button class="secondary-btn" style="width:100%" onclick="showSettings()">Settings</button>
-    </div>
-
-    <div id="leaderboard-view" class="view-section hidden">
-        <h2>Personal Bests</h2>
-        <div class="table-wrapper">
-            <table class="score-table">
-                <thead>
-                    <tr>
-                        <th>Length</th>
-                        <th style="color:#ff5252">1</th>
-                        <th style="color:#ffab40">5</th>
-                        <th style="color:#448aff">10</th>
-                        <th style="color:#69f0ae">20</th>
-                    </tr>
-                </thead>
-                <tbody id="score-body"></tbody>
-            </table>
-        </div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button class="secondary-btn" onclick="confirmWipe()">Reset</button>
-            <button class="menu-btn" style="margin-bottom:0;" onclick="showMenu()">Back</button>
+    <div id="modal-overlay">
+        <div class="modal">
+            <h3 id="modal-title"></h3>
+            <p id="modal-text"></p>
+            <div style="display:flex; gap:10px;"><button class="secondary-btn" style="flex:1" onclick="closeModal()">Back</button><button id="modal-confirm-btn" class="danger-btn" style="flex:1">Confirm</button></div>
         </div>
     </div>
 
-    <div id="settings-view" class="view-section hidden">
-        <h2>Settings</h2>
-        <div class="controls">
-            <div class="setting-group">
-                <label class="setting-label">Learning Numerals (Question)</label>
-                <select id="learning-select" onchange="updateLearningPreview(this.value)"></select>
+    <div id="profile-overlay" onclick="closeProfile(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="profile-pic" id="profile-img-container">
+                <img src="https://github.com/Sawyinator.png" alt="Sawyinator" onerror="this.parentElement.style.display='none';">
             </div>
-            <div class="setting-group">
-                <label class="setting-label">Basis Numerals (Answer)</label>
-                <select id="basis-select" onchange="tempBasis = this.value; renderScriptKey();"></select>
+            <h2 style="margin-bottom:5px;">Sawyinator</h2>
+            <p style="margin-top:0; font-size:0.9rem; color:#888;">silly guy</p>
+            <p style="font-size:0.9rem; margin-bottom:20px; line-height: 1.4;">
+                I built A-INT to practice arabic-indic numbers and thought it would be a useful thing to make public. I ended up deciding that this could help many more people than just me so i gave support for a load of number types. Hope you enjoy foo.
+            </p>
+
+            <div class="profile-links">
+                <a href="https://github.com/Sawyinator" target="_blank" class="profile-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    GitHub
+                </a>
+                <a href="https://github.com/Sawyinator/A-INT" target="_blank" class="profile-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.833z" />
+                    </svg>
+                    A-INT Repository
+                </a>
+                <a href="https://youtube.com/@sawyinator" target="_blank" class="profile-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                    </svg>
+                    YouTube
+                </a>
             </div>
-            <span class="toggle-link" onclick="toggleScriptKey()">Show/Hide Script Key</span>
-            <div id="script-key-area" class="key-container hidden">
-                <div class="key-grid" id="key-grid-content"></div>
-            </div>
+            <button class="secondary-btn" style="width:100%; margin-top:20px;" onclick="closeProfile()">Close</button>
         </div>
-        <div class="controls">
-            <label class="setting-label">Included Digits</label>
-            <div class="digit-grid" id="settings-digit-grid"></div>
+    </div>
+
+    <div class="container">
+        <div id="main-menu" class="view-section">
+            <h1>Arabic-Indic Number Trainer</h1>
+            <div class="credit">By <span onclick="openProfile()">Sawyinator</span></div>
+            <div class="controls">
+                <label>Digit Length: </label>
+                <input type="number" id="menu-manual-len" class="manual-input" min="1" max="100" value="4" oninput="syncSliders(this.value)" onblur="syncSliders(this.value || 1)">
+                <br>
+                <input type="range" id="menu-slider" min="1" max="16" value="4" oninput="syncLabels(this.value)" onchange="syncSliders(this.value)">
+            </div>
+            <button class="menu-btn" onclick="startMode('generator')">Free Practice</button>
+            <button id="quiz-start-btn" class="menu-btn" onclick="startMode('quiz')">Quiz Mode (10s)</button>
+            <div class="time-row">
+                <button class="time-btn" data-time="1" onclick="setTimeLimit(1)">1</button>
+                <button class="time-btn" data-time="5" onclick="setTimeLimit(5)">5</button>
+                <button class="time-btn active" data-time="10" onclick="setTimeLimit(10)">10</button>
+                <button class="time-btn" data-time="20" onclick="setTimeLimit(20)">20</button>
+            </div>
+            <button class="menu-btn" onclick="showLeaderboard()">Best Scores</button>
+            <button class="secondary-btn" style="width:100%" onclick="showSettings()">Settings</button>
         </div>
-        <div class="controls">
-            <label class="setting-label">Data Management</label>
-            <div style="display:flex; gap:10px; margin-top:5px;">
-                <button class="secondary-btn" style="font-size: 0.8rem; flex:1; padding: 8px;" onclick="exportData()">Export</button>
-                <button class="secondary-btn" style="font-size: 0.8rem; flex:1; padding: 8px;" onclick="triggerImport()">Import</button>
-                <input type="file" id="import-input" hidden accept=".json" onchange="importData(event)">
+
+        <div id="leaderboard-view" class="view-section hidden">
+            <h2>Personal Bests</h2>
+            <div class="table-wrapper">
+                <table class="score-table">
+                    <thead>
+                        <tr>
+                            <th>Length</th>
+                            <th style="color:#ff5252">1</th>
+                            <th style="color:#ffab40">5</th>
+                            <th style="color:#448aff">10</th>
+                            <th style="color:#69f0ae">20</th>
+                        </tr>
+                    </thead>
+                    <tbody id="score-body"></tbody>
+                </table>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="secondary-btn" onclick="confirmWipe()">Reset</button>
+                <button class="menu-btn" style="margin-bottom:0;" onclick="showMenu()">Back</button>
             </div>
         </div>
 
-        <div class="controls" style="border: 1px solid var(--danger); background: rgba(244, 67, 54, 0.05);">
-            <label class="setting-label" style="color: var(--danger);">Danger Zone</label>
-            <p style="font-size: 0.7rem; margin: 4px 0 8px 0; color: #888;">Entirely clear all browser data for this app.</p>
-            <button class="danger-btn" style="width: 100%; font-size: 0.85rem; padding: 10px;" onclick="wipeAllLocalStorage()">Clear All Local Storage</button>
+        <div id="settings-view" class="view-section hidden">
+            <h2>Settings</h2>
+            <div class="controls">
+                <div class="setting-group">
+                    <label class="setting-label">Learning Numerals (Question)</label>
+                    <select id="learning-select" onchange="updateLearningPreview(this.value)"></select>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Basis Numerals (Answer)</label>
+                    <select id="basis-select" onchange="tempBasis = this.value; renderScriptKey();"></select>
+                </div>
+                <span class="toggle-link" onclick="toggleScriptKey()">Show/Hide Script Key</span>
+                <div id="script-key-area" class="key-container hidden">
+                    <div class="key-grid" id="key-grid-content"></div>
+                </div>
+            </div>
+            <div class="controls">
+                <label class="setting-label">Included Digits</label>
+                <div class="digit-grid" id="settings-digit-grid"></div>
+            </div>
+            <div class="controls">
+                <label class="setting-label">Data Management</label>
+                <div style="display:flex; gap:10px; margin-top:5px;">
+                    <button class="secondary-btn" style="font-size: 0.8rem; flex:1; padding: 8px;" onclick="exportData()">Export</button>
+                    <button class="secondary-btn" style="font-size: 0.8rem; flex:1; padding: 8px;" onclick="triggerImport()">Import</button>
+                    <input type="file" id="import-input" hidden accept=".json" onchange="importData(event)">
+                </div>
+            </div>
+
+            <div class="controls" style="border: 1px solid var(--danger); background: rgba(244, 67, 54, 0.05);">
+                <label class="setting-label" style="color: var(--danger);">Danger Zone</label>
+                <p style="font-size: 0.7rem; margin: 4px 0 8px 0; color: #888;">Entirely clear all browser data for this app.</p>
+                <button class="danger-btn" style="width: 100%; font-size: 0.85rem; padding: 10px;" onclick="wipeAllLocalStorage()">Clear All Local Storage</button>
+            </div>
+
+            <div style="display:flex; gap:10px;"><button class="secondary-btn" onclick="cancelSettings()">Cancel</button><button id="save-settings-btn" class="primary-btn" onclick="saveSettings()">Save</button></div>
         </div>
 
-        <div style="display:flex; gap:10px;"><button class="secondary-btn" onclick="cancelSettings()">Cancel</button><button id="save-settings-btn" class="primary-btn" onclick="saveSettings()">Save</button></div>
+        <div id="app-view" class="view-section hidden">
+            <div id="practice-controls" class="controls">
+                <label>Digit Length: </label>
+                <input type="number" id="app-manual-len" class="manual-input" min="1" max="100" value="4" oninput="syncSliders(this.value)" onblur="syncSliders(this.value || 1)">
+                <br>
+                <input type="range" id="app-slider" min="1" max="16" value="4" oninput="syncLabels(this.value)" onchange="syncSliders(this.value)">
+            </div>
+            <div id="timer-bar-container" class="hidden">
+                <div id="timer-bar"></div>
+            </div>
+            <div id="question-display"></div>
+            <div id="quiz-ui" class="hidden">
+                <div id="feedback"></div>
+                <div id="quiz-stats-display">Streak: 0</div>
+                <input type="text" id="quiz-input" placeholder="Type answer..." autocomplete="off">
+            </div>
+            <div id="answer-display" class="hidden"></div>
+            <div class="btn-group">
+                <button class="secondary-btn" onclick="showMenu()">Menu</button>
+                <button id="back-btn" class="secondary-btn" onclick="goBack()">Back</button>
+                <button id="main-action-btn" class="primary-btn" onclick="handleAction()">Action</button>
+            </div>
+        </div>
     </div>
 
-    <div id="app-view" class="view-section hidden">
-        <div id="practice-controls" class="controls">
-         <label>Digit Length: </label>
-         <input type="number" id="app-manual-len" class="manual-input" min="1" max="100" value="4" oninput="syncSliders(this.value)" 
-       onblur="syncSliders(this.value || 1)">
-         <br>
-         <input type="range" id="app-slider" min="1" max="16" value="4" oninput="syncLabels(this.value)" onchange="syncSliders(this.value)">
-        </div>
-        <div id="timer-bar-container" class="hidden"><div id="timer-bar"></div></div>
-        <div id="question-display"></div>
-        <div id="quiz-ui" class="hidden">
-            <div id="feedback"></div>
-            <div id="quiz-stats-display">Streak: 0</div>
-            <input type="text" id="quiz-input" placeholder="Type answer..." autocomplete="off">
-        </div>
-        <div id="answer-display" class="hidden"></div>
-        <div class="btn-group">
-            <button class="secondary-btn" onclick="showMenu()">Menu</button>
-            <button id="back-btn" class="secondary-btn" onclick="goBack()">Back</button>
-            <button id="main-action-btn" class="primary-btn" onclick="handleAction()">Action</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    function toggleTheme() {
-        const body = document.body;
-        const toggle = document.getElementById('theme-toggle');
-        body.classList.toggle('light-mode');
-        const isLight = body.classList.contains('light-mode');
-        toggle.innerText = isLight ? "☀️" : "🌙";
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-    }
-
-    function loadSettings() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
-            document.body.classList.add('light-mode');
-            document.getElementById('theme-toggle').innerText = "☀️";
-        }
-        
-        allowedDigits = JSON.parse(localStorage.getItem('allowed_digits')) || [0,1,2,3,4,5,6,7,8,9];
-        learningScript = localStorage.getItem('learning_script') || 'arabic-indic';
-        basisScript = localStorage.getItem('basis_script') || 'western-arabic';
-    }
-
-// Enter key, Shake, and numerals only within quiz
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-        const actionBtn = document.getElementById('main-action-btn');
-        if (actionBtn && !actionBtn.disabled) {
-            event.preventDefault(); 
-            actionBtn.click();
-        }
-        return;
-    }
-
-    if (event.target && event.target.id === 'quiz-input') {
-        const input = event.target;
-        const isChar = event.key.length === 1;
-        const isModifier = event.ctrlKey || event.metaKey || event.altKey;
-        const bypassKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-
-        if (bypassKeys.includes(event.key)) return;
-
-        if (isChar && !isModifier && !/^\d$/.test(event.key)) {
-            event.preventDefault();
-            triggerShake();
-            return;
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const toggle = document.getElementById('theme-toggle');
+            body.classList.toggle('light-mode');
+            const isLight = body.classList.contains('light-mode');
+            toggle.innerText = isLight ? "☀️" : "🌙";
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
         }
 
-        if (input.value.length >= input.maxLength && isChar && !isModifier) {
-            event.preventDefault();
-            if (typeof triggerShake === "function") {
-                triggerShake();
+        function loadSettings() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('theme-toggle').innerText = "☀️";
             }
+
+            allowedDigits = JSON.parse(localStorage.getItem('allowed_digits')) || [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            learningScript = localStorage.getItem('learning_script') || 'arabic-indic';
+            basisScript = localStorage.getItem('basis_script') || 'western-arabic';
         }
-    }
-});
 
-    const digitScripts = {
-'western-arabic': { name: 'Western Arabic', digits: ['0','1','2','3','4','5','6','7','8','9'] },
-'arabic-indic':   { name: 'Arabic-Indic', digits: ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'] },
-'devanagari':      { name: 'Devanagari', digits: ['०','१','२','३','४','५','६','७','८','९'] },
-'bangla':          { name: 'Bangla', digits: ['০','১','২','৩','৪','৫','৬','৭','৮','৯'] },
-'burmese':         { name: 'Burmese', digits: ['၀','၁','၂','၃','၄','၅','၆','၇','၈','၉'] },
-'gujarati':        { name: 'Gujarati', digits: ['૦','૧','૨','૩','૪','٥','৬','٧','٨','૯'] },
-'gurmukhi':        { name: 'Gurmukhi', digits: ['੦','੧','੨','੩','੪','੫','੬','੭','੮','੯'] },
-'kannada':         { name: 'Kannada', digits: ['೦','೧','೨','೩','೪','೫','೬','೭','೮','೯'] },
-'khmer':           { name: 'Khmer', digits: ['០','១','២','३','৪','৫','৬','৭','৮','৯'] },
-'malayalam':       { name: 'Malayalam', digits: ['൦','൧','൨','൩','൪','൫','൬','൭','൮','൯'] },
-'meitei':          { name: 'Meitei', digits: ['꯰','꯱','꯲','꯳','꯴','꯵','꯶','꯸','꯹'] },
-'odia':            { name: 'Odia', digits: ['୦','୧','୨','୩','୪','৫','୬','୭','୮','୯'] },
-'ol-chiki':        { name: 'Ol Chiki', digits: ['᱐','᱑','᱒','᱓','᱔','᱕','᱖','᱗','᱘','᱙'] },
-'telugu':          { name: 'Telugu', digits: ['౦','౧','౨','౩','౪','౫','౬','౭','౮','౯'] }
-    };
-
-    let learningScript = 'arabic-indic', basisScript = 'western-arabic';
-    let tempLearning = 'arabic-indic', tempBasis = 'western-arabic', tempDigits = [];
-    let initialSettingsState = ""; 
-    let history = [], currentMode = '', isRevealed = false, streak = 0, currentLen = 4, selectedTime = 10;
-    let timerInterval, timeLeft = 10, allowedDigits = [0,1,2,3,4,5,6,7,8,9];
-
-    const quizInput = document.getElementById('quiz-input');
-    const timerBar = document.getElementById('timer-bar');
-
-    function openProfile() { document.getElementById('profile-overlay').classList.add('active'); }
-    function closeProfile() { document.getElementById('profile-overlay').classList.remove('active'); }
-
-    function openModal(t, txt, cb) { 
-        document.getElementById('modal-title').innerText = t; 
-        document.getElementById('modal-text').innerText = txt;
-        document.getElementById('modal-confirm-btn').onclick = () => { cb(); closeModal(); };
-        document.getElementById('modal-overlay').classList.add('active'); 
-    }
-    function closeModal() { document.getElementById('modal-overlay').classList.remove('active'); }
-
-    function switchView(id) { document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-
-    function initDropdowns() {
-        const lSelect = document.getElementById('learning-select'), bSelect = document.getElementById('basis-select');
-        lSelect.innerHTML = ''; bSelect.innerHTML = '';
-        Object.keys(digitScripts).forEach(k => {
-            const opt = `<option value="${k}">${digitScripts[k].name}</option>`;
-            lSelect.innerHTML += opt; bSelect.innerHTML += opt;
-        });
-    }
-
-    function setTimeLimit(s) {
-        selectedTime = s;
-        document.querySelectorAll('.time-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.time) === s));
-        document.getElementById('quiz-start-btn').innerText = `Quiz Mode (${s}s)`;
-    }
-
-    function showMenu() { clearInterval(timerInterval); switchView('main-menu'); document.getElementById('main-action-btn').disabled = false; currentMode = ''; }
-
-    function showLeaderboard() {
-        switchView('leaderboard-view');
-        const tbody = document.getElementById('score-body'); 
-        tbody.innerHTML = '';
-        const timeColors = { 1: '#ff5252', 5: '#ffab40', 10: '#448aff', 20: '#69f0ae' };
-        for(let i=1; i<=16; i++) {
-            let row = `<tr><td class="col-len">${i}</td>`;
-            [1, 5, 10, 20].forEach(t => {
-                const s = localStorage.getItem(`best_len${i}_time${t}`) || 0;
-                const displayColor = s > 0 ? timeColors[t] : '#888';
-                row += `<td style="color:${displayColor}; font-weight:${s > 0 ? 'bold' : 'normal'}">${s == 0 ? '-' : s}</td>`;
-            });
-            tbody.innerHTML += row + '</tr>';
-        }
-    }
-
-    function showSettings() { 
-        tempDigits = [...allowedDigits]; tempLearning = learningScript; tempBasis = basisScript;
-        initialSettingsState = JSON.stringify({tempDigits, tempLearning, tempBasis});
-        document.getElementById('learning-select').value = tempLearning;
-        document.getElementById('basis-select').value = tempBasis;
-        renderSettingsGrid(); renderScriptKey(); switchView('settings-view'); 
-    }
-
-    function cancelSettings() {
-        const currentState = JSON.stringify({tempDigits, tempLearning, tempBasis});
-        if (currentState === initialSettingsState) { showMenu(); } 
-        else { openModal("Unsaved Changes", "Discard modifications?", () => { showMenu(); }); }
-    }
-
-    function updateLearningPreview(v) { tempLearning = v; renderSettingsGrid(); renderScriptKey(); }
-    function toggleScriptKey() { document.getElementById('script-key-area').classList.toggle('hidden'); }
-
-    function renderScriptKey() {
-        const grid = document.getElementById('key-grid-content'); grid.innerHTML = '';
-        const lSyms = digitScripts[tempLearning].digits;
-        const bSyms = digitScripts[tempBasis].digits;
-        for(let i=0; i<=9; i++) {
-            grid.innerHTML += `<div class="key-item"><span class="key-sym">${lSyms[i]}</span><span class="key-val">${bSyms[i]}</span></div>`;
-        }
-    }
-
-    function renderSettingsGrid() {
-        const grid = document.getElementById('settings-digit-grid'); grid.innerHTML = '';
-        const syms = digitScripts[tempLearning].digits;
-        for (let i = 0; i <= 9; i++) {
-            const checked = tempDigits.includes(i);
-            const item = document.createElement('div');
-            item.className = 'digit-item';
-            item.innerHTML = `<span style="font-size:1.2rem">${syms[i]}</span><input type="checkbox" ${checked?'checked':''}>`;
-            item.onclick = () => { const cb = item.querySelector('input'); cb.checked = !cb.checked; toggleDigit(i, cb); };
-            grid.appendChild(item);
-        }
-        validateSettings();
-    }
-
-    function toggleDigit(d, cb) {
-        if (!cb.checked && tempDigits.length <= 2 && tempDigits.includes(d)) { cb.checked = true; return; }
-        if (cb.checked) { if (!tempDigits.includes(d)) tempDigits.push(d); } else { tempDigits = tempDigits.filter(x => x !== d); }
-        validateSettings();
-    }
-
-    function validateSettings() { document.getElementById('save-settings-btn').disabled = tempDigits.length < 2; }
-    
-    function saveSettings() { 
-        allowedDigits = [...tempDigits]; 
-        learningScript = tempLearning; 
-        basisScript = tempBasis; 
-        localStorage.setItem('allowed_digits', JSON.stringify(allowedDigits)); 
-        localStorage.setItem('learning_script', learningScript); 
-        localStorage.setItem('basis_script', basisScript); 
-        showMenu(); 
-    }
-
-    function confirmWipe() { 
-        openModal("Reset Scores?", "Wipe only the leaderboard data?", () => { 
-            for(let i=1; i<=16; i++) { [1,5,10,20].forEach(t => localStorage.removeItem(`best_len${i}_time${t}`)); }
-            showLeaderboard(); 
-        }); 
-    }
-
-    function wipeAllLocalStorage() {
-        openModal("Factory Reset?", "This will permanently delete ALL settings, high scores, and preferences. The app will reload.", () => {
-            localStorage.clear();
-            location.reload();
-        });
-    }
-
-    function exportData() {
-        const data = JSON.stringify(localStorage);
-        const blob = new Blob([data], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        const timestamp = new Date().toISOString().replace('T', '_').replace(/:/g, '-').slice(0, 19);
-        link.download = `A-INT_export_${timestamp}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
-
-    function triggerImport() { document.getElementById('import-input').click(); }
-
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const imported = JSON.parse(e.target.result);
-                openModal("Import Data?", "This will overwrite your current scores and settings. Continue?", () => {
-                    localStorage.clear();
-                    Object.keys(imported).forEach(k => localStorage.setItem(k, imported[k]));
-                    location.reload();
-                });
-            } catch (err) { alert("Invalid backup file."); }
-        };
-        reader.readAsText(file);
-        event.target.value = '';
-    }
-
-    function triggerShake() {
-        quizInput.classList.remove('shake');
-        void quizInput.offsetWidth; 
-        quizInput.classList.add('shake');
-        setTimeout(() => quizInput.classList.remove('shake'), 350);
-    }
-
-    function startMode(m) {
-        currentMode = m; history = []; streak = 0; switchView('app-view');
-        const isQ = m === 'quiz';
-        document.getElementById('practice-controls').classList.toggle('hidden', isQ);
-        document.getElementById('quiz-ui').classList.toggle('hidden', !isQ);
-        document.getElementById('timer-bar-container').classList.toggle('hidden', !isQ);
-        document.getElementById('answer-display').classList.toggle('hidden', isQ);
-        document.getElementById('back-btn').classList.toggle('hidden', isQ);
-        quizInput.maxLength = currentLen; 
-        document.getElementById('quiz-stats-display').innerText = `Streak: 0`;
-        generate();
-    }
-
-    function generate() {
-        clearInterval(timerInterval);
-        let num = ""; let last = -1;
-        const firstPool = allowedDigits.filter(d => !(d === 0 && currentLen > 1));
-        for(let i=0; i<currentLen; i++) {
-            const p = (i === 0) ? firstPool : allowedDigits;
-            let sub = p.filter(d => d !== last);
-            const digit = sub[Math.floor(Math.random() * sub.length)];
-            num += digit; last = digit;
-        }
-        history.push(num); display(num);
-        if(currentMode === 'quiz') startTimer();
-    }
-
-    function startTimer() {
-        clearInterval(timerInterval);
-        timeLeft = selectedTime;
-        timerBar.style.width = '100%';
-        timerBar.style.backgroundColor = 'var(--success)';
-        timerBar.style.opacity = '1';
-        timerInterval = setInterval(() => {
-            timeLeft -= 0.1;
-            const percentage = (timeLeft / selectedTime * 100);
-            timerBar.style.width = percentage + '%';
-            if (percentage > 50) timerBar.style.backgroundColor = 'var(--success)';
-            else if (percentage > 20) timerBar.style.backgroundColor = 'var(--warning)';
-            else {
-                timerBar.style.backgroundColor = 'var(--danger)';
-                timerBar.style.opacity = (timerBar.style.opacity === '1' ? '0.2' : '1');
-            }
-            if (timeLeft <= 0) { clearInterval(timerInterval); timerBar.style.opacity = '1'; handleAction(); }
-        }, 100);
-    }
-
-    function display(str) {
-        document.getElementById('question-display').innerText = str.split('').map(d => digitScripts[learningScript].digits[d]).join('');
-        document.getElementById('answer-display').innerText = str.split('').map(d => digitScripts[basisScript].digits[d]).join('');
-        document.getElementById('answer-display').style.visibility = 'hidden';
-        document.getElementById('feedback').innerText = ''; quizInput.value = ''; quizInput.disabled = false;
-        document.getElementById('main-action-btn').innerText = currentMode === 'quiz' ? 'Check' : 'Reveal';
-        document.getElementById('main-action-btn').disabled = false;
-        isRevealed = false; if(currentMode === 'quiz') setTimeout(() => quizInput.focus(), 50);
-    }
-
-    function handleAction() {
-        if (document.getElementById('main-action-btn').disabled) return;
-        const cur = history[history.length-1];
-        if (currentMode === 'generator') {
-            if (!isRevealed) { document.getElementById('answer-display').style.visibility='visible'; document.getElementById('main-action-btn').innerText='Continue'; isRevealed=true; }
-            else generate();
-        } else {
-            if (!isRevealed) {
-                const val = quizInput.value.trim();
-                if (val.length < currentLen && timeLeft > 0) { triggerShake(); return; }
-                clearInterval(timerInterval); 
-                timerBar.style.opacity = '1';
-                isRevealed = true; quizInput.disabled = true;
-                if (val === cur) {
-                    document.getElementById('feedback').innerText = "Correct!"; document.getElementById('feedback').className = "correct";
-                    streak++; document.getElementById('quiz-stats-display').innerText = `Streak: ${streak}`;
-                    const k = `best_len${currentLen}_time${selectedTime}`;
-                    if (streak > (localStorage.getItem(k)||0)) localStorage.setItem(k, streak);
-                    document.getElementById('main-action-btn').innerText = 'Continue';
-                } else {
-                    document.getElementById('feedback').innerText = `Wrong! (${document.getElementById('answer-display').innerText})`;
-                    document.getElementById('feedback').className = "incorrect"; streak = 0;
-                    document.getElementById('main-action-btn').innerText = 'Game Over'; document.getElementById('main-action-btn').disabled = true;
+        // Enter key, Shake, and numerals only within quiz
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const actionBtn = document.getElementById('main-action-btn');
+                if (actionBtn && !actionBtn.disabled) {
+                    event.preventDefault();
+                    actionBtn.click();
                 }
-            } else generate();
+                return;
+            }
+
+            if (event.target && event.target.id === 'quiz-input') {
+                const input = event.target;
+                const isChar = event.key.length === 1;
+                const isModifier = event.ctrlKey || event.metaKey || event.altKey;
+                const bypassKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+
+                if (bypassKeys.includes(event.key)) return;
+
+                if (isChar && !isModifier && !/^\d$/.test(event.key)) {
+                    event.preventDefault();
+                    triggerShake();
+                    return;
+                }
+
+                if (input.value.length >= input.maxLength && isChar && !isModifier) {
+                    event.preventDefault();
+                    if (typeof triggerShake === "function") {
+                        triggerShake();
+                    }
+                }
+            }
+        });
+
+        const digitScripts = {
+            'western-arabic': {
+                name: 'Western Arabic',
+                digits: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            },
+            'arabic-indic': {
+                name: 'Arabic-Indic',
+                digits: ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩']
+            },
+            'devanagari': {
+                name: 'Devanagari',
+                digits: ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९']
+            },
+            'bangla': {
+                name: 'Bangla',
+                digits: ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯']
+            },
+            'burmese': {
+                name: 'Burmese',
+                digits: ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉']
+            },
+            'gujarati': {
+                name: 'Gujarati',
+                digits: ['૦', '૧', '૨', '૩', '૪', '٥', '৬', '٧', '٨', '૯']
+            },
+            'gurmukhi': {
+                name: 'Gurmukhi',
+                digits: ['੦', '੧', '੨', '੩', '੪', '੫', '੬', '੭', '੮', '੯']
+            },
+            'kannada': {
+                name: 'Kannada',
+                digits: ['೦', '೧', '೨', '೩', '೪', '೫', '೬', '೭', '೮', '೯']
+            },
+            'khmer': {
+                name: 'Khmer',
+                digits: ['០', '១', '២', '३', '৪', '৫', '৬', '৭', '৮', '৯']
+            },
+            'malayalam': {
+                name: 'Malayalam',
+                digits: ['൦', '൧', '൨', '൩', '൪', '൫', '൬', '൭', '൮', '൯']
+            },
+            'meitei': {
+                name: 'Meitei',
+                digits: ['꯰', '꯱', '꯲', '꯳', '꯴', '꯵', '꯶', '꯸', '꯹']
+            },
+            'odia': {
+                name: 'Odia',
+                digits: ['୦', '୧', '୨', '୩', '୪', '৫', '୬', '୭', '୮', '୯']
+            },
+            'ol-chiki': {
+                name: 'Ol Chiki',
+                digits: ['᱐', '᱑', '᱒', '᱓', '᱔', '᱕', '᱖', '᱗', '᱘', '᱙']
+            },
+            'telugu': {
+                name: 'Telugu',
+                digits: ['౦', '౧', '౨', '౩', '౪', '౫', '౬', '౭', '౮', '౯']
+            }
+        };
+
+        let learningScript = 'arabic-indic',
+            basisScript = 'western-arabic';
+        let tempLearning = 'arabic-indic',
+            tempBasis = 'western-arabic',
+            tempDigits = [];
+        let initialSettingsState = "";
+        let history = [],
+            currentMode = '',
+            isRevealed = false,
+            streak = 0,
+            currentLen = 4,
+            selectedTime = 10;
+        let timerInterval, timeLeft = 10,
+            allowedDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        const quizInput = document.getElementById('quiz-input');
+        const timerBar = document.getElementById('timer-bar');
+
+        function openProfile() {
+            document.getElementById('profile-overlay').classList.add('active');
         }
-    }
 
-    function syncLabels(v) {
-        document.getElementById('menu-manual-len').value = v;
-        document.getElementById('app-manual-len').value = v;
-    }
+        function closeProfile() {
+            document.getElementById('profile-overlay').classList.remove('active');
+        }
 
-    function syncSliders(v) {
-        let val = v === "" ? "" : parseInt(v);
-        currentLen = (val === "" || isNaN(val) || val < 1) ? 1 : val;
-        if (currentLen > 100) { currentLen = 100; val = 100; }
-        document.getElementById('menu-slider').value = currentLen;
-        document.getElementById('app-slider').value = currentLen;
-        document.getElementById('menu-manual-len').value = val;
-        document.getElementById('app-manual-len').value = val;
-        quizInput.maxLength = currentLen; 
-        if(currentMode === 'generator') generate();
-    }
+        function openModal(t, txt, cb) {
+            document.getElementById('modal-title').innerText = t;
+            document.getElementById('modal-text').innerText = txt;
+            document.getElementById('modal-confirm-btn').onclick = () => {
+                cb();
+                closeModal();
+            };
+            document.getElementById('modal-overlay').classList.add('active');
+        }
 
-    function goBack() { showMenu(); }
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
 
-    window.onload = () => { loadSettings(); initDropdowns(); };
-</script>
+        function switchView(id) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function initDropdowns() {
+            const lSelect = document.getElementById('learning-select'),
+                bSelect = document.getElementById('basis-select');
+            lSelect.innerHTML = '';
+            bSelect.innerHTML = '';
+            Object.keys(digitScripts).forEach(k => {
+                const opt = `<option value="${k}">${digitScripts[k].name}</option>`;
+                lSelect.innerHTML += opt;
+                bSelect.innerHTML += opt;
+            });
+        }
+
+        function setTimeLimit(s) {
+            selectedTime = s;
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.time) === s));
+            document.getElementById('quiz-start-btn').innerText = `Quiz Mode (${s}s)`;
+        }
+
+        function showMenu() {
+            clearInterval(timerInterval);
+            switchView('main-menu');
+            document.getElementById('main-action-btn').disabled = false;
+            currentMode = '';
+        }
+
+        function showLeaderboard() {
+            switchView('leaderboard-view');
+            const tbody = document.getElementById('score-body');
+            tbody.innerHTML = '';
+            const timeColors = {
+                1: '#ff5252',
+                5: '#ffab40',
+                10: '#448aff',
+                20: '#69f0ae'
+            };
+            for (let i = 1; i <= 16; i++) {
+                let row = `<tr><td class="col-len">${i}</td>`;
+                [1, 5, 10, 20].forEach(t => {
+                    const s = localStorage.getItem(`best_len${i}_time${t}`) || 0;
+                    const displayColor = s > 0 ? timeColors[t] : '#888';
+                    row += `<td style="color:${displayColor}; font-weight:${s > 0 ? 'bold' : 'normal'}">${s == 0 ? '-' : s}</td>`;
+                });
+                tbody.innerHTML += row + '</tr>';
+            }
+        }
+
+        function showSettings() {
+            tempDigits = [...allowedDigits];
+            tempLearning = learningScript;
+            tempBasis = basisScript;
+            initialSettingsState = JSON.stringify({
+                tempDigits,
+                tempLearning,
+                tempBasis
+            });
+            document.getElementById('learning-select').value = tempLearning;
+            document.getElementById('basis-select').value = tempBasis;
+            renderSettingsGrid();
+            renderScriptKey();
+            switchView('settings-view');
+        }
+
+        function cancelSettings() {
+            const currentState = JSON.stringify({
+                tempDigits,
+                tempLearning,
+                tempBasis
+            });
+            if (currentState === initialSettingsState) {
+                showMenu();
+            } else {
+                openModal("Unsaved Changes", "Discard modifications?", () => {
+                    showMenu();
+                });
+            }
+        }
+
+        function updateLearningPreview(v) {
+            tempLearning = v;
+            renderSettingsGrid();
+            renderScriptKey();
+        }
+
+        function toggleScriptKey() {
+            document.getElementById('script-key-area').classList.toggle('hidden');
+        }
+
+        function renderScriptKey() {
+            const grid = document.getElementById('key-grid-content');
+            grid.innerHTML = '';
+            const lSyms = digitScripts[tempLearning].digits;
+            const bSyms = digitScripts[tempBasis].digits;
+            for (let i = 0; i <= 9; i++) {
+                grid.innerHTML += `<div class="key-item"><span class="key-sym">${lSyms[i]}</span><span class="key-val">${bSyms[i]}</span></div>`;
+            }
+        }
+
+        function renderSettingsGrid() {
+            const grid = document.getElementById('settings-digit-grid');
+            grid.innerHTML = '';
+            const syms = digitScripts[tempLearning].digits;
+            for (let i = 0; i <= 9; i++) {
+                const checked = tempDigits.includes(i);
+                const item = document.createElement('div');
+                item.className = 'digit-item';
+                item.innerHTML = `<span style="font-size:1.2rem">${syms[i]}</span><input type="checkbox" ${checked?'checked':''}>`;
+                item.onclick = () => {
+                    const cb = item.querySelector('input');
+                    cb.checked = !cb.checked;
+                    toggleDigit(i, cb);
+                };
+                grid.appendChild(item);
+            }
+            validateSettings();
+        }
+
+        function toggleDigit(d, cb) {
+            if (!cb.checked && tempDigits.length <= 2 && tempDigits.includes(d)) {
+                cb.checked = true;
+                return;
+            }
+            if (cb.checked) {
+                if (!tempDigits.includes(d)) tempDigits.push(d);
+            } else {
+                tempDigits = tempDigits.filter(x => x !== d);
+            }
+            validateSettings();
+        }
+
+        function validateSettings() {
+            document.getElementById('save-settings-btn').disabled = tempDigits.length < 2;
+        }
+
+        function saveSettings() {
+            allowedDigits = [...tempDigits];
+            learningScript = tempLearning;
+            basisScript = tempBasis;
+            localStorage.setItem('allowed_digits', JSON.stringify(allowedDigits));
+            localStorage.setItem('learning_script', learningScript);
+            localStorage.setItem('basis_script', basisScript);
+            showMenu();
+        }
+
+        function confirmWipe() {
+            openModal("Reset Scores?", "Wipe only the leaderboard data?", () => {
+                for (let i = 1; i <= 16; i++) {
+                    [1, 5, 10, 20].forEach(t => localStorage.removeItem(`best_len${i}_time${t}`));
+                }
+                showLeaderboard();
+            });
+        }
+
+        function wipeAllLocalStorage() {
+            openModal("Factory Reset?", "This will permanently delete ALL settings, high scores, and preferences. The app will reload.", () => {
+                localStorage.clear();
+                location.reload();
+            });
+        }
+
+        function exportData() {
+            const data = JSON.stringify(localStorage);
+            const blob = new Blob([data], {
+                type: "application/json"
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            const timestamp = new Date().toISOString().replace('T', '_').replace(/:/g, '-').slice(0, 19);
+            link.download = `A-INT_export_${timestamp}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function triggerImport() {
+            document.getElementById('import-input').click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    openModal("Import Data?", "This will overwrite your current scores and settings. Continue?", () => {
+                        localStorage.clear();
+                        Object.keys(imported).forEach(k => localStorage.setItem(k, imported[k]));
+                        location.reload();
+                    });
+                } catch (err) {
+                    alert("Invalid backup file.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function triggerShake() {
+            quizInput.classList.remove('shake');
+            void quizInput.offsetWidth;
+            quizInput.classList.add('shake');
+            setTimeout(() => quizInput.classList.remove('shake'), 350);
+        }
+
+        function startMode(m) {
+            currentMode = m;
+            history = [];
+            streak = 0;
+            switchView('app-view');
+            const isQ = m === 'quiz';
+            document.getElementById('practice-controls').classList.toggle('hidden', isQ);
+            document.getElementById('quiz-ui').classList.toggle('hidden', !isQ);
+            document.getElementById('timer-bar-container').classList.toggle('hidden', !isQ);
+            document.getElementById('answer-display').classList.toggle('hidden', isQ);
+            document.getElementById('back-btn').classList.toggle('hidden', isQ);
+            quizInput.maxLength = currentLen;
+            document.getElementById('quiz-stats-display').innerText = `Streak: 0`;
+            generate();
+        }
+
+        function generate() {
+            clearInterval(timerInterval);
+            let num = "";
+            let last = -1;
+            const firstPool = allowedDigits.filter(d => !(d === 0 && currentLen > 1));
+            for (let i = 0; i < currentLen; i++) {
+                const p = (i === 0) ? firstPool : allowedDigits;
+                let sub = p.filter(d => d !== last);
+                const digit = sub[Math.floor(Math.random() * sub.length)];
+                num += digit;
+                last = digit;
+            }
+            history.push(num);
+            display(num);
+            if (currentMode === 'quiz') startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = selectedTime;
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = 'var(--success)';
+            timerBar.style.opacity = '1';
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                const percentage = (timeLeft / selectedTime * 100);
+                timerBar.style.width = percentage + '%';
+                if (percentage > 50) timerBar.style.backgroundColor = 'var(--success)';
+                else if (percentage > 20) timerBar.style.backgroundColor = 'var(--warning)';
+                else {
+                    timerBar.style.backgroundColor = 'var(--danger)';
+                    timerBar.style.opacity = (timerBar.style.opacity === '1' ? '0.2' : '1');
+                }
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerBar.style.opacity = '1';
+                    handleAction();
+                }
+            }, 100);
+        }
+
+        function display(str) {
+            document.getElementById('question-display').innerText = str.split('').map(d => digitScripts[learningScript].digits[d]).join('');
+            document.getElementById('answer-display').innerText = str.split('').map(d => digitScripts[basisScript].digits[d]).join('');
+            document.getElementById('answer-display').style.visibility = 'hidden';
+            document.getElementById('feedback').innerText = '';
+            quizInput.value = '';
+            quizInput.disabled = false;
+            document.getElementById('main-action-btn').innerText = currentMode === 'quiz' ? 'Check' : 'Reveal';
+            document.getElementById('main-action-btn').disabled = false;
+            isRevealed = false;
+            if (currentMode === 'quiz') setTimeout(() => quizInput.focus(), 50);
+        }
+
+        function handleAction() {
+            if (document.getElementById('main-action-btn').disabled) return;
+            const cur = history[history.length - 1];
+            if (currentMode === 'generator') {
+                if (!isRevealed) {
+                    document.getElementById('answer-display').style.visibility = 'visible';
+                    document.getElementById('main-action-btn').innerText = 'Continue';
+                    isRevealed = true;
+                } else generate();
+            } else {
+                if (!isRevealed) {
+                    const val = quizInput.value.trim();
+                    if (val.length < currentLen && timeLeft > 0) {
+                        triggerShake();
+                        return;
+                    }
+                    clearInterval(timerInterval);
+                    timerBar.style.opacity = '1';
+                    isRevealed = true;
+                    quizInput.disabled = true;
+                    if (val === cur) {
+                        document.getElementById('feedback').innerText = "Correct!";
+                        document.getElementById('feedback').className = "correct";
+                        streak++;
+                        document.getElementById('quiz-stats-display').innerText = `Streak: ${streak}`;
+                        const k = `best_len${currentLen}_time${selectedTime}`;
+                        if (streak > (localStorage.getItem(k) || 0)) localStorage.setItem(k, streak);
+                        document.getElementById('main-action-btn').innerText = 'Continue';
+                    } else {
+                        document.getElementById('feedback').innerText = `Wrong! (${document.getElementById('answer-display').innerText})`;
+                        document.getElementById('feedback').className = "incorrect";
+                        streak = 0;
+                        document.getElementById('main-action-btn').innerText = 'Game Over';
+                        document.getElementById('main-action-btn').disabled = true;
+                    }
+                } else generate();
+            }
+        }
+
+        function syncLabels(v) {
+            document.getElementById('menu-manual-len').value = v;
+            document.getElementById('app-manual-len').value = v;
+        }
+
+        function syncSliders(v) {
+            let val = v === "" ? "" : parseInt(v);
+            currentLen = (val === "" || isNaN(val) || val < 1) ? 1 : val;
+            if (currentLen > 100) {
+                currentLen = 100;
+                val = 100;
+            }
+            document.getElementById('menu-slider').value = currentLen;
+            document.getElementById('app-slider').value = currentLen;
+            document.getElementById('menu-manual-len').value = val;
+            document.getElementById('app-manual-len').value = val;
+            quizInput.maxLength = currentLen;
+            if (currentMode === 'generator') generate();
+        }
+
+        function goBack() {
+            showMenu();
+        }
+
+        window.onload = () => {
+            loadSettings();
+            initDropdowns();
+        };
+    </script>
 
 </body>
+
 </html>

@@ -1,13 +1,14 @@
 <!DOCTYPE html>
+
 <head>
     <link rel="icon" type="image/png" href="/assets/favicons/cmd-shutdown-timer-favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A command generator for cmd that will let you set a sleep timer for your computer.">
     <title>cmd Shutdown Timer</title>
-    
+
     <!-- Embed Behaviours -->
-    
+
     <meta name="title" content="cmd Shutdown Timer">
     <meta name="description" content="A command generator for cmd that will let you set a sleep timer for your computer.">
 
@@ -19,83 +20,84 @@
     <meta name="theme-color" content="#FFFFFF">
 
     <!-- Twitter Embed Behaviours -->
-    
+
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://sawyinator.uk/projects/cmd-shutdown-timer">
     <meta property="twitter:title" content="cmd Shutdown Timer">
     <meta property="twitter:description" content="A command generator for cmd that will let you set a sleep timer for your computer.">
     <meta property="twitter:image" content="https://sawyinator.uk/assets/logos/cmd-shutdown-timer-logo.png">
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: radial-gradient(circle at top right, #0a0e17, #05070a, #020203);
-        color: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 100vh;
-    }
-    #backButton {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    padding: 10px;
-    cursor: pointer;
-    }
-</style>
-</head>
-<body>
-<p></p>
-<br><br><br><br>
-<a href="/">
-<button id="backButton">↩ Back to main website</button>
-</a>
-<h2>Please enter a time</h2>
-<br><br>
-Hours
-<br>
-<input type="number" id="hrs" placeholder="">
-<br>
-Minutes
-<br>
-<input type="number" id="min" placeholder="">
-<br>
-Seconds
-<br>
-<input type="number" id="sec" placeholder="">
-<br><br>
-<button onclick=copyToClipboard()>Copy CMD Command</button>
-<br><br>
-<span id="cmd">shutdown -s</span>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: radial-gradient(circle at top right, #0a0e17, #05070a, #020203);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-<script>
-    const hrs=document.getElementById('hrs')
-    const min=document.getElementById('min')
-    const sec=document.getElementById('sec')
-    hrs.addEventListener('input',calculate)
-    min.addEventListener('input',calculate)
-    sec.addEventListener('input',calculate)
-    
-    function calculate() {
-        const hrsnum=Number(hrs.value)
-        const minnum=Number(min.value)
-        const secnum=Number(sec.value)
-        const sum=(hrsnum*3600)+(minnum*60)+secnum
-        if (sum>0) {
-            document.getElementById('cmd').innerText = "shutdown -s -t " + sum;
+        #backButton {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px;
+            cursor: pointer;
         }
-        else {
-            document.getElementById('cmd').innerText = "shutdown -s";
+    </style>
+</head>
+
+<body>
+    <p></p>
+    <br><br><br><br>
+    <a href="/">
+        <button id="backButton">↩ Back to main website</button>
+    </a>
+    <h2>Please enter a time</h2>
+    <br><br>
+    Hours
+    <br>
+    <input type="number" id="hrs" placeholder="">
+    <br>
+    Minutes
+    <br>
+    <input type="number" id="min" placeholder="">
+    <br>
+    Seconds
+    <br>
+    <input type="number" id="sec" placeholder="">
+    <br><br>
+    <button onclick=copyToClipboard()>Copy CMD Command</button>
+    <br><br>
+    <span id="cmd">shutdown -s</span>
+
+    <script>
+        const hrs = document.getElementById('hrs')
+        const min = document.getElementById('min')
+        const sec = document.getElementById('sec')
+        hrs.addEventListener('input', calculate)
+        min.addEventListener('input', calculate)
+        sec.addEventListener('input', calculate)
+
+        function calculate() {
+            const hrsnum = Number(hrs.value)
+            const minnum = Number(min.value)
+            const secnum = Number(sec.value)
+            const sum = (hrsnum * 3600) + (minnum * 60) + secnum
+            if (sum > 0) {
+                document.getElementById('cmd').innerText = "shutdown -s -t " + sum;
+            } else {
+                document.getElementById('cmd').innerText = "shutdown -s";
+            }
         }
-    }
-    
-    function copyToClipboard() {
-        const copiedText=document.getElementById('cmd').innerText;
-        navigator.clipboard.writeText(copiedText);
-        
-        alert("Copied "+copiedText+" to clipboard");
-    }
-</script>
+
+        function copyToClipboard() {
+            const copiedText = document.getElementById('cmd').innerText;
+            navigator.clipboard.writeText(copiedText);
+
+            alert("Copied " + copiedText + " to clipboard");
+        }
+    </script>
 </body>
