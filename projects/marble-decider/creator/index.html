@@ -282,20 +282,35 @@
     <div id="toast">CODE COPIED!</div>
 
     <script>
-        const { Engine, Render, Runner, Bodies, Composite, Body, Events } = Matter;
+        const {
+            Engine,
+            Render,
+            Runner,
+            Bodies,
+            Composite,
+            Body,
+            Events
+        } = Matter;
         const engine = Engine.create();
 
         const MARBLE_RADIUS = 20;
-        const MOD_WIDTH = 820, MOD_HEIGHT = 900;
+        const MOD_WIDTH = 820,
+            MOD_HEIGHT = 900;
 
         let canvasW = document.getElementById('canvas-container').clientWidth;
         let canvasH = document.getElementById('canvas-container').clientHeight;
-        let CX = canvasW / 2, CY = canvasH / 2;
+        let CX = canvasW / 2,
+            CY = canvasH / 2;
 
         const render = Render.create({
             element: document.getElementById('canvas-container'),
             engine: engine,
-            options: { width: canvasW, height: canvasH, wireframes: false, background: 'transparent' }
+            options: {
+                width: canvasW,
+                height: canvasH,
+                wireframes: false,
+                background: 'transparent'
+            }
         });
 
         Render.run(render);
@@ -315,18 +330,32 @@
         }
         requestAnimationFrame(loop);
 
-        let shapes = [], marbles = [], selectedShape = null, isSimulating = false, mousePos = { x: 0, y: 0 };
+        let shapes = [],
+            marbles = [],
+            selectedShape = null,
+            isSimulating = false,
+            mousePos = {
+                x: 0,
+                y: 0
+            };
         engine.gravity.y = 0;
 
         window.addEventListener('resize', () => {
             const container = document.getElementById('canvas-container');
             canvasW = container.clientWidth;
             canvasH = container.clientHeight;
-            const oldCX = CX; const oldCY = CY;
-            CX = canvasW / 2; CY = canvasH / 2;
-            shapes.forEach(s => { s.x = (s.x - oldCX) + CX; s.y = (s.y - oldCY) + CY; });
-            render.canvas.width = canvasW; render.canvas.height = canvasH;
-            render.options.width = canvasW; render.options.height = canvasH;
+            const oldCX = CX;
+            const oldCY = CY;
+            CX = canvasW / 2;
+            CY = canvasH / 2;
+            shapes.forEach(s => {
+                s.x = (s.x - oldCX) + CX;
+                s.y = (s.y - oldCY) + CY;
+            });
+            render.canvas.width = canvasW;
+            render.canvas.height = canvasH;
+            render.options.width = canvasW;
+            render.options.height = canvasH;
             rebuildWorld();
         });
 
@@ -339,7 +368,10 @@
                     if (s.behavior === 'rotate') Body.setAngle(body, body.angle + s.speed);
                     else if (s.behavior === 'oscillate') {
                         const newX = s.origX + Math.sin(time * 0.003) * (s.speed * 100);
-                        Body.setPosition(body, { x: newX, y: s.origY });
+                        Body.setPosition(body, {
+                            x: newX,
+                            y: s.origY
+                        });
                     }
                 }
             });
@@ -347,16 +379,42 @@
 
         Events.on(render, 'afterRender', () => {
             const ctx = render.context;
-            const left = CX - MOD_WIDTH / 2, right = CX + MOD_WIDTH / 2, top = CY - MOD_HEIGHT / 2, bottom = CY + MOD_HEIGHT / 2;
-            ctx.strokeStyle = '#64ff4e'; ctx.setLineDash([5, 5]); ctx.lineWidth = 1.5; ctx.globalAlpha = 0.4;
+            const left = CX - MOD_WIDTH / 2,
+                right = CX + MOD_WIDTH / 2,
+                top = CY - MOD_HEIGHT / 2,
+                bottom = CY + MOD_HEIGHT / 2;
+            ctx.strokeStyle = '#64ff4e';
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.4;
             ctx.strokeRect(left, top, MOD_WIDTH, MOD_HEIGHT);
-            ctx.globalAlpha = 0.2; ctx.beginPath(); ctx.moveTo(CX, top); ctx.lineTo(CX, bottom); ctx.moveTo(left, CY); ctx.lineTo(right, CY); ctx.stroke();
-            ctx.setLineDash([]); ctx.globalAlpha = 1.0;
+            ctx.globalAlpha = 0.2;
+            ctx.beginPath();
+            ctx.moveTo(CX, top);
+            ctx.lineTo(CX, bottom);
+            ctx.moveTo(left, CY);
+            ctx.lineTo(right, CY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1.0;
         });
 
         function addShape(type) {
             if (isSimulating) return;
-            const newShape = { id: Date.now(), type, x: CX, y: CY, w: type === 'circle' ? 60 : 200, h: 60, angle: 0, behavior: 'static', speed: 0.05, name: type + "_" + (shapes.length + 1), bouncy: 0.4, isStatic: true };
+            const newShape = {
+                id: Date.now(),
+                type,
+                x: CX,
+                y: CY,
+                w: type === 'circle' ? 60 : 200,
+                h: 60,
+                angle: 0,
+                behavior: 'static',
+                speed: 0.05,
+                name: type + "_" + (shapes.length + 1),
+                bouncy: 0.4,
+                isStatic: true
+            };
             shapes.push(newShape);
             rebuildWorld();
             selectShape(newShape.id);
@@ -365,21 +423,45 @@
         function rebuildWorld() {
             const currentMarbles = [...marbles];
             Composite.clear(engine.world);
-            const wallOpts = { isStatic: true, render: { visible: false } };
+            const wallOpts = {
+                isStatic: true,
+                render: {
+                    visible: false
+                }
+            };
             const leftWall = Bodies.rectangle(CX - MOD_WIDTH / 2 - 10, CY, 20, MOD_HEIGHT, wallOpts);
             const rightWall = Bodies.rectangle(CX + MOD_WIDTH / 2 + 10, CY, 20, MOD_HEIGHT, wallOpts);
             Composite.add(engine.world, [leftWall, rightWall]);
 
             shapes.forEach(s => {
-                const opts = { label: s.name, isStatic: s.isStatic, restitution: parseFloat(s.bouncy), render: { fillStyle: selectedShape?.id === s.id ? '#1e40af' : '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: s.angle * (Math.PI / 180) };
+                const opts = {
+                    label: s.name,
+                    isStatic: s.isStatic,
+                    restitution: parseFloat(s.bouncy),
+                    render: {
+                        fillStyle: selectedShape?.id === s.id ? '#1e40af' : '#052e16',
+                        strokeStyle: '#64ff4e',
+                        lineWidth: 4
+                    },
+                    angle: s.angle * (Math.PI / 180)
+                };
                 let body;
-                if (s.type === 'rectangle') body = Bodies.rectangle(s.x, s.y, s.w, s.h, { ...opts, chamfer: { radius: 15 } });
+                if (s.type === 'rectangle') body = Bodies.rectangle(s.x, s.y, s.w, s.h, {
+                    ...opts,
+                    chamfer: {
+                        radius: 15
+                    }
+                });
                 else if (s.type === 'circle') body = Bodies.circle(s.x, s.y, s.w, opts);
                 else if (s.type === 'triangle') body = Bodies.polygon(s.x, s.y, 3, s.w, opts);
-                
+
                 body.restitution = parseFloat(s.bouncy);
                 body.originalRadius = s.w;
-                body.behaviorData = { ...s, origX: s.x, origY: s.y };
+                body.behaviorData = {
+                    ...s,
+                    origX: s.x,
+                    origY: s.y
+                };
                 Composite.add(engine.world, body);
             });
             currentMarbles.forEach(m => Composite.add(engine.world, m));
@@ -437,11 +519,17 @@
 
         function deleteShape(id) {
             shapes = shapes.filter(s => s.id !== id);
-            if (selectedShape?.id === id) { selectedShape = null; document.getElementById('inspector').style.display = 'none'; }
+            if (selectedShape?.id === id) {
+                selectedShape = null;
+                document.getElementById('inspector').style.display = 'none';
+            }
             rebuildWorld();
         }
 
-        function clearMarbles() { marbles.forEach(m => Composite.remove(engine.world, m)); marbles = []; }
+        function clearMarbles() {
+            marbles.forEach(m => Composite.remove(engine.world, m));
+            marbles = [];
+        }
 
         function toggleSim() {
             isSimulating = !isSimulating;
@@ -453,26 +541,38 @@
                 Composite.allBodies(engine.world).forEach(body => {
                     if (body.behaviorData) body.restitution = parseFloat(body.behaviorData.bouncy);
                 });
-            } else { clearMarbles(); }
+            } else {
+                clearMarbles();
+            }
             rebuildWorld();
         }
 
         render.canvas.addEventListener('mousedown', (e) => {
             if (isSimulating) return;
             const rect = render.canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            const mx = e.clientX - rect.left,
+                my = e.clientY - rect.top;
             const clicked = [...shapes].reverse().find(s => Math.abs(s.x - mx) < 50 && Math.abs(s.y - my) < 50);
-            if (clicked) { selectShape(clicked.id); isDragging = true; } 
-            else { selectedShape = null; document.getElementById('inspector').style.display = 'none'; rebuildWorld(); }
+            if (clicked) {
+                selectShape(clicked.id);
+                isDragging = true;
+            } else {
+                selectedShape = null;
+                document.getElementById('inspector').style.display = 'none';
+                rebuildWorld();
+            }
         });
 
         let isDragging = false;
         render.canvas.addEventListener('mousemove', (e) => {
             const rect = render.canvas.getBoundingClientRect();
-            mousePos.x = e.clientX - rect.left; mousePos.y = e.clientY - rect.top;
+            mousePos.x = e.clientX - rect.left;
+            mousePos.y = e.clientY - rect.top;
             if (isDragging && selectedShape && !isSimulating) {
-                selectedShape.x = Math.round(mousePos.x); selectedShape.y = Math.round(mousePos.y);
-                rebuildWorld(); updateInspectorInputs();
+                selectedShape.x = Math.round(mousePos.x);
+                selectedShape.y = Math.round(mousePos.y);
+                rebuildWorld();
+                updateInspectorInputs();
             }
         });
         window.addEventListener('mouseup', () => isDragging = false);
@@ -480,8 +580,16 @@
         window.addEventListener('keydown', (e) => {
             if (!isSimulating) return;
             if (e.key.toLowerCase() === 's') {
-                const m = Bodies.circle(mousePos.x, mousePos.y, MARBLE_RADIUS, { restitution: 0.5, friction: 0.001, frictionAir: 0.01, render: { fillStyle: `hsl(${Math.random()*360}, 80%, 60%)` } });
-                marbles.push(m); Composite.add(engine.world, m);
+                const m = Bodies.circle(mousePos.x, mousePos.y, MARBLE_RADIUS, {
+                    restitution: 0.5,
+                    friction: 0.001,
+                    frictionAir: 0.01,
+                    render: {
+                        fillStyle: `hsl(${Math.random()*360}, 80%, 60%)`
+                    }
+                });
+                marbles.push(m);
+                Composite.add(engine.world, m);
             }
             if (e.key.toLowerCase() === 'c') clearMarbles();
         });
@@ -501,28 +609,43 @@
                 code += `        Composite.add(world, ${s.name});\n\n`;
             });
             code += `    }\n}`;
-            navigator.clipboard.writeText(code).then(() => { showToast("CODE COPIED!"); });
+            navigator.clipboard.writeText(code).then(() => {
+                showToast("CODE COPIED!");
+            });
         }
 
-        function showImportPrompt() { document.getElementById('import-overlay').style.display = 'block'; document.getElementById('import-area').value = ''; }
+        function showImportPrompt() {
+            document.getElementById('import-overlay').style.display = 'block';
+            document.getElementById('import-area').value = '';
+        }
 
         async function processImport() {
             let rawInput = document.getElementById('import-area').value.trim();
             try {
                 const sanitizedInput = rawInput.replace(/^const\s+\w+\s*=\s*/, '').replace(/;$/, '');
                 let moduleObj;
-                try { moduleObj = eval(`(${sanitizedInput})`); } catch (e) { throw new Error("Syntax error in pasted code."); }
+                try {
+                    moduleObj = eval(`(${sanitizedInput})`);
+                } catch (e) {
+                    throw new Error("Syntax error in pasted code.");
+                }
                 const capturedBodies = [];
                 const originalAdd = Composite.add;
-                Composite.add = (world, body) => { if (Array.isArray(body)) capturedBodies.push(...body); else capturedBodies.push(body); };
-                moduleObj.create({ bodies: [] }, CY - 450, CX, engine);
+                Composite.add = (world, body) => {
+                    if (Array.isArray(body)) capturedBodies.push(...body);
+                    else capturedBodies.push(body);
+                };
+                moduleObj.create({
+                    bodies: []
+                }, CY - 450, CX, engine);
                 Composite.add = originalAdd;
 
                 shapes = capturedBodies.map(body => {
                     let type = 'rectangle';
-                    if (body.circleRadius) type = 'circle'; else if (body.vertices.length === 3) type = 'triangle';
+                    if (body.circleRadius) type = 'circle';
+                    else if (body.vertices.length === 3) type = 'triangle';
                     const bodyName = (body.label && !body.label.includes('Body')) ? body.label : (type + "_" + Math.floor(Math.random() * 1000));
-                    
+
                     // Regex search specifically for the restitution value assigned to this specific object in the string
                     const restRegex = new RegExp(`${bodyName}.*?restitution:\\s*([0-9.]+)`);
                     const restMatch = sanitizedInput.match(restRegex);
@@ -530,15 +653,20 @@
 
                     const shapeData = {
                         id: Date.now() + Math.random(),
-                        name: bodyName, type: type, x: body.position.x, y: body.position.y,
+                        name: bodyName,
+                        type: type,
+                        x: body.position.x,
+                        y: body.position.y,
                         w: body.circleRadius || body.originalRadius || calculateWidth(body),
                         h: type === 'rectangle' ? calculateHeight(body) : 0,
                         angle: Math.round(body.angle * (180 / Math.PI)),
                         isStatic: body.isStatic,
                         bouncy: capturedRest,
-                        behavior: 'static', speed: 0.05
+                        behavior: 'static',
+                        speed: 0.05
                     };
-                    const searchName = shapeData.name; const normalizedText = sanitizedInput.replace(/\s+/g, ' ');
+                    const searchName = shapeData.name;
+                    const normalizedText = sanitizedInput.replace(/\s+/g, ' ');
                     if (normalizedText.includes(`Body.setAngle(${searchName}`)) {
                         shapeData.behavior = 'rotate';
                         const speedMatch = normalizedText.match(new RegExp(`${searchName}\\.angle\\s*\\+\\s*([0-9.]+)`));
@@ -550,14 +678,36 @@
                     }
                     return shapeData;
                 });
-                rebuildWorld(); document.getElementById('import-overlay').style.display = 'none'; showToast("MODULE IMPORTED!");
-            } catch (e) { console.error("Import Error:", e); alert("Import Error: " + e.message); }
+                rebuildWorld();
+                document.getElementById('import-overlay').style.display = 'none';
+                showToast("MODULE IMPORTED!");
+            } catch (e) {
+                console.error("Import Error:", e);
+                alert("Import Error: " + e.message);
+            }
         }
 
-        function calculateWidth(body) { const xs = body.vertices.map(v => v.x); return Math.max(...xs) - Math.min(...xs); }
-        function calculateHeight(body) { const ys = body.vertices.map(v => v.y); return Math.max(...ys) - Math.min(...ys); }
-        function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => { t.style.display = 'none'; t.innerText = "CODE COPIED!"; }, 1500); }
+        function calculateWidth(body) {
+            const xs = body.vertices.map(v => v.x);
+            return Math.max(...xs) - Math.min(...xs);
+        }
+
+        function calculateHeight(body) {
+            const ys = body.vertices.map(v => v.y);
+            return Math.max(...ys) - Math.min(...ys);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => {
+                t.style.display = 'none';
+                t.innerText = "CODE COPIED!";
+            }, 1500);
+        }
         rebuildWorld();
     </script>
 </body>
+
 </html>
