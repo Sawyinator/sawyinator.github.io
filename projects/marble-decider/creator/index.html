@@ -600,12 +600,28 @@
                 const relX = `cx + (${Math.round(s.x - CX)})`;
                 const relY = `y + (${Math.round(s.y - CY)} + 450)`;
                 const radAngle = (s.angle * (Math.PI / 180)).toFixed(3);
-                const style = `{ label: '${s.name}', originalRadius: ${s.w}, isStatic: ${s.isStatic}, restitution: ${s.bouncy}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
-                if (s.type === 'rectangle') code += `        const ${s.name} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
-                else if (s.type === 'circle') code += `        const ${s.name} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
-                else if (s.type === 'triangle') code += `        const ${s.name} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
-                if (s.behavior === 'rotate') code += `        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(${s.name}, ${s.name}.angle + ${s.speed}); });\n`;
-                else if (s.behavior === 'oscillate') code += `        Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(${s.name}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} }); });\n`;
+                const style = `{ label: '${s.name}', isStatic: ${s.isStatic}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
+                // 1. Create the Body
+                if (s.type === 'rectangle') {
+                    code += `        const ${s.name} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
+                } else if (s.type === 'circle') {
+                    code += `        const ${s.name} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
+                } else if (s.type === 'triangle') {
+                    code += `        const ${s.name} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
+                }
+
+                // 2. Explicit overrides
+                // Direct assignment bypasses Matter.js constructor clamping
+                code += `        ${s.name}.restitution = ${s.bouncy};\n`;
+                code += `        ${s.name}.friction = 0;\n`;
+                code += `        ${s.name}.frictionStatic = 0;\n`;
+                // 3. Add Behaviors
+                if (s.behavior === 'rotate') {
+                    code += `        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(${s.name}, ${s.name}.angle + ${s.speed}); });\n`;
+                } else if (s.behavior === 'oscillate') {
+                    code += `        Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(${s.name}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} }); });\n`;
+                }
+                // 4. Add to World
                 code += `        Composite.add(world, ${s.name});\n\n`;
             });
             code += `    }\n}`;
