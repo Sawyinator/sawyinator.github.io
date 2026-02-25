@@ -1384,20 +1384,23 @@
 
         // Replaces the name in the code string with a new one
         function updateNameInCode(code, newName) {
-            return code.replace(/(name:\s*["'`](.*?)(["'`],?))/, `name: "${newName}"$3`);
+            return code.replace(/(name:\s*["'`](.*?)(["'`],?))/, `name: "${newName}$3`);
         }
 
         function renameModule(idx) {
             const oldCode = customModules[idx].code;
-            const oldName = getNameFromCode(oldCode);
+            const oldName = customModules[idx].name; // Get name from the object property
             const newName = prompt("Enter new name for the module:", oldName);
 
             if (newName && newName !== oldName) {
-                // Update the code string
+                // 1. Update the code string (the text inside the editor)
                 const newCode = updateNameInCode(oldCode, newName);
                 customModules[idx].code = newCode;
 
-                // Update the enabled list so it doesn't get "unselected"
+                // 2. Update the name property on the object (CRITICAL FIX)
+                customModules[idx].name = newName;
+
+                // 3. Update the enabled list so it stays selected
                 enabledModules = enabledModules.map(n => n === oldName ? newName : n);
 
                 saveModuleData();
