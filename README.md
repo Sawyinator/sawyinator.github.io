@@ -1,6 +1,6 @@
 https://sawyinator.uk/
 
 FeatureBoard:
-https://www.notion.so/313711ae240380d68a85d23c05dab408?v=313711ae2403804f95c9000cbfafb675&source=copy_link
+[https://www.notion.so/Feature-Board](https://www.notion.so/Feature-Board-313711ae240380f6835ff80238a940d4?source=copy_link)
 
 DISCLAIMER - Project made with heavy involvement from Google's Gemini
