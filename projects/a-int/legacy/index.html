@@ -1,0 +1,143 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arabic-Indic Number Practice</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        #arabic-display {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            min-height: 1.2em;
+        }
+        #western-display {
+            font-size: 2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            height: 1.2em;
+            visibility: hidden;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        #main-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        #main-btn:hover { background-color: #0056b3; }
+        #back-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        #back-btn:hover { background-color: #5a6268; }
+        #back-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="arabic-display">Press Start</div>
+    <div id="western-display"></div>
+    
+    <div class="btn-group">
+        <button id="back-btn" onclick="goBack()" disabled>Back</button>
+        <button id="main-btn" onclick="handleMainAction()">Start</button>
+    </div>
+</div>
+
+<script>
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    let history = [];
+    let isRevealed = false;
+
+    const arabicDisplay = document.getElementById('arabic-display');
+    const westernDisplay = document.getElementById('western-display');
+    const mainBtn = document.getElementById('main-btn');
+    const backBtn = document.getElementById('back-btn');
+
+    function toArabicIndic(num) {
+        return num.toString().split('').map(d => arabicDigits[parseInt(d)]).join('');
+    }
+
+    function generateNewNumber() {
+        // Generates a random number between 1 and 9999
+        const newNum = Math.floor(Math.random() * 9999) + 1;
+        
+        // Keep history to 10 items
+        if (history.length >= 11) history.shift();
+        history.push(newNum);
+        
+        showNumber(newNum);
+        updateBackButton();
+    }
+
+    function showNumber(num) {
+        arabicDisplay.innerText = toArabicIndic(num);
+        westernDisplay.innerText = num;
+        westernDisplay.style.visibility = 'hidden';
+        mainBtn.innerText = 'Reveal';
+        isRevealed = false;
+    }
+
+    function handleMainAction() {
+        if (history.length === 0) {
+            generateNewNumber();
+            return;
+        }
+
+        if (!isRevealed) {
+            westernDisplay.style.visibility = 'visible';
+            mainBtn.innerText = 'Continue';
+            isRevealed = true;
+        } else {
+            generateNewNumber();
+        }
+    }
+
+    function goBack() {
+        if (history.length > 1) {
+            history.pop(); // Remove current
+            const previous = history[history.length - 1];
+            showNumber(previous);
+            updateBackButton();
+        }
+    }
+
+    function updateBackButton() {
+        backBtn.disabled = history.length <= 1;
+    }
+</script>
+
+</body>
+</html>
