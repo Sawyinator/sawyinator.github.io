@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sawyinator.github.io/sitemap.xml
+Sitemap: https://sawyinator.uk/sitemap.xml
