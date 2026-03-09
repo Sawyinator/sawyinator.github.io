@@ -379,7 +379,8 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h1 style="color: var(--acc); margin: 0;">MODULE BROWSER</h1>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-                <a href="creator/" class="ui-btn creator-link-btn">MODULE CREATOR</a>
+
+                <button class="ui-btn toggle-btn" onclick="window.location.href='creator/'">MODULE CREATOR</button>
 
                 <button class="ui-btn toggle-btn" onclick="addCustomModule()">+ NEW CUSTOM MODULE</button>
                 <button class="ui-btn toggle-btn" onclick="importModules()">IMPORT JSON</button>
@@ -387,7 +388,7 @@
                 <button class="ui-btn reset-btn" onclick="closeModuleBrowser()">CLOSE</button>
             </div>
         </div>
-        <p>Select at least 2 modules to be used in the race generation.</p>
+        <p>Please select modules to be used in the race generation.</p>
         <div class="module-grid" id="module-grid"></div>
     </div>
 
