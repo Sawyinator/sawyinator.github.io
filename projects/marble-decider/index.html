@@ -866,10 +866,6 @@
         }
 
         function closeModuleBrowser() {
-            if (enabledModules.length < 2) {
-                alert("Please enable at least 2 modules!");
-                return;
-            }
             document.getElementById('module-overlay').style.display = 'none';
         }
 
@@ -917,10 +913,6 @@
 
         function toggleModule(name) {
             if (enabledModules.includes(name)) {
-                if (enabledModules.length <= 2) {
-                    alert("Minimum 2 modules required!");
-                    return;
-                }
                 enabledModules = enabledModules.filter(n => n !== name);
             } else {
                 enabledModules.push(name);
