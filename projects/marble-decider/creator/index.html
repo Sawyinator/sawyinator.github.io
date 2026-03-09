@@ -602,9 +602,8 @@
                 const relY = `y + (${Math.round(s.y - CY)} + 450)`;
                 const radAngle = (s.angle * (Math.PI / 180)).toFixed(3);
 
-                // Define a chamfer radius (e.g., 15). 
-                // You could also make this a property of your 's' (shape) object.
-                const chamferValue = (s.type === 'rectangle' || s.type === 'triangle') ? `, chamfer: { radius: 15 }` : '';
+                // Define a chamfer radius
+                const chamferValue = (s.type === 'rectangle') ? `, chamfer: { radius: 15 }` : '';
 
                 // 1. Update the style string to include the chamferValue
                 const style = `{ label: '${s.name}', isStatic: ${s.isStatic}${chamferValue}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
