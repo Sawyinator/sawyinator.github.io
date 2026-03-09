@@ -394,9 +394,8 @@
     <div id="editor-modal">
         <div class="editor-box">
             <h2 id="editor-title" style="color: var(--acc);">Edit Module</h2>
-            <input type="text" id="moduleNameInput" placeholder="Module Name" style="width: 100%; padding: 10px; background: #000; color: var(--acc); border: 1px solid #14532d; border-radius: 8px; box-sizing: border-box;">
 
-            <textarea id="moduleCodeInput" placeholder="Add custom module code here"></textarea>
+            <textarea id="moduleCodeInput" placeholder="Paste custom module code here"></textarea>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="ui-btn toggle-btn" style="flex: 1;" onclick="saveModule()">SAVE</button>
                 <button class="ui-btn reset-btn" style="flex: 1;" onclick="document.getElementById('editor-modal').style.display='none'">CANCEL</button>
@@ -925,9 +924,6 @@
             editingIndex = -1;
             document.getElementById('editor-title').innerText = "New Custom Module";
 
-            // This clears the Name input field entirely
-            document.getElementById('moduleNameInput').value = "";
-
             // This clears the Code textarea entirely
             document.getElementById('moduleCodeInput').value = "";
 
@@ -938,7 +934,6 @@
             editingIndex = idx;
             const m = customModules[idx];
             document.getElementById('editor-title').innerText = "Edit Module";
-            document.getElementById('moduleNameInput').value = m.name;
             document.getElementById('moduleCodeInput').value = m.code;
             document.getElementById('editor-modal').style.display = 'flex';
         }
@@ -1012,7 +1007,7 @@
 
         // Updated saveModule to automatically extract the name if you paste the whole object
         function saveModule() {
-            let name = document.getElementById('moduleNameInput').value.trim();
+            let name = "Custom Module";
             const code = document.getElementById('moduleCodeInput').value.trim();
 
             // Check if the user pasted a full object and try to extract the name automatically
