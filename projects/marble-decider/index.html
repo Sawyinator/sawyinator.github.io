@@ -638,6 +638,92 @@
                 }
             },
             {
+                name: "Custom Module",
+                create: (world, y, cx, engine) => {
+                    const rectangle_1 = Bodies.rectangle(cx + (-324), y + (-272 + 450), 200, 60, {
+                        label: 'rectangle_1',
+                        isStatic: true,
+                        chamfer: {
+                            radius: 15
+                        },
+                        render: {
+                            fillStyle: '#052e16',
+                            strokeStyle: '#64ff4e',
+                            lineWidth: 4
+                        },
+                        angle: 0.000
+                    });
+                    rectangle_1.restitution = 0.4;
+                    rectangle_1.friction = 0;
+                    rectangle_1.frictionStatic = 0;
+                    Composite.add(world, rectangle_1);
+
+                    const rectangle_2 = Bodies.rectangle(cx + (221), y + (-286 + 450), 200, 60, {
+                        label: 'rectangle_2',
+                        isStatic: true,
+                        chamfer: {
+                            radius: 15
+                        },
+                        render: {
+                            fillStyle: '#052e16',
+                            strokeStyle: '#64ff4e',
+                            lineWidth: 4
+                        },
+                        angle: 0.000
+                    });
+                    rectangle_2.restitution = 0.4;
+                    rectangle_2.friction = 0;
+                    rectangle_2.frictionStatic = 0;
+                    Composite.add(world, rectangle_2);
+
+                    const circle_3 = Bodies.circle(cx + (-245), y + (-83 + 450), 60, {
+                        label: 'circle_3',
+                        isStatic: true,
+                        render: {
+                            fillStyle: '#052e16',
+                            strokeStyle: '#64ff4e',
+                            lineWidth: 4
+                        },
+                        angle: 0.000
+                    });
+                    circle_3.restitution = 0.4;
+                    circle_3.friction = 0;
+                    circle_3.frictionStatic = 0;
+                    Composite.add(world, circle_3);
+
+                    const circle_4 = Bodies.circle(cx + (-58), y + (-150 + 450), 60, {
+                        label: 'circle_4',
+                        isStatic: true,
+                        render: {
+                            fillStyle: '#052e16',
+                            strokeStyle: '#64ff4e',
+                            lineWidth: 4
+                        },
+                        angle: 0.000
+                    });
+                    circle_4.restitution = 0.4;
+                    circle_4.friction = 0;
+                    circle_4.frictionStatic = 0;
+                    Composite.add(world, circle_4);
+
+                    const triangle_5 = Bodies.polygon(cx + (156), y + (57 + 450), 3, 200, {
+                        label: 'triangle_5',
+                        isStatic: true,
+                        render: {
+                            fillStyle: '#052e16',
+                            strokeStyle: '#64ff4e',
+                            lineWidth: 4
+                        },
+                        angle: 0.000
+                    });
+                    triangle_5.restitution = 0.4;
+                    triangle_5.friction = 0;
+                    triangle_5.frictionStatic = 0;
+                    Composite.add(world, triangle_5);
+
+                }
+            },
+            {
                 name: "grinder",
                 create: (world, y, cx) => {
                     [cx - 180, cx + 180].forEach((xPos, idx) => {
@@ -983,26 +1069,18 @@
         // Helper to turn strings into executable functions safely-ish
         // Updated helper to handle both raw code and object-style strings
         function getModuleLogic(m) {
-            if (m.create) return m.create;
+            // If it's already a function (built-in), return it
+            if (typeof m.create === 'function') return m.create;
+
+            // If it's a string (custom), evaluate it into an object first
             try {
                 let codeToEval = m.code.trim();
-
-                // Handle full object strings { name: "...", create: ... }
-                if (codeToEval.startsWith('{')) {
-                    // We use eval to turn the string into a real object
-                    const moduleObj = eval(`(${codeToEval})`);
-                    return moduleObj.create;
-                }
-
-                // Handle raw function strings (world, y, cx) => { ... }
-                const codeClean = codeToEval.substring(codeToEval.indexOf('=>') + 2).trim();
-                const body = codeClean.startsWith('{') ? codeClean.slice(1, -1) : codeClean;
-
-                // IMPORTANT: Added 'engine' to the constructor so custom code can access it
-                return new Function('world', 'y', 'cx', 'engine', body);
+                // Wrap in parentheses to treat the string as an expression
+                const moduleObj = eval(`(${codeToEval})`);
+                return moduleObj.create;
             } catch (e) {
                 console.error("Failed to parse module: " + m.name, e);
-                return () => {};
+                return () => {}; // Return empty function on failure
             }
         }
 
