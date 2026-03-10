@@ -486,13 +486,13 @@
 
         // --- BUILT-IN MODULES ---
         const DefaultModules = [{
-                name: "tri-blade spinner",
+                name: "Tri-Blade Spinner",
                 create: (world, y, cx) => {
                     createGuides(world, y, cx);
                     const parts = [];
                     for (let i = 0; i < 3; i++) {
                         const angle = (i / 3) * Math.PI * 2;
-                        parts.push(Bodies.rectangle(cx + Math.cos(angle) * 120, y + 500 + Math.sin(angle) * 120, 320, 80, {
+                        parts.push(Bodies.rectangle(cx + Math.cos(angle) * 120, y + 500 + Math.sin(angle) * 120, 500, 80, {
                             angle: angle,
                             chamfer: {
                                 radius: 20
@@ -523,7 +523,7 @@
                 }
             },
             {
-                name: "moving diamond splitter",
+                name: "Splitter",
                 create: (world, y, cx) => {
                     const wallStyle = {
                         isStatic: true,
@@ -573,7 +573,7 @@
                 }
             },
             {
-                name: "dual spinners",
+                name: "Dual Spinners",
                 create: (world, y, cx) => {
                     createGuides(world, y, cx);
                     [cx - 240, cx + 240].forEach((xPos, i) => {
@@ -603,128 +603,7 @@
                 }
             },
             {
-                name: "hanging rectangles",
-                create: (world, y, cx) => {
-                    for (let i = 0; i < 2; i++) {
-                        const xPos = cx - 200 + (i * 400);
-                        const weight = Bodies.rectangle(xPos, y + 600, 300, 100, {
-                            render: {
-                                fillStyle: '#052e16',
-                                strokeStyle: '#64ff4e',
-                                lineWidth: 4
-                            },
-                            chamfer: {
-                                radius: 30
-                            },
-                            frictionAir: 0.02,
-                            restitution: 0.7,
-                            inertia: 7500
-                        });
-                        const pivot = Constraint.create({
-                            pointA: {
-                                x: xPos,
-                                y: y + 150
-                            },
-                            bodyB: weight,
-                            stiffness: 0.01,
-                            length: 400,
-                            render: {
-                                strokeStyle: '#64ff4e',
-                                lineWidth: 4
-                            }
-                        });
-                        Composite.add(world, [weight, pivot]);
-                    }
-                }
-            },
-            {
-                name: "Custom Module",
-                create: (world, y, cx, engine) => {
-                    const rectangle_1 = Bodies.rectangle(cx + (-324), y + (-272 + 450), 200, 60, {
-                        label: 'rectangle_1',
-                        isStatic: true,
-                        chamfer: {
-                            radius: 15
-                        },
-                        render: {
-                            fillStyle: '#052e16',
-                            strokeStyle: '#64ff4e',
-                            lineWidth: 4
-                        },
-                        angle: 0.000
-                    });
-                    rectangle_1.restitution = 0.4;
-                    rectangle_1.friction = 0;
-                    rectangle_1.frictionStatic = 0;
-                    Composite.add(world, rectangle_1);
-
-                    const rectangle_2 = Bodies.rectangle(cx + (221), y + (-286 + 450), 200, 60, {
-                        label: 'rectangle_2',
-                        isStatic: true,
-                        chamfer: {
-                            radius: 15
-                        },
-                        render: {
-                            fillStyle: '#052e16',
-                            strokeStyle: '#64ff4e',
-                            lineWidth: 4
-                        },
-                        angle: 0.000
-                    });
-                    rectangle_2.restitution = 0.4;
-                    rectangle_2.friction = 0;
-                    rectangle_2.frictionStatic = 0;
-                    Composite.add(world, rectangle_2);
-
-                    const circle_3 = Bodies.circle(cx + (-245), y + (-83 + 450), 60, {
-                        label: 'circle_3',
-                        isStatic: true,
-                        render: {
-                            fillStyle: '#052e16',
-                            strokeStyle: '#64ff4e',
-                            lineWidth: 4
-                        },
-                        angle: 0.000
-                    });
-                    circle_3.restitution = 0.4;
-                    circle_3.friction = 0;
-                    circle_3.frictionStatic = 0;
-                    Composite.add(world, circle_3);
-
-                    const circle_4 = Bodies.circle(cx + (-58), y + (-150 + 450), 60, {
-                        label: 'circle_4',
-                        isStatic: true,
-                        render: {
-                            fillStyle: '#052e16',
-                            strokeStyle: '#64ff4e',
-                            lineWidth: 4
-                        },
-                        angle: 0.000
-                    });
-                    circle_4.restitution = 0.4;
-                    circle_4.friction = 0;
-                    circle_4.frictionStatic = 0;
-                    Composite.add(world, circle_4);
-
-                    const triangle_5 = Bodies.polygon(cx + (156), y + (57 + 450), 3, 200, {
-                        label: 'triangle_5',
-                        isStatic: true,
-                        render: {
-                            fillStyle: '#052e16',
-                            strokeStyle: '#64ff4e',
-                            lineWidth: 4
-                        },
-                        angle: 0.000
-                    });
-                    triangle_5.restitution = 0.4;
-                    triangle_5.friction = 0;
-                    triangle_5.frictionStatic = 0;
-                    Composite.add(world, triangle_5);
-
-                }
-            },
-            {
-                name: "grinder",
+                name: "Grinder",
                 create: (world, y, cx) => {
                     [cx - 180, cx + 180].forEach((xPos, idx) => {
                         const parts = [];
@@ -763,7 +642,7 @@
                 }
             },
             {
-                name: "zigzags",
+                name: "Zigzags",
                 create: (world, y, cx) => {
                     const stepStyle = {
                         isStatic: true,
@@ -786,7 +665,7 @@
                 }
             },
             {
-                name: "funnel",
+                name: "Funnel",
                 create: (world, y, cx) => {
                     const wallStyle = {
                         isStatic: true,
@@ -819,39 +698,6 @@
                             }
                         })
                     ]);
-                }
-            },
-            {
-                name: "plinko",
-                create: (world, y, cx) => {
-                    const bumperStyle = {
-                        isStatic: true,
-                        restitution: 1.1,
-                        render: {
-                            fillStyle: '#052e16',
-                            strokeStyle: '#64ff4e',
-                            lineWidth: 4
-                        }
-                    };
-                    const positions = [{
-                        x: -160,
-                        y: 150
-                    }, {
-                        x: 160,
-                        y: 150
-                    }, {
-                        x: 0,
-                        y: 400
-                    }, {
-                        x: -160,
-                        y: 650
-                    }, {
-                        x: 160,
-                        y: 650
-                    }];
-                    positions.forEach(pos => {
-                        Composite.add(world, Bodies.circle(cx + pos.x, y + pos.y, 55, bumperStyle));
-                    });
                 }
             },
             {
@@ -919,7 +765,39 @@
                             angle: rollsRight ? 0.15 : -0.15
                         }));
                     }
-                },
+                }
+            },
+            {
+                name: "Plinko",
+                create: (world, y, cx, engine) => {
+                    const pegRadius = 15;
+                    const rowSpacing = 100;
+                    const colSpacing = 100;
+                    const startY = -400 + 450;
+
+                    const pegOptions = {
+                        isStatic: true,
+                        restitution: 0.4,
+                        friction: 0,
+                        render: {
+                            fillStyle: '#052e16',
+                            strokeStyle: '#64ff4e',
+                            lineWidth: 4
+                        }
+                    };
+
+                    for (let row = 0; row <= 8; row++) {
+                        const currentY = y + startY + (row * rowSpacing);
+                        const isOddRow = row % 2 !== 0;
+                        const pegsInRow = isOddRow ? 8 : 9;
+
+                        for (let i = 0; i < pegsInRow; i++) {
+                            let xOffset = isOddRow ? (i * colSpacing) - 350 : (i * colSpacing) - 400;
+                            const peg = Bodies.circle(cx + xOffset, currentY, pegRadius, pegOptions);
+                            Composite.add(world, peg);
+                        }
+                    }
+                }
             }
         ];
 
@@ -989,8 +867,8 @@
                     ${isEnabled ? 'ENABLED' : 'DISABLED'}
                 </button>
                 <button class="mod-btn mod-edit" style="background:#3b82f6; color:white;" onclick="renameModule(${idx})">RENAME</button>
-                <button class="mod-btn mod-edit" onclick="editCustomModule(${idx})">EDIT CODE</button>
-                <button class="mod-btn mod-del" onclick="deleteCustomModule(${idx})">DEL</button>
+                <button class="mod-btn mod-edit" onclick="editCustomModule(${idx})">EDIT</button>
+                <button class="mod-btn mod-del" onclick="deleteCustomModule(${idx})">DELETE</button>
             </div>
         `;
                 grid.appendChild(card);
@@ -1308,7 +1186,7 @@
                 return Bodies.circle(startX, startY, marbleRadius, {
                     restitution: 0.4,
                     friction: 0,
-                    frictionAir: 0.005,
+                    frictionAir: 0,
                     label: n,
                     render: {
                         fillStyle: color,
