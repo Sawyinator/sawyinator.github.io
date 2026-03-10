@@ -217,6 +217,8 @@
             <label>Name</label>
             <input type="text" id="prop-name" oninput="updateSelected()">
 
+            <button onclick="duplicateSelected()" style="background: #052e16; margin-top: 10px;">Duplicate Object</button>
+
             <div class="section-header">TRANSFORM</div>
             <div class="coord-row">
                 <div><label>Rel X</label><input type="number" id="prop-x" oninput="updateSelected()"></div>
@@ -732,6 +734,23 @@
             }, 1500);
         }
         rebuildWorld();
+
+        function duplicateSelected() {
+            if (!selectedShape) return;
+
+            // Create a deep copy of the selected shape
+            const newShape = {
+                ...selectedShape,
+                id: Date.now(), // New unique ID
+                name: selectedShape.name + "_copy",
+            };
+
+            shapes.push(newShape);
+            rebuildWorld();
+
+            // Automatically select the new copy
+            selectShape(newShape.id);
+        }
     </script>
 </body>
 
