@@ -597,42 +597,42 @@
         });
 
         function generateCode() {
-            let code = `{\n    name: "${selectedShape ? selectedShape.name : 'Custom Module'}",\n    create: (world, y, cx, engine) => {\n`;
+            let code = `{\n    name: "Custom Module",\n    create: (world, y, cx, engine) => {\n`;
+
+            selectedShape = null;
+            document.getElementById('inspector').style.display = 'none';
+            rebuildWorld();
 
             shapes.forEach(s => {
+                const safeName = s.name.replace(/\s+/g, '_');
+
                 const relX = `cx + (${Math.round(s.x - CX)})`;
                 const relY = `y + (${Math.round(s.y - CY)} + 450)`;
                 const radAngle = (s.angle * (Math.PI / 180)).toFixed(3);
 
-                // Define a chamfer radius
                 const chamferValue = (s.type === 'rectangle') ? `, chamfer: { radius: 15 }` : '';
-
-                // 1. Update the style string to include the chamferValue
                 const style = `{ label: '${s.name}', isStatic: ${s.isStatic}${chamferValue}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
 
-                // 2. Create the Body
+                // safeName for the variable and engine events, s.name stays in the label
                 if (s.type === 'rectangle') {
-                    code += `        const ${s.name} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
+                    code += `        const ${safeName} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
                 } else if (s.type === 'circle') {
-                    code += `        const ${s.name} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
+                    code += `        const ${safeName} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
                 } else if (s.type === 'triangle') {
-                    code += `        const ${s.name} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
+                    code += `        const ${safeName} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
                 }
 
-                // 3. Explicit overrides
-                code += `        ${s.name}.restitution = ${s.bouncy};\n`;
-                code += `        ${s.name}.friction = 0;\n`;
-                code += `        ${s.name}.frictionStatic = 0;\n`;
+                code += `        ${safeName}.restitution = ${s.bouncy};\n`;
+                code += `        ${safeName}.friction = 0;\n`;
+                code += `        ${safeName}.frictionStatic = 0;\n`;
 
-                // 4. Add Behaviors
                 if (s.behavior === 'rotate') {
-                    code += `        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(${s.name}, ${s.name}.angle + ${s.speed}); });\n`;
+                    code += `        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(${safeName}, ${safeName}.angle + ${s.speed}); });\n`;
                 } else if (s.behavior === 'oscillate') {
-                    code += `        Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(${s.name}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} }); });\n`;
+                    code += `        Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(${safeName}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} }); });\n`;
                 }
 
-                // 5. Add to World
-                code += `        Composite.add(world, ${s.name});\n\n`;
+                code += `        Composite.add(world, ${safeName});\n\n`;
             });
 
             code += `    }\n}`;
