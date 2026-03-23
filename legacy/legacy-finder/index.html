@@ -249,10 +249,56 @@
         margin-bottom: 20px;
     }
 }
+    /* Main Page Floating Button */
+.legacy-top-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    
+    /* Layout */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between logo and text */
+    padding: 8px 16px 8px 8px; /* Less padding on left to frame the logo */
+    
+    /* Style */
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    
+    /* Text */
+    color: white;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.legacy-top-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(2px);
+}
+
+.legacy-btn-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
 </style>
 </head>
 <body>
-
+<body>
+    <a href="/legacy/legacy-finder/" class="legacy-top-btn">
+        <img src="/assets/logos/sawyinator-logo.png" alt="" class="legacy-btn-logo">
+        <span>Main Page</span>
+    </a>
+    
     <header>
         <h1>Sawyinator.uk | LEGACY FINDER</h1>
         <p>This is a subpage where you can view the first versions of all of my projects.</p>
@@ -261,18 +307,6 @@
 
     <nav>
         <ul>
-            <li>
-                <a href="/">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="/assets/logos/sawyinator-logo.png" alt="Sawyinator Logo" class="project-icon">
-                    <span class="project-title">Main Page (SAWYINATOR.UK)</span>
-                
-                    <div class="project-description" style="display:none;">
-                        A quick way to get back to the main page from the legacy finder.
-                    </div>
-                </a>
-            </li>
             <li>
                 <a href="/legacy/" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
@@ -330,6 +364,30 @@
                 
                     <div class="project-description" style="display:none;">
                         The first version of the module creator. This was introduced a fair way into the development of the marble decider, therefore it has the green colour scheme that the legacy version of the marble decider does not. The changes are visually minimal but most of it is to do with how the code module is generated, how exactly the canvas sizing works, and how the object properties are generated (this gave me so much damn trouble, you have no idea (if you check the commits for the creator youll find that me fixing the restitution was worthy of full caps, i was that happy to finally fix it)). 
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="/projects/sub-and-sup-to-html/legacy/" target="_blank" rel="noopener noreferrer">
+                 <button class="info-btn" onclick="openModal(event, this)">i</button>
+                    
+                    <img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22500%22 height=%22500%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%239333ea%22/><g transform=%22scale(2.5) translate(8, 8)%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M17 6.1H3%22/><path d=%22M21 12.1H3%22/><path d=%22M15.1 18H3%22/></g></svg>" alt="Sub and Sup to HTML Logo" class="project-icon">
+                    <span class="project-title">Sub and Sup to HTML</span>
+                
+                    <div class="project-description" style="display:none;">
+                        This and capitaliser were both ported over from another place i was using them, so these legacy versions are pretty finished as is. These changes are probably really minimal.
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="/projects/capitaliser/legacy/" target="_blank" rel="noopener noreferrer">
+                 <button class="info-btn" onclick="openModal(event, this)">i</button>
+                    
+                    <img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ea580c%22/><g transform=%22scale(2.5) translate(8, 8)%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m3 15 4-8 4 8%22/><path d=%22M4 13h6%22/><circle cx=%2218%22 cy=%2212%22 r=%223%22/><path d=%22M21 9v6%22/></g></svg>" alt="Capitaliser Logo" class="project-icon">
+                    <span class="project-title">Capitaliser</span>
+                
+                    <div class="project-description" style="display:none;">
+                        This and sub and sup to html were both ported over from another place i was using them, so these legacy versions are pretty finished as is. These changes are probably really minimal.
                     </div>
                 </a>
             </li>
