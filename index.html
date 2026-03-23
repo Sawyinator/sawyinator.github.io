@@ -250,10 +250,47 @@
         margin-bottom: 20px;
     }
 }
+    /* Legacy Finder Floating Button */
+.legacy-top-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.legacy-top-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(2px);
+}
+
+/* Adjust header margin so they don't overlap on small screens */
+@media (max-width: 600px) {
+    header {
+        margin-top: 80px;
+    }
+}
 </style>
 </head>
 <body>
-
+    <body>
+    <a href="/legacy/legacy-finder/" class="legacy-top-btn">
+        Legacy Finder
+    </a>
+        
     <header>
         <h1>Sawyinator.uk</h1>
         <p>A website for my projects and links</p>
@@ -282,18 +319,6 @@
                 
                     <div class="project-description" style="display:none;">
                         My GitHub Page. No idea what else to say. I have an exe download for A-INT on there though if you want it (that is only if i havent added a downloads section to this file where you can download my A-INT exe)
-                    </div>
-                </a>
-            </li>
-            <li>
-                <a href="/legacy/legacy-finder/">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="/assets/logos/sawyinator-old-logo.png" alt="Old Sawyinator Logo" class="project-icon">
-                    <span class="project-title">Legacy Finder</span>
-                
-                    <div class="project-description" style="display:none;">
-                        A way to easily navigate to the original versions of any of my projects. You can access these regularly by just adding 'legacy' to the end of the url, however this way I can make it actually known that they exist, and make navigation to them easier.
                     </div>
                 </a>
             </li>
