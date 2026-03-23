@@ -21,15 +21,14 @@
     <div class="max-w-3xl mx-auto">
         <header class="mb-8 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <a href="/" class="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200 rounded-lg transition-colors">
-                    <i data-lucide="home" class="w-5 h-5"></i>
+                <a href="/" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 rounded-lg transition-colors">
+                    ↩ Back to main website
                 </a>
                 <h1 class="text-2xl font-bold tracking-tight">Sub & Sup <span class="text-purple-600">to HTML</span></h1>
             </div>
         </header>
 
         <div class="grid gap-6">
-            <!-- Input Area -->
             <div class="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden focus-within:border-purple-500 transition-all">
                 <div class="flex items-center justify-between p-3 bg-zinc-50 border-b border-zinc-200">
                     <div class="flex items-center gap-4">
@@ -59,7 +58,6 @@
                     class="w-full h-80 p-4 bg-white text-sm outline-none transition-all resize-none font-mono border-none"></textarea>
             </div>
 
-            <!-- Output Area -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-zinc-200">
                 <div class="flex items-center justify-between mb-3">
                     <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest">HTML Output</label>
@@ -71,7 +69,6 @@
                 <div id="output-html" class="w-full min-h-[100px] p-4 bg-zinc-900 text-zinc-300 rounded-xl text-sm font-mono break-all whitespace-pre-wrap"></div>
             </div>
 
-            <!-- Preview Area -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-zinc-200">
                 <div class="flex items-center justify-between mb-3">
                     <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest">Rendered Preview</label>
@@ -128,20 +125,13 @@
             
             if (selectedText.length === 0) return;
 
-            // Save scroll position
             const scrollTop = input.scrollTop;
-
             const replacement = `<${tag}>${selectedText}</${tag}>`;
             
-            // Focus and select the range to ensure execCommand targets the correct area
             input.focus();
             input.setSelectionRange(start, end);
-            
-            // Use insertText to ensure it's added to the native undo stack
             document.execCommand('insertText', false, replacement);
             
-            // Restore scroll position after a tiny delay to override any browser auto-scrolling
-            // triggered by the focus or selection change
             setTimeout(() => {
                 input.scrollTop = scrollTop;
                 updateUndoRedoState();
@@ -205,8 +195,6 @@
             if (html) {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                
-                // Check if the HTML actually contains sub/sup tags or styles
                 const hasSubSup = doc.querySelector('sub, sup') || 
                                  Array.from(doc.querySelectorAll('*')).some(el => {
                                      const styleAttr = el.getAttribute('style') || '';
@@ -215,13 +203,7 @@
                                      return style.verticalAlign === 'sub' || 
                                             style.verticalAlign === 'super' ||
                                             lowerStyle.includes('vertical-align:sub') ||
-                                            lowerStyle.includes('vertical-align:super') ||
-                                            lowerStyle.includes('vertical-align: sub') ||
-                                            lowerStyle.includes('vertical-align: super') ||
-                                            lowerStyle.includes('mso-char-type:subscript') ||
-                                            lowerStyle.includes('mso-char-type:superscript') ||
-                                            lowerStyle.includes('baseline-shift:sub') ||
-                                            lowerStyle.includes('baseline-shift:super');
+                                            lowerStyle.includes('vertical-align:super');
                                  });
 
                 if (hasSubSup) {
@@ -233,62 +215,16 @@
                                 text += child.textContent;
                             } else if (child.nodeType === Node.ELEMENT_NODE) {
                                 const tagName = child.tagName.toLowerCase();
-                                const styleAttr = child.getAttribute('style') || '';
-                                const style = child.style || {};
-                                const lowerStyle = styleAttr.toLowerCase();
-                                
-                                // Detect "small" font size patterns often used to fake sub/sup
-                                const fontSize = lowerStyle.match(/font-size:\s*([^;]+)/)?.[1] || '';
-                                const isSmall = tagName === 'small' ||
-                                                fontSize.includes('smaller') || 
-                                                fontSize.includes('x-small') || 
-                                                fontSize.includes('xx-small') ||
-                                                (fontSize.includes('%') && parseFloat(fontSize) < 90) ||
-                                                (fontSize.includes('em') && parseFloat(fontSize) < 0.9) ||
-                                                (fontSize.includes('pt') && parseFloat(fontSize) < 9);
-
-                                const isSup = tagName === 'sup' || 
-                                              style.verticalAlign === 'super' || 
-                                              lowerStyle.includes('vertical-align:super') ||
-                                              lowerStyle.includes('vertical-align: super') ||
-                                              lowerStyle.includes('mso-char-type:superscript') ||
-                                              lowerStyle.includes('baseline-shift:super') ||
-                                              (isSmall && (lowerStyle.includes('vertical-align:top') || lowerStyle.includes('vertical-align: top') || lowerStyle.includes('vertical-align:text-top')));
-                                              
-                                const isSub = tagName === 'sub' || 
-                                              style.verticalAlign === 'sub' || 
-                                              lowerStyle.includes('vertical-align:sub') ||
-                                              lowerStyle.includes('vertical-align: sub') ||
-                                              lowerStyle.includes('mso-char-type:subscript') ||
-                                              lowerStyle.includes('baseline-shift:sub') ||
-                                              (isSmall && (lowerStyle.includes('vertical-align:bottom') || lowerStyle.includes('vertical-align: bottom') || lowerStyle.includes('vertical-align:text-bottom')));
-                                
-                                if (isSup) {
-                                    text += `<sup>${processNode(child)}</sup>`;
-                                } else if (isSub) {
-                                    text += `<sub>${processNode(child)}</sub>`;
-                                } else if (tagName === 'br') {
-                                    text += '\n';
-                                } else if (tagName === 'p' || tagName === 'div') {
-                                    const content = processNode(child);
-                                    if (content) text += content + '\n';
-                                } else {
-                                    text += processNode(child);
-                                }
+                                if (tagName === 'sup') text += `<sup>${processNode(child)}</sup>`;
+                                else if (tagName === 'sub') text += `<sub>${processNode(child)}</sub>`;
+                                else text += processNode(child);
                             }
                         });
                         return text;
                     }
-
                     const processedText = processNode(doc.body);
-                    if (processedText.trim()) {
-                        document.execCommand('insertText', false, processedText);
-                    } else {
-                        const plainText = e.clipboardData.getData('text/plain');
-                        document.execCommand('insertText', false, plainText);
-                    }
+                    document.execCommand('insertText', false, processedText);
                 }
-                // If no sub/sup found, let the default paste handle it (which will use text/plain)
             }
         });
 
@@ -299,13 +235,11 @@
             updateUndoRedoState();
         });
 
-        // Update undo/redo state on focus and selection change
         input.addEventListener('focus', updateUndoRedoState);
         input.addEventListener('mouseup', updateUndoRedoState);
         input.addEventListener('keyup', updateUndoRedoState);
 
         function updateUndoRedoState() {
-            // Small timeout to allow the browser to update its internal state
             setTimeout(() => {
                 undoBtn.disabled = !document.queryCommandEnabled('undo');
                 redoBtn.disabled = !document.queryCommandEnabled('redo');
