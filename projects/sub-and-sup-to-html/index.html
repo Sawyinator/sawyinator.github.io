@@ -17,13 +17,14 @@
         }
     </style>
 </head>
-<body class="bg-zinc-50 text-zinc-900 min-h-screen p-8">
+<body class="bg-zinc-50 text-zinc-900 min-h-screen p-8 pt-16">
+    <a href="/" class="fixed top-4 left-4 flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors z-50">
+        ↩ Back to main website
+    </a>
+
     <div class="max-w-3xl mx-auto">
         <header class="mb-8 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <a href="/" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 rounded-lg transition-colors">
-                    ↩ Back to main website
-                </a>
                 <h1 class="text-2xl font-bold tracking-tight">Sub & Sup <span class="text-purple-600">to HTML</span></h1>
             </div>
         </header>
@@ -215,13 +216,27 @@
                                 text += child.textContent;
                             } else if (child.nodeType === Node.ELEMENT_NODE) {
                                 const tagName = child.tagName.toLowerCase();
-                                if (tagName === 'sup') text += `<sup>${processNode(child)}</sup>`;
-                                else if (tagName === 'sub') text += `<sub>${processNode(child)}</sub>`;
-                                else text += processNode(child);
+                                const styleAttr = child.getAttribute('style') || '';
+                                const style = child.style || {};
+                                const lowerStyle = styleAttr.toLowerCase();
+                                
+                                const isSup = tagName === 'sup' || style.verticalAlign === 'super' || lowerStyle.includes('vertical-align:super');
+                                const isSub = tagName === 'sub' || style.verticalAlign === 'sub' || lowerStyle.includes('vertical-align:sub');
+                                
+                                if (isSup) {
+                                    text += `<sup>${processNode(child)}</sup>`;
+                                } else if (isSub) {
+                                    text += `<sub>${processNode(child)}</sub>`;
+                                } else if (tagName === 'br') {
+                                    text += '\n';
+                                } else {
+                                    text += processNode(child);
+                                }
                             }
                         });
                         return text;
                     }
+
                     const processedText = processNode(doc.body);
                     document.execCommand('insertText', false, processedText);
                 }
@@ -234,10 +249,6 @@
             preview.innerHTML = converted;
             updateUndoRedoState();
         });
-
-        input.addEventListener('focus', updateUndoRedoState);
-        input.addEventListener('mouseup', updateUndoRedoState);
-        input.addEventListener('keyup', updateUndoRedoState);
 
         function updateUndoRedoState() {
             setTimeout(() => {
