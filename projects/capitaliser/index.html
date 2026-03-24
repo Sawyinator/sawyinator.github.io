@@ -5,45 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A quick way to turn unicode or other format sub/superscripts into HTML.">
     
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                document.documentElement.classList.remove('dark');
-            } else {
-                document.documentElement.classList.add('dark');
-                if (!savedTheme) localStorage.setItem('theme', 'dark');
-            }
-        })();
-    </script>
+    <!-- Embed Behaviours -->
+    
+    <meta name="title" content="Capitaliser">
+    <meta name="description" content="A quick way to turn unicode or other format sub/superscripts into HTML.">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sawyinator.uk/projects/capitaliser/">
-    <meta property="og:title" content="Capitaliser - Text Case Converter">
+    <meta property="og:title" content="Sawyinator.uk">
     <meta property="og:description" content="A quick way to turn unicode or other format sub/superscripts into HTML.">
     <meta property="og:image" content="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ea580c%22/><g transform=%22scale(2.5) translate(8, 8)%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m3 15 4-8 4 8%22/><path d=%22M4 13h6%22/><circle cx=%2218%22 cy=%2212%22 r=%223%22/><path d=%22M21 9v6%22/></g></svg>">
     <meta name="theme-color" content="#ea580c">
 
+    <!-- Twitter Embed Behaviours -->
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://sawyinator.uk/projects/capitaliser/">
+    <meta property="twitter:title" content="Sawyinator.uk">
+    <meta property="twitter:description" content="A quick way to turn unicode or other format sub/superscripts into HTML.">
+    <meta property="twitter:image" content="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ea580c%22/><g transform=%22scale(2.5) translate(8, 8)%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m3 15 4-8 4 8%22/><path d=%22M4 13h6%22/><circle cx=%2218%22 cy=%2212%22 r=%223%22/><path d=%22M21 9v6%22/></g></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Capitaliser</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ea580c%22/><g transform=%22scale(2.5) translate(8, 8)%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m3 15 4-8 4 8%22/><path d=%22M4 13h6%22/><circle cx=%2218%22 cy=%2212%22 r=%223%22/><path d=%22M21 9v6%22/></g></svg>">
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .transition-theme { transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
     </style>
 </head>
-<body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 min-h-screen p-8 pt-16 transition-theme">
-    
-    <a href="/" class="fixed top-4 left-4 flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors z-50">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to main website
+<body class="bg-zinc-50 text-zinc-900 min-h-screen p-8 pt-16">
+    <a href="/" class="fixed top-4 left-4 flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200 rounded-lg transition-colors z-50">
+        ↩ Back to main website
     </a>
 
     <div class="max-w-3xl mx-auto">
@@ -51,35 +49,31 @@
             <div class="flex items-center gap-3">
                 <h1 class="text-2xl font-bold tracking-tight">Capital<span class="text-orange-600">iser</span></h1>
             </div>
-            <button id="theme-toggle" class="p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-orange-500 transition-all shadow-sm">
-                <i data-lucide="moon" class="dark:hidden block w-5 h-5"></i>
-                <i data-lucide="sun" class="hidden dark:block w-5 h-5"></i>
-            </button>
         </header>
 
         <div class="grid gap-6">
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 transition-theme">
-                <label class="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-3">Input Text</label>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-zinc-200">
+                <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Input Text</label>
                 <textarea id="input-text" placeholder="Type or paste your text here..." 
-                    class="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm outline-none focus:border-orange-500 dark:focus:border-orange-600 transition-all resize-none dark:text-zinc-200"></textarea>
+                    class="w-full h-40 p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-sm outline-none focus:border-orange-500 transition-all resize-none"></textarea>
             </div>
 
             <div class="flex flex-wrap gap-2 justify-center">
-                <button onclick="transform('title')" class="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-orange-500 dark:hover:border-orange-600 hover:text-orange-600 dark:text-zinc-300 rounded-xl text-sm font-semibold shadow-sm transition-all">Title Case</button>
-                <button onclick="transform('sentence')" class="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-orange-500 dark:hover:border-orange-600 hover:text-orange-600 dark:text-zinc-300 rounded-xl text-sm font-semibold shadow-sm transition-all">Sentence case</button>
-                <button onclick="transform('upper')" class="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-orange-500 dark:hover:border-orange-600 hover:text-orange-600 dark:text-zinc-300 rounded-xl text-sm font-semibold shadow-sm transition-all">UPPERCASE</button>
-                <button onclick="transform('lower')" class="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-orange-500 dark:hover:border-orange-600 hover:text-orange-600 dark:text-zinc-300 rounded-xl text-sm font-semibold shadow-sm transition-all">lowercase</button>
-                <button onclick="transform('first')" class="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-orange-500 dark:hover:border-orange-600 hover:text-orange-600 dark:text-zinc-300 rounded-xl text-sm font-semibold shadow-sm transition-all">First Letter</button>
-                <button onclick="transform('toggle')" class="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-orange-500 dark:hover:border-orange-600 hover:text-orange-600 dark:text-zinc-300 rounded-xl text-sm font-semibold shadow-sm transition-all">tOGGLE</button>
+                <button onclick="transform('title')" class="px-4 py-2 bg-white border border-zinc-200 hover:border-orange-500 hover:text-orange-600 rounded-xl text-sm font-semibold shadow-sm transition-all">Title Case</button>
+                <button onclick="transform('sentence')" class="px-4 py-2 bg-white border border-zinc-200 hover:border-orange-500 hover:text-orange-600 rounded-xl text-sm font-semibold shadow-sm transition-all">Sentence case</button>
+                <button onclick="transform('upper')" class="px-4 py-2 bg-white border border-zinc-200 hover:border-orange-500 hover:text-orange-600 rounded-xl text-sm font-semibold shadow-sm transition-all">UPPERCASE</button>
+                <button onclick="transform('lower')" class="px-4 py-2 bg-white border border-zinc-200 hover:border-orange-500 hover:text-orange-600 rounded-xl text-sm font-semibold shadow-sm transition-all">lowercase</button>
+                <button onclick="transform('first')" class="px-4 py-2 bg-white border border-zinc-200 hover:border-orange-500 hover:text-orange-600 rounded-xl text-sm font-semibold shadow-sm transition-all">First Letter</button>
+                <button onclick="transform('toggle')" class="px-4 py-2 bg-white border border-zinc-200 hover:border-orange-500 hover:text-orange-600 rounded-xl text-sm font-semibold shadow-sm transition-all">tOGGLE</button>
             </div>
 
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 transition-theme">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-zinc-200">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-3">
-                        <label class="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Output Text</label>
-                        <div id="change-warning" class="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 dark:text-zinc-500 hidden">
+                        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-widest">Output Text</label>
+                        <div id="change-warning" class="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 hidden">
                             <i data-lucide="info" class="w-3.5 h-3.5"></i>
-                            <span>Input changed. Re-run to update.</span>
+                            <span>The input has changed. Please choose a capitalisation method again to update the output.</span>
                         </div>
                     </div>
                     <button id="copy-btn" onclick="copyOutput()" class="flex items-center gap-2 text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors">
@@ -88,28 +82,30 @@
                     </button>
                 </div>
                 <textarea id="output-text" readonly placeholder="Transformed text will appear here..." 
-                    class="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm outline-none resize-none dark:text-zinc-200"></textarea>
+                    class="w-full h-40 p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-sm outline-none resize-none"></textarea>
             </div>
         </div>
     </div>
-
     <script>
         const input = document.getElementById('input-text');
         const output = document.getElementById('output-text');
         const copyBtn = document.getElementById('copy-btn');
         const warning = document.getElementById('change-warning');
-        const themeToggle = document.getElementById('theme-toggle');
 
-        // Logic for Case Transformations
         function transform(type) {
             const text = input.value;
             if (!text) return;
+
             warning.classList.add('hidden');
             let result = '';
 
             switch (type) {
-                case 'upper': result = text.toUpperCase(); break;
-                case 'lower': result = text.toLowerCase(); break;
+                case 'upper':
+                    result = text.toUpperCase();
+                    break;
+                case 'lower':
+                    result = text.toLowerCase();
+                    break;
                 case 'title':
                     const minorWords = ['a', 'an', 'the', 'and', 'but', 'for', 'or', 'nor', 'at', 'by', 'from', 'in', 'into', 'of', 'off', 'on', 'onto', 'out', 'over', 'to', 'up', 'with', 'as'];
                     const parts = text.toLowerCase().split(/(\s+)/);
@@ -117,10 +113,14 @@
                     let wordIndex = 0;
                     result = parts.map((part, i) => {
                         if (i % 2 !== 0 || part.length === 0) return part;
+                        
                         const isFirst = wordIndex === 0;
                         const isLast = wordIndex === wordsOnly.length - 1;
                         wordIndex++;
-                        if (!isFirst && !isLast && minorWords.includes(part)) return part;
+
+                        if (!isFirst && !isLast && minorWords.includes(part)) {
+                            return part;
+                        }
                         return part.charAt(0).toUpperCase() + part.slice(1);
                     }).join('');
                     break;
@@ -128,23 +128,31 @@
                     result = text.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w|\n\s*\w)/g, c => c.toUpperCase());
                     break;
                 case 'first':
-                    result = text.toLowerCase().split(/(\s+)/).map(p => p.length > 0 ? p[0].toUpperCase() + p.slice(1) : p).join('');
+                    result = text.toLowerCase().split(/(\s+)/).map(part => {
+                        if (part.length === 0 || /^\s+$/.test(part)) return part;
+                        return part.charAt(0).toUpperCase() + part.slice(1);
+                    }).join('');
                     break;
                 case 'toggle':
-                    result = text.split('').map(c => c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()).join('');
+                    result = text.split('').map(char => {
+                        if (char === char.toUpperCase()) return char.toLowerCase();
+                        return char.toUpperCase();
+                    }).join('');
                     break;
             }
+
             output.value = result;
         }
 
-        // Warning on Input Change
         input.addEventListener('input', () => {
-            if (output.value) warning.classList.remove('hidden');
+            if (output.value) {
+                warning.classList.remove('hidden');
+            }
         });
 
-        // Copy Feature
         async function copyOutput() {
             if (!output.value) return;
+            
             try {
                 await navigator.clipboard.writeText(output.value);
                 const originalText = copyBtn.innerHTML;
@@ -154,14 +162,10 @@
                     copyBtn.innerHTML = originalText;
                     lucide.createIcons();
                 }, 2000);
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+            }
         }
-
-        // Theme Toggle Persistence
-        themeToggle.addEventListener('click', () => {
-            const isDark = document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        });
 
         lucide.createIcons();
     </script>
