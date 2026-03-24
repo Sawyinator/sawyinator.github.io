@@ -111,6 +111,7 @@
 
         // Added Toggle Logic
         function toggleTheme() {
+            console.log("theme toggled");
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             lucide.createIcons(); // Redraw icons
