@@ -33,12 +33,17 @@
         }
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
             transition: background-color 0.3s, color 0.3s;
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.3 !important;
         }
     </style>
 </head>
@@ -63,9 +68,28 @@
         </header>
 
         <div class="grid gap-6">
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
-                <label class="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-3">Input Text</label>
-                <textarea id="input-text" placeholder="Type or paste your text here..." class="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm outline-none focus:border-orange-500 transition-all resize-none dark:text-zinc-200"></textarea>
+            <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden focus-within:border-orange-500 transition-all">
+                <div class="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800">
+                    <div class="flex items-center gap-4">
+                        <label class="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Input Text</label>
+                        <div class="w-px h-4 bg-zinc-300 dark:bg-zinc-700"></div>
+                        <div class="flex items-center gap-1">
+                            <button id="clear-btn-input" class="px-3 py-1.5 text-zinc-600 dark:text-zinc-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded-lg text-xs font-bold transition-all flex items-center gap-2" title="Clear Text">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button id="undo-btn" class="p-2 text-zinc-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all" title="Undo (Ctrl+Z)">
+                            <i data-lucide="undo-2" class="w-4 h-4"></i>
+                        </button>
+                        <button id="redo-btn" class="p-2 text-zinc-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all" title="Redo (Ctrl+Y)">
+                            <i data-lucide="redo-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <textarea id="input-text" placeholder="Type or paste your text here..." class="w-full h-80 p-4 bg-white dark:bg-zinc-900 text-sm outline-none transition-all resize-y font-mono border-none text-zinc-900 dark:text-zinc-100"></textarea>
             </div>
 
             <div class="flex flex-wrap gap-2 justify-center">
@@ -91,7 +115,7 @@
                         Copy Text
                     </button>
                 </div>
-                <textarea id="output-text" readonly placeholder="Transformed text will appear here..." class="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm outline-none resize-none dark:text-zinc-200"></textarea>
+                <textarea id="output-text" readonly placeholder="Transformed text will appear here..." class="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm outline-none resize-y dark:text-zinc-200"></textarea>
             </div>
         </div>
     </div>
@@ -103,6 +127,35 @@
         const warning = document.getElementById('change-warning');
         const themeToggle = document.getElementById('theme-toggle');
         const themeIcon = document.getElementById('theme-icon');
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        const clearBtnInput = document.getElementById('clear-btn-input');
+
+        const INPUT_STORAGE_KEY = 'capitaliser_input_height';
+        const OUTPUT_STORAGE_KEY = 'capitaliser_output_height';
+
+        // Load saved heights
+        const savedInputHeight = localStorage.getItem(INPUT_STORAGE_KEY);
+        if (savedInputHeight) {
+            input.style.height = savedInputHeight + 'px';
+        }
+        const savedOutputHeight = localStorage.getItem(OUTPUT_STORAGE_KEY);
+        if (savedOutputHeight) {
+            output.style.height = savedOutputHeight + 'px';
+        }
+
+        // Save heights on resize
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.target === input) {
+                    localStorage.setItem(INPUT_STORAGE_KEY, input.offsetHeight);
+                } else if (entry.target === output) {
+                    localStorage.setItem(OUTPUT_STORAGE_KEY, output.offsetHeight);
+                }
+            }
+        });
+        resizeObserver.observe(input);
+        resizeObserver.observe(output);
 
         // Theme Handling logic
         function updateThemeIcon() {
@@ -176,7 +229,39 @@
             if (output.value) {
                 warning.classList.remove('hidden');
             }
+            updateUndoRedoState();
         });
+
+        undoBtn.addEventListener('click', () => {
+            input.focus();
+            document.execCommand('undo');
+            updateUndoRedoState();
+        });
+
+        redoBtn.addEventListener('click', () => {
+            input.focus();
+            document.execCommand('redo');
+            updateUndoRedoState();
+        });
+
+        clearBtnInput.addEventListener('click', () => {
+            input.value = '';
+            output.value = '';
+            warning.classList.add('hidden');
+            input.focus();
+            updateUndoRedoState();
+        });
+
+        function updateUndoRedoState() {
+            setTimeout(() => {
+                undoBtn.disabled = !document.queryCommandEnabled('undo');
+                redoBtn.disabled = !document.queryCommandEnabled('redo');
+            }, 0);
+        }
+
+        input.addEventListener('focus', updateUndoRedoState);
+        input.addEventListener('mouseup', updateUndoRedoState);
+        input.addEventListener('keyup', updateUndoRedoState);
 
         async function copyOutput() {
             if (!output.value) return;
@@ -196,6 +281,7 @@
         }
 
         lucide.createIcons();
+        updateUndoRedoState();
     </script>
 </body>
 
