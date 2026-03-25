@@ -91,7 +91,7 @@
                     </div>
                 </div>
                 <textarea id="input-text" placeholder="Type text here, highlight parts, and use buttons, or paste unicode (₀₁₂ / ⁰¹²)..." 
-                    class="w-full h-80 p-4 bg-white dark:bg-zinc-900 text-sm outline-none transition-all resize-none font-mono border-none text-zinc-900 dark:text-zinc-100"></textarea>
+                    class="w-full h-80 p-4 bg-white dark:bg-zinc-900 text-sm outline-none transition-all resize-y font-mono border-none text-zinc-900 dark:text-zinc-100"></textarea>
             </div>
 
             <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
@@ -138,6 +138,24 @@
         const undoBtn = document.getElementById('undo-btn');
         const redoBtn = document.getElementById('redo-btn');
         const linebreaksToggle = document.getElementById('linebreaks-toggle');
+
+        const STORAGE_KEY = 'subsup_input_height';
+
+        // Load saved height
+        const savedHeight = localStorage.getItem(STORAGE_KEY);
+        if (savedHeight) {
+            input.style.height = savedHeight + 'px';
+        }
+
+        // Save height on resize
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.target === input) {
+                    localStorage.setItem(STORAGE_KEY, input.offsetHeight);
+                }
+            }
+        });
+        resizeObserver.observe(input);
 
         linebreaksToggle.addEventListener('change', () => {
             if (linebreaksToggle.checked) {
