@@ -94,7 +94,7 @@
         padding: 40px;
         border: 1px solid var(--acc);
         border-radius: 20px;
-        width: 400px;
+        width: 500px;
         max-width: 90%;
         text-align: center;
         box-sizing: border-box;
@@ -1054,17 +1054,17 @@
 
         // Updated saveModule to automatically extract the name if you paste the whole object
         function saveModule() {
-            let name = "Custom Module";
             const code = document.getElementById('moduleCodeInput').value.trim();
+            let name = "";
 
             // Check if the user pasted a full object and try to extract the name automatically
-            if (!name && code.includes('name:')) {
-                const match = code.match(/name:\s*["'`](.*?)["'`]/);
-                if (match) name = match[1];
-            }
+            const match = code.match(/name:\s*["'`](.*?)["'`]/);
+            if (match) name = match[1];
 
-            if (!name || !code) {
-                alert("Please enter a name (or ensure the code contains a 'name' property)!");
+            if (!name) name = "Custom Module";
+
+            if (!code) {
+                alert("Please enter some code!");
                 return;
             }
 
@@ -1453,7 +1453,12 @@
 
         // Replaces the name in the code string with a new one
         function updateNameInCode(code, newName) {
-            return code.replace(/(name:\s*["'`](.*?)(["'`],?))/, `name: "${newName}$3`);
+            // More robust regex to match name property regardless of quotes or spacing
+            const nameRegex = /(name:\s*)(["'`](.*?)(["'`]))/;
+            if (nameRegex.test(code)) {
+                return code.replace(nameRegex, `$1"${newName}"`);
+            }
+            return code;
         }
 
         function renameModule(idx) {
