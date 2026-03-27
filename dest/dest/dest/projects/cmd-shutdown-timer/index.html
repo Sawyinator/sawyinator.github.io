@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" type="image/png" href="/assets/favicons/cmd-shutdown-timer-favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A command generator for cmd that will let you set a sleep timer for your computer.">
+    <title>cmd Shutdown Timer</title>
+
+    <meta name="title" content="cmd Shutdown Timer">
+    <meta name="description" content="A command generator for cmd that will let you set a sleep timer for your computer.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sawyinator.uk/projects/cmd-shutdown-timer">
+    <meta property="og:title" content="cmd Shutdown Timer">
+    <meta property="og:description" content="A command generator for cmd that will let you set a sleep timer for your computer.">
+    <meta property="og:image" content="https://sawyinator.uk/assets/logos/cmd-shutdown-timer-logo.png">
+    <meta name="theme-color" content="#FFFFFF">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://sawyinator.uk/projects/cmd-shutdown-timer">
+    <meta property="twitter:title" content="cmd Shutdown Timer">
+    <meta property="twitter:description" content="A command generator for cmd that will let you set a sleep timer for your computer.">
+    <meta property="twitter:image" content="https://sawyinator.uk/assets/logos/cmd-shutdown-timer-logo.png">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Container */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+
+        h2 {
+            font-weight: 300;
+            font-family: 'Consolas', monospace;
+            letter-spacing: -0.5px;
+            margin-bottom: 30px;
+        }
+
+        #backButton {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        #backButton:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        /* Input Styling */
+        input[type="number"] {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            /* Classic CMD Green */
+            font-family: 'Consolas', monospace;
+            padding: 12px;
+            width: 100px;
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 8px 0 20px 0;
+            outline: none;
+            transition: border 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Primary Button */
+        button:not(#backButton) {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        button:not(#backButton):hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        button:not(#backButton):active {
+            transform: translateY(0);
+        }
+
+        /* CMD Display Area */
+        #cmd {
+            display: block;
+            margin-top: 20px;
+            font-family: 'Consolas', monospace;
+            background: #000;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #fff;
+            border: 1px solid #333;
+            word-break: break-all;
+        }
+
+        .label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/">
+        <button id="backButton">↩ Back to main website</button>
+    </a>
+
+    <div class="glass-card">
+        <p></p>
+        <h2>Please enter a time.</h2>
+
+        <div class="label">Hours</div>
+        <input type="number" id="hrs" placeholder="0">
+
+        <div class="label">Minutes</div>
+        <input type="number" id="min" placeholder="0">
+
+        <div class="label">Seconds</div>
+        <input type="number" id="sec" placeholder="0">
+
+        <br><br>
+        <button onclick="copyToClipboard()">Copy CMD Command</button>
+
+        <span id="cmd">shutdown -s</span>
+    </div>
+
+    <script>
+        const hrs = document.getElementById('hrs')
+        const min = document.getElementById('min')
+        const sec = document.getElementById('sec')
+        hrs.addEventListener('input', calculate)
+        min.addEventListener('input', calculate)
+        sec.addEventListener('input', calculate)
+
+        function calculate() {
+            const hrsnum = Number(hrs.value)
+            const minnum = Number(min.value)
+            const secnum = Number(sec.value)
+            const sum = (hrsnum * 3600) + (minnum * 60) + secnum
+            if (sum > 0) {
+                document.getElementById('cmd').innerText = "shutdown -s -t " + sum;
+            } else {
+                document.getElementById('cmd').innerText = "shutdown -s";
+            }
+        }
+
+        function copyToClipboard() {
+            const copiedText = document.getElementById('cmd').innerText;
+            navigator.clipboard.writeText(copiedText);
+
+            alert("Copied " + copiedText + " to clipboard");
+        }
+    </script>
+</body>
+
+</html>
