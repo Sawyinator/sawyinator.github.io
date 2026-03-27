@@ -28,7 +28,6 @@
         if (localStorage.getItem('theme') === 'light') {
             document.documentElement.classList.remove('dark');
         } else {
-            // Default to dark if 'light' is not explicitly set
             document.documentElement.classList.add('dark');
         }
     </script>
@@ -50,7 +49,8 @@
 
 <body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 min-h-screen p-8 pt-16">
     <a href="/" class="fixed top-4 left-4 flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors z-50">
-        ↩ Back to main website
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Back to main website
     </a>
 
     <div class="max-w-3xl mx-auto">
@@ -59,10 +59,9 @@
                 <h1 class="text-2xl font-bold tracking-tight">Capital<span class="text-orange-600">iser</span></h1>
             </div>
 
-            <button id="theme-toggle" class="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-orange-500 transition-all">
-                <i data-lucide="sun" class="theme-icon hidden dark:block w-5 h-5 text-zinc-600 dark:text-orange-500"></i>
-
-                <i data-lucide="moon" class="theme-icon block dark:hidden w-5 h-5 text-zinc-600 dark:text-orange-500"></i>
+            <button id="theme-toggle" class="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-orange-500 transition-all group">
+                <i data-lucide="sun" class="hidden dark:block w-5 h-5 text-zinc-400 dark:text-orange-500 group-hover:text-orange-600 transition-colors"></i>
+                <i data-lucide="moon" class="block dark:hidden w-5 h-5 text-zinc-500 group-hover:text-orange-600 transition-colors"></i>
             </button>
 
         </header>
@@ -113,18 +112,13 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button id="reset-size-btn-output" class="px-3 py-1.5 text-zinc-600 dark:text-zinc-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded-lg text-xs font-bold transition-all flex items-center gap-2" title="Reset Textbox Size">
-                            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
-                            Reset Size
-                        </button>
-                        <div class="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-1"></div>
                         <button id="copy-btn" onclick="copyOutput()" class="flex items-center gap-2 text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors">
                             <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                             Copy Text
                         </button>
                     </div>
                 </div>
-                <textarea id="output-text" readonly placeholder="Transformed text will appear here..." class="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm outline-none resize-y dark:text-zinc-200"></textarea>
+                <textarea id="output-text" readonly placeholder="Transformed text will appear here..." class="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm outline-none resize-none overflow-hidden dark:text-zinc-200"></textarea>
             </div>
         </div>
     </div>
@@ -140,19 +134,13 @@
         const redoBtn = document.getElementById('redo-btn');
         const clearBtnInput = document.getElementById('clear-btn-input');
         const resetSizeBtnInput = document.getElementById('reset-size-btn-input');
-        const resetSizeBtnOutput = document.getElementById('reset-size-btn-output');
-
+        
         const INPUT_STORAGE_KEY = 'capitaliser_input_height';
-        const OUTPUT_STORAGE_KEY = 'capitaliser_output_height';
 
         // Load saved heights
         const savedInputHeight = localStorage.getItem(INPUT_STORAGE_KEY);
         if (savedInputHeight) {
             input.style.height = savedInputHeight + 'px';
-        }
-        const savedOutputHeight = localStorage.getItem(OUTPUT_STORAGE_KEY);
-        if (savedOutputHeight) {
-            output.style.height = savedOutputHeight + 'px';
         }
 
         // Save heights on resize
@@ -160,39 +148,26 @@
             for (let entry of entries) {
                 if (entry.target === input) {
                     localStorage.setItem(INPUT_STORAGE_KEY, input.offsetHeight);
-                } else if (entry.target === output) {
-                    localStorage.setItem(OUTPUT_STORAGE_KEY, output.offsetHeight);
                 }
             }
         });
         resizeObserver.observe(input);
-        resizeObserver.observe(output);
 
         resetSizeBtnInput.addEventListener('click', () => {
             input.style.height = '';
             localStorage.removeItem(INPUT_STORAGE_KEY);
         });
 
-        resetSizeBtnOutput.addEventListener('click', () => {
-            output.style.height = '';
-            localStorage.removeItem(OUTPUT_STORAGE_KEY);
-        });
-
-        // Theme Handling logic
-        function updateThemeIcon() {
-            // We just need to trigger Lucide to ensure the icons are rendered
-            lucide.createIcons();
+        function adjustOutputHeight() {
+            output.style.height = 'auto';
+            output.style.height = output.scrollHeight + 'px';
         }
 
+        // Theme Handling logic
         themeToggle.addEventListener('click', () => {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            // No need to manually change attributes anymore, CSS handles it!
-            updateThemeIcon();
         });
-
-        // Initialize on load
-        updateThemeIcon();
 
         function transform(type) {
             const text = input.value;
@@ -244,6 +219,7 @@
             }
 
             output.value = result;
+            adjustOutputHeight();
         }
 
         input.addEventListener('input', () => {
@@ -268,6 +244,7 @@
         clearBtnInput.addEventListener('click', () => {
             input.value = '';
             output.value = '';
+            adjustOutputHeight();
             warning.classList.add('hidden');
             input.focus();
             updateUndoRedoState();
