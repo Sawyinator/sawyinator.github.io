@@ -245,7 +245,7 @@
         padding: 15px;
         border: 1px solid var(--acc);
         border-radius: 12px;
-        width: 280px;
+        width: 320px;
         max-width: calc(100% - 40px);
         max-height: 40vh;
         overflow-y: auto;
@@ -255,11 +255,16 @@
 
     .leader-row {
         display: grid;
-        grid-template-columns: 1fr 80px;
+        grid-template-columns: 1fr 110px;
         gap: 10px;
         margin-bottom: 8px;
         font-size: 0.85rem;
         font-weight: bold;
+    }
+
+    .leader-row span:last-child {
+        text-align: right;
+        white-space: nowrap;
     }
 
     .finished-row {
@@ -276,10 +281,11 @@
     }
 
     #results-modal,
-    #confirm-modal {
+    #clear-storage-modal,
+    #remove-victor-modal {
         position: fixed;
         inset: 0;
-        z-index: 600;
+        z-index: 1500;
         background: rgba(1, 10, 1, 0.9);
         display: none;
         align-items: center;
@@ -400,6 +406,54 @@
         font-size: 0.85rem;
         color: #dcfce7;
         opacity: 0.8;
+    }
+
+    /* Toggle Switch Styling */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 34px;
+        height: 20px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #333;
+        transition: .4s;
+        border-radius: 20px;
+        border: 1px solid var(--acc);
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 2px;
+        bottom: 2px;
+        background-color: var(--acc);
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--acc);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(14px);
+        background-color: #052e16;
     }
 
     .remove-victor-btn {
@@ -598,12 +652,7 @@
 
     .history-winner span,
     .history-runners-up span {
-        cursor: help;
-        border-bottom: 1px dotted rgba(255, 255, 255, 0.2);
-    }
-
-    .history-winner span {
-        border-bottom-color: rgba(255, 215, 0, 0.2);
+        /* Times hidden by default, toggled via JS */
     }
 </style>
 </head>
@@ -630,7 +679,7 @@
                     <span style="letter-spacing: 2px;">•••</span>
                 </button>
                 <div id="bottomDropdown" class="dropdown-content" style="bottom: 100%; top: auto; right: 0; margin-bottom: 10px;">
-                    <button class="dropdown-item" style="color: var(--danger);" onclick="confirmClearStorage()">CLEAR ALL BROWSER LOCALSTORAGE</button>
+                    <button class="dropdown-item" style="color: var(--danger);" onclick="confirmClearStorage()">CLEAR LOCAL STORAGE</button>
                 </div>
             </div>
         </div>
@@ -662,13 +711,13 @@
         <div class="module-grid" id="module-grid"></div>
     </div>
 
-    <div id="confirm-modal" style="display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(1, 10, 1, 0.9); align-items: center; justify-content: center; padding: 20px;">
+    <div id="clear-storage-modal" style="display: none; position: fixed; inset: 0; z-index: 1500; background: rgba(1, 10, 1, 0.9); align-items: center; justify-content: center; padding: 20px;">
         <div class="editor-box" style="max-width: 400px; text-align: center;">
             <h2 style="color: var(--danger); margin-top: 0;">CLEAR STORAGE?</h2>
             <p style="color: white; margin-bottom: 25px;">This will permanently delete all preferences and data unique to you. This includes, but is not limited to: race history, custom modules, enabled and disabled module choices.<br><br>Are you sure you want to proceed?</p>
             <div style="display: flex; gap: 10px;">
                 <button class="ui-btn reset-btn" style="flex: 1;" onclick="clearStorage()">YES, CLEAR ALL</button>
-                <button class="ui-btn toggle-btn" style="flex: 1;" onclick="document.getElementById('confirm-modal').style.display='none'">CANCEL</button>
+                <button class="ui-btn toggle-btn" style="flex: 1;" onclick="document.getElementById('clear-storage-modal').style.display='none'">CANCEL</button>
             </div>
         </div>
     </div>
@@ -695,13 +744,22 @@
 
     <div id="history-modal">
         <div class="history-box">
-            <h2 style="color:var(--acc); text-align:center; margin-top:0;">RACE HISTORY</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color:var(--acc); margin: 0;">RACE HISTORY</h2>
+                <label style="color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 10px; cursor: pointer; opacity: 0.8;">
+                    <span>Show Times</span>
+                    <div class="switch">
+                        <input type="checkbox" id="showTimesToggle" onchange="toggleHistoryTimes(this.checked)">
+                        <span class="slider"></span>
+                    </div>
+                </label>
+            </div>
             <div id="history-list"></div>
             <button class="start-btn" style="width:100%; margin-top:20px;" onclick="closeHistory()">CLOSE</button>
         </div>
     </div>
 
-    <div id="confirm-modal">
+    <div id="remove-victor-modal">
         <div class="confirm-box">
             <h2 style="color:var(--danger); margin-top:0;">REMOVE VICTOR?</h2>
             <p>This will remove <span id="victorNameDisplay" style="font-weight: 900;"></span> and restart the race immediately.</p>
@@ -716,7 +774,7 @@
         <div id="countdown">3</div>
     </div>
     <div id="leaderboard">
-        <div class="leader-row header-row"><span>Racer</span></div>
+        <div class="leader-row header-row"><span>Racer</span><span style="text-align:right">Gap</span></div>
         <div id="leader-list"></div>
         <div id="recent-victors-container" style="display: none; margin-top: 20px; border-top: 1px solid var(--acc); padding-top: 10px;">
             <div class="leader-row header-row"><span>Recent Victors</span><span style="text-align:right">Time</span></div>
@@ -750,7 +808,8 @@
         let camY = 0,
             autoResultsShown = false,
             startTime = null,
-            winnerName = null;
+            winnerName = null,
+            currentRaceId = null;
 
         const createGuides = (world, y, cx) => {
             const wallStyle = {
@@ -1129,7 +1188,7 @@
         }
 
         function confirmClearStorage() {
-            document.getElementById('confirm-modal').style.display = 'flex';
+            document.getElementById('clear-storage-modal').style.display = 'flex';
         }
 
         function clearStorage() {
@@ -1378,17 +1437,20 @@
                 }
             };
 
-            document.getElementById('reloadBtn').onclick = () => location.reload();
+            document.getElementById('reloadBtn').onclick = () => {
+                saveRaceSnapshot();
+                location.reload();
+            };
             document.getElementById('toggleBoard').onclick = toggleLeaderboard;
             document.getElementById('closeResults').onclick = () => document.getElementById('results-modal').style.display = 'none';
             document.getElementById('resBtn').onclick = showFullResults;
 
             document.getElementById('removeVictorBtn').onclick = () => {
                 document.getElementById('victorNameDisplay').innerText = winnerName;
-                document.getElementById('confirm-modal').style.display = 'flex';
+                document.getElementById('remove-victor-modal').style.display = 'flex';
             };
 
-            document.getElementById('cancelRemove').onclick = () => document.getElementById('confirm-modal').style.display = 'none';
+            document.getElementById('cancelRemove').onclick = () => document.getElementById('remove-victor-modal').style.display = 'none';
 
             document.getElementById('confirmRemove').onclick = () => {
                 let currentNames = nameBox.value.split('\n').map(n => n.trim()).filter(n => n !== "" && n !== winnerName);
@@ -1398,7 +1460,7 @@
                 }
                 nameBox.value = currentNames.join('\n');
                 localStorage.setItem('marbleRacerNames', nameBox.value);
-                document.getElementById('confirm-modal').style.display = 'none';
+                document.getElementById('remove-victor-modal').style.display = 'none';
                 cleanupWorld();
                 initiateRace(currentNames);
             };
@@ -1434,6 +1496,9 @@
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('leaderboard').style.display = 'block';
             document.getElementById('controls').style.display = 'flex';
+            
+            currentRaceId = Date.now().toString();
+            
             setupRace(names);
         }
 
@@ -1571,9 +1636,15 @@
                 const active = marbles.filter(m => !m.isFinished).sort((a, b) => b.position.y - a.position.y);
                 let liveHtml = '';
                 active.slice(0, 10).forEach((m, i) => {
-                    let gapDisplay = '-';
-                    const marbleBehind = active[i + 1];
-                    if (marbleBehind) gapDisplay = `+${((m.position.y - marbleBehind.position.y) / 50).toFixed(1)}m`;
+                    let gapDisplay = '';
+                    if (i === 0) {
+                        const distToFinish = Math.max(0, (finishLineY - m.position.y) / 50);
+                        gapDisplay = `${distToFinish.toFixed(1)}m to go`;
+                    } else {
+                        const marbleInFront = active[i - 1];
+                        const gap = (marbleInFront.position.y - m.position.y) / 50;
+                        gapDisplay = `+${gap.toFixed(1)}m`;
+                    }
                     liveHtml += `<div class="leader-row" style="color:${m.render.textColor}"><span>${finishedMarbles.length + i + 1}. ${m.label}</span><span style="text-align:right">${gapDisplay}</span></div>`;
                 });
                 document.getElementById('leader-list').innerHTML = liveHtml;
@@ -1602,6 +1673,7 @@
                         marble.isFinished = true;
                         marble.finishTime = ((performance.now() - startTime) / 1000).toFixed(2);
                         finishedMarbles.push(marble);
+                        saveRaceSnapshot();
                         document.getElementById('resBtn').style.display = 'block';
                         document.getElementById('removeVictorBtn').style.display = 'block';
                         if (finishedMarbles.length === 1) {
@@ -1693,22 +1765,36 @@
         <div class="results-item" style="color:${m.render.textColor}"><span>#${i+1} ${m.label}</span><span>${m.isFinished ? m.finishTime + 's' : 'DNF'}</span></div>
     `).join('');
             document.getElementById('results-modal').style.display = 'flex';
-
-            // Save to history
-            saveRaceToHistory(allRanked);
         }
 
-        function saveRaceToHistory(allRanked) {
+        function saveRaceSnapshot() {
+            if (finishedMarbles.length === 0) return;
+
             const history = JSON.parse(localStorage.getItem('marbleRaceHistory') || '[]');
+            const active = marbles.filter(m => !m.isFinished).sort((a, b) => b.position.y - a.position.y);
+            const allRanked = [...finishedMarbles, ...active];
+            
             const newEntry = {
+                id: currentRaceId,
                 date: new Date().toLocaleString(),
-                participants: allRanked.length,
+                participants: marbles.length,
                 winner: allRanked[0] ? { label: allRanked[0].label, color: allRanked[0].render.textColor, time: allRanked[0].finishTime } : null,
-                runnersUp: allRanked.slice(1, 5).map(m => ({ label: m.label, color: m.render.textColor, time: m.isFinished ? m.finishTime : 'DNF' }))
+                runnersUp: allRanked.slice(1, 5).map(m => ({ label: m.label, color: m.render.textColor, time: m.isFinished ? m.finishTime : 'DNF' })),
+                allMarbles: allRanked.map(m => ({
+                    label: m.label,
+                    color: m.render.textColor,
+                    time: m.isFinished ? m.finishTime : 'DNF',
+                    isFinished: m.isFinished
+                }))
             };
             
-            history.unshift(newEntry);
-            if (history.length > 25) history.pop();
+            const existingIndex = history.findIndex(entry => entry.id === currentRaceId);
+            if (existingIndex !== -1) {
+                history[existingIndex] = newEntry;
+            } else {
+                history.unshift(newEntry);
+                if (history.length > 25) history.pop();
+            }
             
             localStorage.setItem('marbleRaceHistory', JSON.stringify(history));
         }
@@ -1716,24 +1802,31 @@
         function openHistory() {
             const history = JSON.parse(localStorage.getItem('marbleRaceHistory') || '[]');
             const list = document.getElementById('history-list');
+            const showTimes = localStorage.getItem('showHistoryTimes') === 'true';
+            
+            const toggle = document.getElementById('showTimesToggle');
+            if (toggle) toggle.checked = showTimes;
             
             if (history.length === 0) {
                 list.innerHTML = '<p style="text-align:center; opacity:0.5;">No races recorded yet.</p>';
             } else {
                 list.innerHTML = history.map(entry => `
-                    <div class="history-item">
-                        <div class="history-header">
+                    <div class="history-item" style="position: relative;">
+                        <button class="ui-btn" style="position: absolute; right: 10px; top: 10px; font-size: 0.65rem; padding: 5px 10px; background: var(--gold); color: #020617;" onclick="showHistoryFullResults('${entry.id}')">FULL RESULTS</button>
+                        <div class="history-header" style="padding-right: 90px;">
                             <span>${entry.participants || '?'} Participants | ${entry.date}</span>
                         </div>
                         <div class="history-winner">
-                            <span title="${entry.winner ? entry.winner.time : '-'}s">
+                            <span>
                                 1. ${entry.winner ? entry.winner.label : 'None'}
+                                ${showTimes && entry.winner ? `<span style="opacity:0.6; font-size:0.85em; margin-left:8px;">(${entry.winner.time}s)</span>` : ''}
                             </span>
                         </div>
                         <div class="history-runners-up">
                             ${entry.runnersUp.map((m, i) => `
-                                <span style="color:white" title="${m.time}${m.time === 'DNF' ? '' : 's'}">
+                                <span style="color:white">
                                     ${i + 2}. ${m.label}
+                                    ${showTimes ? `<span style="opacity:0.6; font-size:0.85em; margin-left:4px;">(${m.time}${m.time === 'DNF' ? '' : 's'})</span>` : ''}
                                 </span>
                             `).join(' | ')}
                         </div>
@@ -1742,6 +1835,27 @@
             }
             
             document.getElementById('history-modal').style.display = 'flex';
+        }
+
+        function showHistoryFullResults(raceId) {
+            const history = JSON.parse(localStorage.getItem('marbleRaceHistory') || '[]');
+            const entry = history.find(e => e.id === raceId);
+            if (!entry || !entry.allMarbles) return;
+
+            const list = document.getElementById('full-results-list');
+            list.innerHTML = entry.allMarbles.map((m, i) => `
+                <div class="results-item" style="color:${m.color}">
+                    <span>#${i+1} ${m.label}</span>
+                    <span>${m.isFinished ? m.time + 's' : 'DNF'}</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('results-modal').style.display = 'flex';
+        }
+
+        function toggleHistoryTimes(checked) {
+            localStorage.setItem('showHistoryTimes', checked);
+            openHistory();
         }
 
         function closeHistory() {
