@@ -36,7 +36,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         /* Glassmorphism Container */
@@ -48,9 +48,15 @@
             border-radius: 24px;
             padding: 40px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         h2 {
@@ -58,6 +64,7 @@
             font-family: 'Consolas', monospace;
             letter-spacing: -0.5px;
             margin-bottom: 30px;
+            margin-top: 0;
         }
 
         #backButton {
@@ -72,11 +79,28 @@
             border-radius: 10px;
             font-size: 0.9rem;
             transition: all 0.3s ease;
+            z-index: 100;
+            text-decoration: none;
+            display: inline-block;
         }
 
         #backButton:hover {
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
+        }
+
+        /* Timer Input Layout */
+        .timer-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         /* Input Styling */
@@ -85,115 +109,337 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             color: #fff;
-            /* Classic CMD Green */
             font-family: 'Consolas', monospace;
             padding: 12px;
-            width: 100px;
+            width: 70px;
             text-align: center;
-            font-size: 1.2rem;
-            margin: 8px 0 20px 0;
+            font-size: 1.4rem;
+            margin: 8px 0;
             outline: none;
-            transition: border 0.3s ease;
+            transition: all 0.3s ease;
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         input[type="number"]:focus {
             border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Presets */
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         /* Primary Button */
-        button:not(#backButton) {
+        .action-btn {
             background: #fff;
             color: #000;
             border: none;
             padding: 15px 30px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.2s ease, opacity 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1rem;
+            margin-bottom: 15px;
         }
 
-        button:not(#backButton):hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
         }
 
-        button:not(#backButton):active {
-            transform: translateY(0);
+        .action-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .action-btn.copied {
+            background: #4ade80;
+            color: #064e3b;
         }
 
         /* CMD Display Area */
+        .terminal-window {
+            margin-top: 25px;
+            text-align: left;
+            background: #000;
+            border-radius: 10px;
+            border: 1px solid #333;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: #1e1e1e;
+            padding: 4px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .terminal-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cmd-icon {
+            width: 14px;
+            height: 14px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: bold;
+            color: #fff;
+            border-radius: 2px;
+            font-family: 'Consolas', monospace;
+        }
+
+        .terminal-title {
+            color: #ccc;
+            font-size: 0.75rem;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .terminal-controls {
+            display: flex;
+            height: 100%;
+        }
+
+        .win-control {
+            width: 32px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #ccc;
+            transition: background 0.2s;
+            cursor: default;
+            font-family: "Marlett", "Segoe MDL2 Assets", sans-serif;
+        }
+
+        .win-control:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        .win-control.close:hover {
+            background: #e81123;
+            color: #fff;
+        }
+
         #cmd {
             display: block;
-            margin-top: 20px;
             font-family: 'Consolas', monospace;
-            background: #000;
             padding: 15px;
-            border-radius: 10px;
             font-size: 0.9rem;
             color: #fff;
-            border: 1px solid #333;
             word-break: break-all;
+            min-height: 1.2em;
         }
 
         .label {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: #888;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
+        }
+
+        .cancel-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .cancel-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .secondary-btn {
+            background: transparent;
+            color: #888;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .secondary-btn:hover {
+            background: rgba(255, 68, 68, 0.1);
+            color: #ff4444;
+            border-color: rgba(255, 68, 68, 0.3);
+        }
+
+        .summary {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 20px;
+            font-family: 'Consolas', monospace;
         }
     </style>
 </head>
 
 <body>
-    <a href="/">
-        <button id="backButton">↩ Back to main website</button>
-    </a>
+    <a href="/" id="backButton">↩ Back to main website</a>
 
     <div class="glass-card">
-        <p></p>
-        <h2>Please enter a time.</h2>
+        <h2>Shutdown Timer</h2>
 
-        <div class="label">Hours</div>
-        <input type="number" id="hrs" placeholder="0">
+        <div class="timer-inputs">
+            <div class="input-group">
+                <div class="label">Hours</div>
+                <input type="number" id="hrs" placeholder="0" min="0">
+            </div>
+            <div class="input-group">
+                <div class="label">Minutes</div>
+                <input type="number" id="min" placeholder="0" min="0" max="59">
+            </div>
+            <div class="input-group">
+                <div class="label">Seconds</div>
+                <input type="number" id="sec" placeholder="0" min="0" max="59">
+            </div>
+        </div>
 
-        <div class="label">Minutes</div>
-        <input type="number" id="min" placeholder="0">
+        <div class="presets">
+            <button class="preset-btn" onclick="setPreset(0, 30, 0)">30m</button>
+            <button class="preset-btn" onclick="setPreset(1, 0, 0)">1h</button>
+            <button class="preset-btn" onclick="setPreset(2, 0, 0)">2h</button>
+            <button class="preset-btn" onclick="setPreset(4, 0, 0)">4h</button>
+            <button class="preset-btn" onclick="setPreset(8, 0, 0)">8h</button>
+        </div>
 
-        <div class="label">Seconds</div>
-        <input type="number" id="sec" placeholder="0">
+        <div class="summary" id="summary">Total: 0 seconds</div>
 
-        <br><br>
-        <button onclick="copyToClipboard()">Copy CMD Command</button>
+        <button class="action-btn" id="copyBtn" onclick="copyToClipboard()">Copy Command</button>
 
-        <span id="cmd">shutdown -s</span>
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-header-left">
+                    <div class="cmd-icon">C:\</div>
+                    <span class="terminal-title">Command Prompt</span>
+                </div>
+                <div class="terminal-controls">
+                    <div class="win-control">0</div>
+                    <div class="win-control">1</div>
+                    <div class="win-control close">r</div>
+                </div>
+            </div>
+            <span id="cmd">shutdown -s</span>
+        </div>
+
+        <div class="cancel-section">
+            <div class="cancel-text">Need to cancel a scheduled shutdown?</div>
+            <button class="secondary-btn" onclick="copyCancel()">Copy Cancel Command (shutdown -a)</button>
+        </div>
     </div>
 
     <script>
         const hrs = document.getElementById('hrs')
         const min = document.getElementById('min')
         const sec = document.getElementById('sec')
+        const cmdDisplay = document.getElementById('cmd')
+        const summaryDisplay = document.getElementById('summary')
+        const copyBtn = document.getElementById('copyBtn')
+
         hrs.addEventListener('input', calculate)
         min.addEventListener('input', calculate)
         sec.addEventListener('input', calculate)
 
+        function setPreset(h, m, s) {
+            hrs.value = h || '';
+            min.value = m || '';
+            sec.value = s || '';
+            calculate();
+        }
+
         function calculate() {
-            const hrsnum = Number(hrs.value)
-            const minnum = Number(min.value)
-            const secnum = Number(sec.value)
+            const hrsnum = Math.max(0, Number(hrs.value))
+            const minnum = Math.max(0, Number(min.value))
+            const secnum = Math.max(0, Number(sec.value))
+            
             const sum = (hrsnum * 3600) + (minnum * 60) + secnum
+            
             if (sum > 0) {
-                document.getElementById('cmd').innerText = "shutdown -s -t " + sum;
+                cmdDisplay.innerText = "shutdown -s -t " + sum;
+                summaryDisplay.innerText = `Total: ${sum.toLocaleString()} seconds`;
             } else {
-                document.getElementById('cmd').innerText = "shutdown -s";
+                cmdDisplay.innerText = "shutdown -s";
+                summaryDisplay.innerText = "Total: 0 seconds";
+            }
+            
+            // Reset copy button state
+            copyBtn.innerText = "Copy Command";
+            copyBtn.classList.remove('copied');
+        }
+
+        async function copyToClipboard() {
+            const copiedText = cmdDisplay.innerText;
+            try {
+                await navigator.clipboard.writeText(copiedText);
+                
+                copyBtn.innerText = "✓ Command Copied!";
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.innerText = "Copy Command";
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
             }
         }
 
-        function copyToClipboard() {
-            const copiedText = document.getElementById('cmd').innerText;
-            navigator.clipboard.writeText(copiedText);
-
-            alert("Copied " + copiedText + " to clipboard");
+        async function copyCancel() {
+            try {
+                await navigator.clipboard.writeText("shutdown -a");
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = "✓ Cancel Command Copied!";
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+            }
         }
     </script>
 </body>
