@@ -78,6 +78,15 @@
         z-index: 550;
     }
 
+    .lobby-top-right {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 550;
+        display: flex;
+        gap: 10px;
+    }
+
     #lobby {
         position: fixed;
         inset: 0;
@@ -339,6 +348,60 @@
         display: none;
     }
 
+    /* History Modal */
+    #history-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 600;
+        background: rgba(1, 10, 1, 0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .history-box {
+        background: var(--ui);
+        border: 2px solid var(--acc);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 600px;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 30px;
+        box-shadow: 0 0 20px rgba(100, 255, 78, 0.1);
+    }
+
+    .history-item {
+        background: rgba(20, 83, 45, 0.3);
+        border: 1px solid #14532d;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--acc);
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(100, 255, 78, 0.2);
+        padding-bottom: 5px;
+    }
+
+    .history-winner {
+        font-weight: bold;
+        color: var(--gold);
+        font-size: 1.1rem;
+    }
+
+    .history-runners-up {
+        font-size: 0.85rem;
+        color: #dcfce7;
+        opacity: 0.8;
+    }
+
     .remove-victor-btn {
         background: transparent;
         border: 2px solid var(--danger);
@@ -379,13 +442,25 @@
             text-align: center;
         }
 
-        .module-browser-btn {
+        .lobby-top-right {
             top: 10px;
             right: 10px;
+            width: calc(50% - 15px);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .lobby-top-right .ui-btn,
+        .lobby-top-right .module-browser-btn {
+            width: 100%;
             padding: 12px 8px;
             font-size: 0.7rem;
-            width: calc(50% - 15px);
             text-align: center;
+        }
+
+        .module-browser-btn {
+            position: static;
         }
 
         .lobby-box {
@@ -514,6 +589,22 @@
         background: var(--acc);
         color: #052e16;
     }
+    .bottom-right-dropdown {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 700;
+    }
+
+    .history-winner span,
+    .history-runners-up span {
+        cursor: help;
+        border-bottom: 1px dotted rgba(255, 255, 255, 0.2);
+    }
+
+    .history-winner span {
+        border-bottom-color: rgba(255, 215, 0, 0.2);
+    }
 </style>
 </head>
 
@@ -521,13 +612,26 @@
 
     <div id="lobby">
         <a href="/" class="back-home">↩ Back to main website</a>
-        <button class="module-browser-btn" onclick="openModuleBrowser()">MODULE BROWSER</button>
+        <div class="lobby-top-right">
+            <button class="ui-btn toggle-btn" onclick="openHistory()">RACE HISTORY</button>
+            <button class="module-browser-btn" style="position: static;" onclick="openModuleBrowser()">MODULE BROWSER</button>
+        </div>
         <div class="lobby-box">
             <h1 style="color:var(--acc)">MARBLE DECIDER</h1>
             <textarea id="nameInput" placeholder="Enter Names">Alpha&#10;Beta&#10;Gamma&#10;Delta&#10;Epsilon&#10;Zeta&#10;Eta&#10;Theta&#10;Iota&#10;Kappa</textarea>
             <div style="display: flex; gap: 10px; flex-direction: column;">
                 <button class="start-btn" id="startBtn">START RACE</button>
                 <button class="ui-btn toggle-btn" id="shuffleBtn" style="padding: 12px; border-radius: 50px;">SHUFFLE NAMES</button>
+            </div>
+        </div>
+        <div class="bottom-right-dropdown">
+            <div class="dropdown">
+                <button class="dots-btn" onclick="toggleDropdown(event, 'bottomDropdown')">
+                    <span style="letter-spacing: 2px;">•••</span>
+                </button>
+                <div id="bottomDropdown" class="dropdown-content" style="bottom: 100%; top: auto; right: 0; margin-bottom: 10px;">
+                    <button class="dropdown-item" style="color: var(--danger);" onclick="confirmClearStorage()">CLEAR ALL BROWSER LOCALSTORAGE</button>
+                </div>
             </div>
         </div>
     </div>
@@ -537,7 +641,7 @@
             <h1 style="color: var(--acc); margin: 0;">MODULE BROWSER</h1>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <div class="dropdown">
-                    <button class="dots-btn" onclick="toggleDropdown(event)">
+                    <button class="dots-btn" onclick="toggleDropdown(event, 'moduleDropdown')">
                         <span style="letter-spacing: 2px;">•••</span>
                     </button>
                     <div id="moduleDropdown" class="dropdown-content">
@@ -558,6 +662,17 @@
         <div class="module-grid" id="module-grid"></div>
     </div>
 
+    <div id="confirm-modal" style="display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(1, 10, 1, 0.9); align-items: center; justify-content: center; padding: 20px;">
+        <div class="editor-box" style="max-width: 400px; text-align: center;">
+            <h2 style="color: var(--danger); margin-top: 0;">CLEAR STORAGE?</h2>
+            <p style="color: white; margin-bottom: 25px;">This will permanently delete all preferences and data unique to you. This includes, but is not limited to: race history, custom modules, enabled and disabled module choices.<br><br>Are you sure you want to proceed?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="ui-btn reset-btn" style="flex: 1;" onclick="clearStorage()">YES, CLEAR ALL</button>
+                <button class="ui-btn toggle-btn" style="flex: 1;" onclick="document.getElementById('confirm-modal').style.display='none'">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
     <div id="editor-modal">
         <div class="editor-box">
             <h2 id="editor-title" style="color: var(--acc);">Edit Module</h2>
@@ -575,6 +690,14 @@
             <h2 style="color:var(--gold); text-align:center; margin-top:0;">🏆 FINAL STANDINGS 🏆</h2>
             <div id="full-results-list"></div>
             <button class="start-btn" style="width:100%; margin-top:20px;" id="closeResults">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="history-modal">
+        <div class="history-box">
+            <h2 style="color:var(--acc); text-align:center; margin-top:0;">RACE HISTORY</h2>
+            <div id="history-list"></div>
+            <button class="start-btn" style="width:100%; margin-top:20px;" onclick="closeHistory()">CLOSE</button>
         </div>
     </div>
 
@@ -999,9 +1122,19 @@
             document.getElementById('module-overlay').style.display = 'none';
         }
 
-        function toggleDropdown(e) {
+        function toggleDropdown(e, id) {
             e.stopPropagation();
-            document.getElementById('moduleDropdown').classList.toggle('show');
+            const target = id || 'moduleDropdown';
+            document.getElementById(target).classList.toggle('show');
+        }
+
+        function confirmClearStorage() {
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            window.location.reload();
         }
 
         // Close dropdown when clicking outside
@@ -1292,6 +1425,12 @@
         }
 
         function initiateRace(names) {
+            // Close any open dropdowns
+            const dropdowns = document.getElementsByClassName("dropdown-content");
+            for (let i = 0; i < dropdowns.length; i++) {
+                dropdowns[i].classList.remove('show');
+            }
+
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('leaderboard').style.display = 'block';
             document.getElementById('controls').style.display = 'flex';
@@ -1554,6 +1693,59 @@
         <div class="results-item" style="color:${m.render.textColor}"><span>#${i+1} ${m.label}</span><span>${m.isFinished ? m.finishTime + 's' : 'DNF'}</span></div>
     `).join('');
             document.getElementById('results-modal').style.display = 'flex';
+
+            // Save to history
+            saveRaceToHistory(allRanked);
+        }
+
+        function saveRaceToHistory(allRanked) {
+            const history = JSON.parse(localStorage.getItem('marbleRaceHistory') || '[]');
+            const newEntry = {
+                date: new Date().toLocaleString(),
+                participants: allRanked.length,
+                winner: allRanked[0] ? { label: allRanked[0].label, color: allRanked[0].render.textColor, time: allRanked[0].finishTime } : null,
+                runnersUp: allRanked.slice(1, 5).map(m => ({ label: m.label, color: m.render.textColor, time: m.isFinished ? m.finishTime : 'DNF' }))
+            };
+            
+            history.unshift(newEntry);
+            if (history.length > 25) history.pop();
+            
+            localStorage.setItem('marbleRaceHistory', JSON.stringify(history));
+        }
+
+        function openHistory() {
+            const history = JSON.parse(localStorage.getItem('marbleRaceHistory') || '[]');
+            const list = document.getElementById('history-list');
+            
+            if (history.length === 0) {
+                list.innerHTML = '<p style="text-align:center; opacity:0.5;">No races recorded yet.</p>';
+            } else {
+                list.innerHTML = history.map(entry => `
+                    <div class="history-item">
+                        <div class="history-header">
+                            <span>${entry.participants || '?'} Participants | ${entry.date}</span>
+                        </div>
+                        <div class="history-winner">
+                            <span title="${entry.winner ? entry.winner.time : '-'}s">
+                                1. ${entry.winner ? entry.winner.label : 'None'}
+                            </span>
+                        </div>
+                        <div class="history-runners-up">
+                            ${entry.runnersUp.map((m, i) => `
+                                <span style="color:white" title="${m.time}${m.time === 'DNF' ? '' : 's'}">
+                                    ${i + 2}. ${m.label}
+                                </span>
+                            `).join(' | ')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('history-modal').style.display = 'flex';
+        }
+
+        function closeHistory() {
+            document.getElementById('history-modal').style.display = 'none';
         }
         // Extracts the name from the code string
         function getNameFromCode(code) {
