@@ -447,6 +447,73 @@
             height: 200px;
         }
     }
+
+    /* Dropdown Menu */
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background-color: var(--ui);
+        min-width: 220px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.8);
+        z-index: 1200;
+        border: 1px solid var(--acc);
+        border-radius: 8px;
+        margin-top: 5px;
+    }
+
+    .dropdown-content.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        color: var(--acc);
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.85rem;
+        transition: background 0.2s;
+        border-bottom: 1px solid rgba(100, 255, 78, 0.1);
+    }
+
+    .dropdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(100, 255, 78, 0.1);
+    }
+
+    .dots-btn {
+        background: var(--ui);
+        color: var(--acc);
+        border: 1px solid var(--acc);
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 10px 15px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .dots-btn:hover {
+        background: var(--acc);
+        color: #052e16;
+    }
 </style>
 </head>
 
@@ -468,13 +535,22 @@
     <div id="module-overlay">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h1 style="color: var(--acc); margin: 0;">MODULE BROWSER</h1>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="dropdown">
+                    <button class="dots-btn" onclick="toggleDropdown(event)">
+                        <span style="letter-spacing: 2px;">•••</span>
+                    </button>
+                    <div id="moduleDropdown" class="dropdown-content">
+                        <button class="dropdown-item" onclick="addCustomModule()">+ NEW CUSTOM MODULE</button>
+                        <button class="dropdown-item" style="color: var(--acc);" onclick="enableAllModules()">ENABLE ALL</button>
+                        <button class="dropdown-item" style="color: var(--danger);" onclick="disableAllModules()">DISABLE ALL</button>
+                        <button class="dropdown-item" onclick="importModules()">IMPORT JSON</button>
+                        <button class="dropdown-item" onclick="exportModules()">EXPORT JSON</button>
+                    </div>
+                </div>
 
                 <button class="ui-btn toggle-btn" onclick="window.location.href='creator/'">MODULE CREATOR</button>
 
-                <button class="ui-btn toggle-btn" onclick="addCustomModule()">+ NEW CUSTOM MODULE</button>
-                <button class="ui-btn toggle-btn" onclick="importModules()">IMPORT JSON</button>
-                <button class="ui-btn toggle-btn" onclick="exportModules()">EXPORT JSON</button>
                 <button class="ui-btn reset-btn" onclick="closeModuleBrowser()">CLOSE</button>
             </div>
         </div>
@@ -923,6 +999,24 @@
             document.getElementById('module-overlay').style.display = 'none';
         }
 
+        function toggleDropdown(e) {
+            e.stopPropagation();
+            document.getElementById('moduleDropdown').classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(event) {
+            if (!event.target.matches('.dots-btn') && !event.target.closest('.dots-btn')) {
+                const dropdowns = document.getElementsByClassName("dropdown-content");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        });
+
         function renderModuleGrid() {
             const grid = document.getElementById('module-grid');
             grid.innerHTML = '';
@@ -971,6 +1065,22 @@
             } else {
                 enabledModules.push(name);
             }
+            saveModuleData();
+            renderModuleGrid();
+        }
+
+        function enableAllModules() {
+            const allNames = [
+                ...DefaultModules.map(m => m.name),
+                ...customModules.map(m => getNameFromCode(m.code))
+            ];
+            enabledModules = allNames;
+            saveModuleData();
+            renderModuleGrid();
+        }
+
+        function disableAllModules() {
+            enabledModules = [];
             saveModuleData();
             renderModuleGrid();
         }
