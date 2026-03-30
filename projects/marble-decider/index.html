@@ -160,6 +160,37 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
+        position: relative;
+    }
+
+    .preview-eye-btn {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(100, 255, 78, 0.3);
+        color: var(--acc);
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        z-index: 5;
+    }
+
+    .preview-eye-btn:hover {
+        background: var(--acc);
+        color: var(--ui);
+        border-color: var(--acc);
+        transform: scale(1.1);
+    }
+
+    .preview-eye-btn svg {
+        width: 20px;
+        height: 20px;
     }
 
     .module-card.enabled {
@@ -759,6 +790,31 @@
         </div>
     </div>
 
+    <div id="module-preview-modal" style="display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; padding: 20px;">
+        <div class="editor-box" style="width: 90%; max-width: 1000px; height: 90vh; display: flex; flex-direction: column; padding: 25px; position: relative; background: var(--ui); border: 1px solid var(--acc); border-radius: 12px; box-shadow: 0 0 30px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(100, 255, 78, 0.2); padding-bottom: 15px;">
+                <h2 id="preview-title" style="margin: 0; color: var(--acc); font-size: 1.4rem; letter-spacing: 1px;">MODULE PREVIEW</h2>
+                <button class="ui-btn reset-btn" style="padding: 8px 20px; flex: none;" onclick="closeModulePreview()">CLOSE</button>
+            </div>
+            <div style="flex: 1; display: flex; gap: 25px; overflow: hidden;">
+                <div id="preview-canvas-container" style="flex: 1; background: radial-gradient(circle, #052e16 0%, #000 100%); border-radius: 8px; position: relative; overflow: hidden; border: 1px solid rgba(100, 255, 78, 0.3); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                    <!-- Matter.js canvas will be injected here -->
+                </div>
+                <div style="width: 200px; display: flex; flex-direction: column; gap: 20px; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; color: var(--acc); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Spawn Rate</label>
+                        <input type="range" id="spawn-rate-slider" min="50" max="2000" value="1050" step="50" style="width: 100%; cursor: pointer; accent-color: var(--acc);">
+                        <div id="spawn-rate-display" style="font-size: 0.9rem; color: white; text-align: center; font-family: monospace; margin-top: 8px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 4px;">1000ms</div>
+                    </div>
+                    
+                    <div style="height: 1px; background: rgba(255,255,255,0.1);"></div>
+                    
+                    <button class="ui-btn toggle-btn" style="font-size: 0.8rem; padding: 12px;" onclick="clearPreviewMarbles()">CLEAR MARBLES</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="remove-victor-modal">
         <div class="confirm-box">
             <h2 style="color:var(--danger); margin-top:0;">REMOVE VICTOR?</h2>
@@ -835,7 +891,7 @@
         // --- BUILT-IN MODULES ---
         const DefaultModules = [{
                 name: "Tri-Blade Spinner",
-                create: (world, y, cx) => {
+                create: (world, y, cx, engine) => {
                     createGuides(world, y, cx);
                     const parts = [];
                     for (let i = 0; i < 3; i++) {
@@ -872,7 +928,7 @@
             },
             {
                 name: "Splitter",
-                create: (world, y, cx) => {
+                create: (world, y, cx, engine) => {
                     const wallStyle = {
                         isStatic: true,
                         render: {
@@ -922,7 +978,7 @@
             },
             {
                 name: "Dual Spinners",
-                create: (world, y, cx) => {
+                create: (world, y, cx, engine) => {
                     createGuides(world, y, cx);
                     [cx - 240, cx + 240].forEach((xPos, i) => {
                         const sat = Bodies.rectangle(xPos + (i === 0 ? 100 : -100), y + 500, 280, 80, {
@@ -952,7 +1008,7 @@
             },
             {
                 name: "Grinder",
-                create: (world, y, cx) => {
+                create: (world, y, cx, engine) => {
                     [cx - 180, cx + 180].forEach((xPos, idx) => {
                         const parts = [];
                         for (let i = 0; i < 8; i++) {
@@ -991,7 +1047,7 @@
             },
             {
                 name: "Zigzags",
-                create: (world, y, cx) => {
+                create: (world, y, cx, engine) => {
                     const stepStyle = {
                         isStatic: true,
                         chamfer: {
@@ -1014,7 +1070,7 @@
             },
             {
                 name: "Funnel",
-                create: (world, y, cx) => {
+                create: (world, y, cx, engine) => {
                     const wallStyle = {
                         isStatic: true,
                         chamfer: {
@@ -1050,7 +1106,7 @@
             },
             {
                 name: "50 50",
-                create: (world, y, cx) => {
+                create: (world, y, cx, engine) => {
                     const wallStyle = {
                         isStatic: true,
                         chamfer: {
@@ -1219,8 +1275,11 @@
                 const card = document.createElement('div');
                 card.className = `module-card ${isEnabled ? 'enabled' : ''}`;
                 card.innerHTML = `
-            <h3>${m.name} <small>(Built-in)</small></h3>
-            <div class="module-actions">
+                    <button class="preview-eye-btn" title="Preview Module" onclick="showModulePreview('${m.name}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                    <h3>${m.name} <small>(Built-in)</small></h3>
+                    <div class="module-actions">
                 <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${m.name}')">
                     ${isEnabled ? 'ENABLED' : 'DISABLED'}
                 </button>
@@ -1237,8 +1296,11 @@
                 const card = document.createElement('div');
                 card.className = `module-card ${isEnabled ? 'enabled' : ''}`;
                 card.innerHTML = `
-            <h3>${currentName}</h3>
-            <div class="module-actions">
+                    <button class="preview-eye-btn" title="Preview Module" onclick="showModulePreview('${currentName}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                    <h3>${currentName}</h3>
+                    <div class="module-actions">
                 <button class="mod-btn mod-toggle ${isEnabled ? 'on' : ''}" onclick="toggleModule('${currentName}')">
                     ${isEnabled ? 'ENABLED' : 'DISABLED'}
                 </button>
@@ -1250,6 +1312,168 @@
                 grid.appendChild(card);
             });
         } // This is the ONLY closing brace needed for the whole function
+
+        let previewEngine, previewRender, previewRunner, previewMarbles = [], previewInterval, previewAnimationId;
+
+        function showModulePreview(moduleName) {
+            const modal = document.getElementById('module-preview-modal');
+            const container = document.getElementById('preview-canvas-container');
+            const title = document.getElementById('preview-title');
+            
+            title.innerText = `PREVIEW: ${moduleName.toUpperCase()}`;
+            modal.style.display = 'flex';
+            container.innerHTML = '';
+
+            // Find module
+            let module = DefaultModules.find(m => m.name === moduleName);
+            if (!module) {
+                const custom = customModules.find(m => getNameFromCode(m.code) === moduleName);
+                if (custom) {
+                    try {
+                        const moduleObj = eval(`(${custom.code.replace(/^const\s+\w+\s*=\s*/, '').replace(/;$/, '')})`);
+                        module = moduleObj;
+                    } catch (e) {
+                        console.error("Failed to parse custom module for preview", e);
+                    }
+                }
+            }
+
+            if (!module) return;
+
+            // Setup Matter.js
+            previewEngine = Engine.create();
+            previewEngine.gravity.y = 1.5;
+
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // Virtual coordinate system for vertical space
+            const virtualWidth = 1200;
+            const virtualHeight = 1500; // Reduced from 2800 for less space above/below
+            const vCX = virtualWidth / 2;
+            const vModuleY = 300; // Position module with 300px space above
+            
+            previewRender = Render.create({
+                element: container,
+                engine: previewEngine,
+                options: {
+                    width: width,
+                    height: height,
+                    wireframes: false,
+                    background: 'transparent',
+                    hasBounds: true
+                }
+            });
+
+            // Adjust bounds to show the virtual area while maintaining aspect ratio
+            const aspect = width / height;
+            const viewHeight = virtualHeight;
+            const viewWidth = viewHeight * aspect;
+            
+            previewRender.bounds.min.x = vCX - viewWidth / 2;
+            previewRender.bounds.max.x = vCX + viewWidth / 2;
+            previewRender.bounds.min.y = 0;
+            previewRender.bounds.max.y = virtualHeight;
+
+            Render.run(previewRender);
+            
+            // Custom update loop for FPS cap
+            let lastTime = 0;
+            function previewUpdate(time) {
+                if (time - lastTime >= (1000 / 60)) {
+                    Engine.update(previewEngine, 1000 / 60);
+                    lastTime = time;
+                }
+                previewAnimationId = requestAnimationFrame(previewUpdate);
+            }
+            previewAnimationId = requestAnimationFrame(previewUpdate);
+
+            // Add side walls (visual indicators + physical boundaries)
+            const wallStyle = { 
+                isStatic: true, 
+                render: { 
+                    fillStyle: 'rgba(100, 255, 78, 0.05)', 
+                    strokeStyle: 'rgba(100, 255, 78, 0.2)',
+                    lineWidth: 2
+                } 
+            };
+            Composite.add(previewEngine.world, [
+                Bodies.rectangle(vCX - 410 - 50, virtualHeight / 2, 100, virtualHeight, wallStyle),
+                Bodies.rectangle(vCX + 410 + 50, virtualHeight / 2, 100, virtualHeight, wallStyle)
+            ]);
+
+            // Add Module
+            module.create(previewEngine.world, vModuleY, vCX, previewEngine);
+
+            // Spawning logic
+            const slider = document.getElementById('spawn-rate-slider');
+            const display = document.getElementById('spawn-rate-display');
+            
+            const spawnMarble = () => {
+                // Spawn within the module's width (approx 800px)
+                const x = vCX + (Math.random() - 0.5) * 700; 
+                const marble = Bodies.circle(x, vModuleY - 150, 20, { // radius 20
+                    restitution: 0.4, // Consistent with race mode
+                    friction: 0,      // Consistent with race mode
+                    frictionAir: 0,   // Consistent with race mode
+                    render: {
+                        fillStyle: `hsl(${Math.random() * 360}, 70%, 60%)`
+                    }
+                });
+                previewMarbles.push(marble);
+                Composite.add(previewEngine.world, marble);
+            };
+
+            const updateInterval = () => {
+                if (previewInterval) clearInterval(previewInterval);
+                // Invert: higher slider value = faster spawning (smaller interval)
+                const sliderVal = parseInt(slider.value);
+                const interval = 2050 - sliderVal;
+                display.innerText = `${interval}ms`;
+                previewInterval = setInterval(spawnMarble, interval);
+            };
+
+            slider.oninput = updateInterval;
+            updateInterval();
+
+            // Cleanup logic - delete marbles that fall out of virtual window
+            Events.on(previewEngine, 'afterUpdate', () => {
+                previewMarbles = previewMarbles.filter(m => {
+                    if (m.position.y > virtualHeight + 100) {
+                        Composite.remove(previewEngine.world, m);
+                        return false;
+                    }
+                    return true;
+                });
+            });
+        }
+
+        function closeModulePreview() {
+            document.getElementById('module-preview-modal').style.display = 'none';
+            if (previewInterval) clearInterval(previewInterval);
+            if (previewAnimationId) cancelAnimationFrame(previewAnimationId);
+            if (previewRunner) {
+                Runner.stop(previewRunner);
+                previewRunner = null;
+            }
+            if (previewRender) {
+                Render.stop(previewRender);
+                previewRender.canvas.remove();
+                previewRender.canvas = null;
+                previewRender.context = null;
+                previewRender.textures = {};
+            }
+            if (previewEngine) {
+                Engine.clear(previewEngine);
+                Composite.clear(previewEngine.world, false);
+            }
+            previewMarbles = [];
+        }
+
+        function clearPreviewMarbles() {
+            previewMarbles.forEach(m => Composite.remove(previewEngine.world, m));
+            previewMarbles = [];
+        }
 
         function toggleModule(name) {
             if (enabledModules.includes(name)) {
@@ -1897,6 +2121,36 @@
                 renderModuleGrid();
             }
         }
+        window.addEventListener('click', (e) => {
+            const previewModal = document.getElementById('module-preview-modal');
+            if (e.target === previewModal) {
+                closeModulePreview();
+            }
+            const historyModal = document.getElementById('history-modal');
+            if (e.target === historyModal) {
+                closeHistory();
+            }
+            const moduleOverlay = document.getElementById('module-overlay');
+            if (e.target === moduleOverlay) {
+                closeModuleBrowser();
+            }
+            const editorModal = document.getElementById('editor-modal');
+            if (e.target === editorModal) {
+                closeEditor();
+            }
+            const resultsModal = document.getElementById('results-modal');
+            if (e.target === resultsModal) {
+                closeResults();
+            }
+            const clearStorageModal = document.getElementById('clear-storage-modal');
+            if (e.target === clearStorageModal) {
+                clearStorageModal.style.display = 'none';
+            }
+            const removeVictorModal = document.getElementById('remove-victor-modal');
+            if (e.target === removeVictorModal) {
+                removeVictorModal.style.display = 'none';
+            }
+        });
     </script>
 </body>
 
