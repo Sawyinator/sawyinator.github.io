@@ -734,6 +734,142 @@
         background-color: rgba(100, 255, 78, 0.1);
     }
 
+    /* Marble Image Modal Styles */
+    #marble-images-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        background: rgba(1, 10, 1, 0.95);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+    }
+
+    .upload-grid-container {
+        background: var(--ui);
+        border: 1px solid var(--acc);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 900px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        padding: 30px;
+        box-shadow: 0 0 30px rgba(100, 255, 78, 0.1);
+    }
+
+    .upload-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+        overflow-y: auto;
+        padding: 10px;
+        margin-bottom: 20px;
+    }
+
+    .upload-card {
+        background: rgba(1, 10, 1, 0.5);
+        border: 1px dashed #14532d;
+        border-radius: 12px;
+        padding: 10px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .upload-card.has-image {
+        border-style: solid;
+        border-color: var(--acc);
+    }
+
+    .upload-card.drag-over {
+        background: rgba(100, 255, 78, 0.1);
+        border-color: var(--acc);
+        transform: scale(1.02);
+    }
+
+    .upload-preview {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #010a01;
+        border: 1px solid #14532d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .upload-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .remove-upload-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    .upload-card.has-image .remove-upload-btn {
+        display: flex;
+    }
+
+    .color-picker-container {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.7rem;
+        color: var(--acc);
+        margin-top: 5px;
+    }
+
+    .color-input {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: 1px solid #14532d;
+        background: none;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    .upload-name {
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: var(--acc);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+    }
+
+    .upload-card .skip-indicator {
+        font-size: 0.7rem;
+        color: #4ade80;
+        opacity: 0.6;
+    }
+
     .dots-btn {
         background: var(--ui);
         color: var(--acc);
@@ -789,8 +925,32 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                 </button>
                 <div id="bottomDropdown" class="dropdown-content" style="bottom: 100%; top: auto; right: 0; margin-bottom: 10px;">
+                    <button class="dropdown-item" style="display: flex; justify-content: space-between; align-items: center;" onclick="document.getElementById('marbleImagesToggle').click()">
+                        <span>MARBLE IMAGES</span>
+                        <label class="switch" style="margin-right: 10px; pointer-events: none;">
+                            <input type="checkbox" id="marbleImagesToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </button>
                     <button class="dropdown-item" style="color: var(--danger);" onclick="confirmClearStorage()">CLEAR LOCAL STORAGE</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="marble-images-modal">
+        <div class="upload-grid-container">
+            <h2 style="color: var(--acc); margin-top: 0; text-align: center;">MARBLE IMAGES</h2>
+            <p style="text-align: center; font-size: 0.9rem; opacity: 0.8; margin-bottom: 20px;">
+                Click a marble to upload, or drag & drop / paste an image.<br>
+                <span style="font-size: 0.75rem;">(Images are center-cropped and resized for optimization)</span>
+            </p>
+            <div id="uploadGrid" class="upload-grid">
+                <!-- Cards will be injected here -->
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 10px;">
+                <button class="start-btn" style="flex: 2;" id="confirmImagesBtn">START RACE</button>
+                <button class="ui-btn reset-btn" style="flex: 1;" id="cancelImagesBtn">CANCEL</button>
             </div>
         </div>
     </div>
@@ -959,6 +1119,9 @@
             startTime = null,
             winnerName = null,
             currentRaceId = null;
+
+        let marbleImages = {}; // Stores processed 128x128 data URLs
+        let marbleColors = {}; // Stores custom colors for marbles
 
         const createGuides = (world, y, cx) => {
             const wallStyle = {
@@ -1772,11 +1935,29 @@
                 const names = nameBox.value.split('\n').map(n => n.trim()).filter(n => n);
                 if (names.length > 0) {
                     localStorage.setItem('marbleRacerNames', nameBox.value);
-                    initiateRace(names);
+                    
+                    const useImages = document.getElementById('marbleImagesToggle').checked;
+                    if (useImages) {
+                        openMarbleImagesModal(names);
+                    } else {
+                        initiateRace(names);
+                    }
                 }
             };
 
+            document.getElementById('confirmImagesBtn').onclick = () => {
+                const names = nameBox.value.split('\n').map(n => n.trim()).filter(n => n);
+                document.getElementById('marble-images-modal').style.display = 'none';
+                initiateRace(names);
+            };
+
+            document.getElementById('cancelImagesBtn').onclick = () => {
+                document.getElementById('marble-images-modal').style.display = 'none';
+            };
+
             document.getElementById('reloadBtn').onclick = () => {
+                marbleImages = {}; // Wipe images on return to lobby
+                marbleColors = {}; // Wipe colors on return to lobby
                 saveRaceSnapshot();
                 location.reload();
             };
@@ -1865,6 +2046,163 @@
             currentRaceId = Date.now().toString();
             
             setupRace(names);
+        }
+
+        // --- MARBLE IMAGES LOGIC ---
+        function openMarbleImagesModal(names) {
+            const modal = document.getElementById('marble-images-modal');
+            const grid = document.getElementById('uploadGrid');
+            grid.innerHTML = '';
+            modal.style.display = 'flex';
+
+            names.forEach((name, i) => {
+                const card = document.createElement('div');
+                card.className = 'upload-card';
+                if (marbleImages[name]) card.classList.add('has-image');
+
+                // Remove Button
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-upload-btn';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    delete marbleImages[name];
+                    card.classList.remove('has-image');
+                    preview.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+                    skipLabel.innerText = 'Will use color';
+                };
+                card.appendChild(removeBtn);
+
+                const preview = document.createElement('div');
+                preview.className = 'upload-preview';
+                preview.innerHTML = marbleImages[name] ? `<img src="${marbleImages[name]}">` : 
+                    `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+
+                const nameLabel = document.createElement('div');
+                nameLabel.className = 'upload-name';
+                nameLabel.innerText = name;
+
+                const skipLabel = document.createElement('div');
+                skipLabel.className = 'skip-indicator';
+                skipLabel.innerText = marbleImages[name] ? 'Ready' : 'Will use color';
+
+                // Color Picker
+                const colorContainer = document.createElement('div');
+                colorContainer.className = 'color-picker-container';
+                const colorLabel = document.createElement('span');
+                colorLabel.innerText = 'Color:';
+                const colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.className = 'color-input';
+                
+                // Default color based on index
+                const defaultColor = `hsl(${i * (360/names.length)}, 70%, 55%)`;
+                // Convert HSL to Hex for input
+                const tempDiv = document.createElement('div');
+                tempDiv.style.color = defaultColor;
+                document.body.appendChild(tempDiv);
+                const rgb = getComputedStyle(tempDiv).color;
+                document.body.removeChild(tempDiv);
+                
+                const rgbMatch = rgb.match(/\d+/g);
+                const hex = rgbMatch ? "#" + rgbMatch.map(x => {
+                    const h = parseInt(x).toString(16);
+                    return h.length === 1 ? "0" + h : h;
+                }).join("") : "#64ff4e";
+
+                colorInput.value = marbleColors[name] || hex;
+                marbleColors[name] = colorInput.value;
+
+                colorInput.oninput = (e) => {
+                    marbleColors[name] = e.target.value;
+                };
+
+                colorContainer.appendChild(colorLabel);
+                colorContainer.appendChild(colorInput);
+
+                card.appendChild(preview);
+                card.appendChild(nameLabel);
+                card.appendChild(colorContainer);
+                card.appendChild(skipLabel);
+
+                // Hidden file input
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.style.display = 'none';
+                card.appendChild(input);
+
+                const handleFile = (file) => {
+                    if (!file) return;
+                    if (file.size > 20 * 1024 * 1024) {
+                        alert("File too large (Max 20MB)");
+                        return;
+                    }
+                    processImage(file, (dataUrl) => {
+                        marbleImages[name] = dataUrl;
+                        preview.innerHTML = `<img src="${dataUrl}">`;
+                        card.classList.add('has-image');
+                        skipLabel.innerText = 'Ready';
+                    });
+                };
+
+                preview.onclick = () => input.click();
+                input.onchange = (e) => handleFile(e.target.files[0]);
+
+                // Drag and Drop
+                card.ondragover = (e) => {
+                    e.preventDefault();
+                    card.classList.add('drag-over');
+                };
+                card.ondragleave = () => card.classList.remove('drag-over');
+                card.ondrop = (e) => {
+                    e.preventDefault();
+                    card.classList.remove('drag-over');
+                    handleFile(e.dataTransfer.files[0]);
+                };
+
+                // Paste
+                card.tabIndex = 0; // Make focusable for paste
+                card.onpaste = (e) => {
+                    const items = e.clipboardData.items;
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf('image') !== -1) {
+                            handleFile(items[i].getAsFile());
+                            break;
+                        }
+                    }
+                };
+
+                grid.appendChild(card);
+            });
+        }
+
+        function processImage(file, callback) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 128;
+                    canvas.height = 128;
+                    const ctx = canvas.getContext('2d');
+
+                    // Center Crop
+                    const size = Math.min(img.width, img.height);
+                    const x = (img.width - size) / 2;
+                    const y = (img.height - size) / 2;
+
+                    // Circular Mask
+                    ctx.beginPath();
+                    ctx.arc(64, 64, 64, 0, Math.PI * 2);
+                    ctx.clip();
+
+                    ctx.drawImage(img, x, y, size, size, 0, 0, 128, 128);
+                    callback(canvas.toDataURL('image/png')); // Use PNG for transparency
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         function setupRace(names) {
@@ -1975,22 +2313,33 @@
                 marblesPerRow = Math.floor(gateWidth / cellSize);
 
             marbles = names.map((n, i) => {
-                const color = `hsl(${i * (360/names.length)}, 70%, 55%)`;
+                const color = marbleColors[n] || `hsl(${i * (360/names.length)}, 70%, 55%)`;
                 const row = Math.floor(i / marblesPerRow),
                     col = i % marblesPerRow;
                 const marblesInThisRow = Math.min(marblesPerRow, names.length - (row * marblesPerRow));
                 const rowWidth = (marblesInThisRow - 1) * cellSize;
                 const startX = cx - (rowWidth / 2) + (col * cellSize),
                     startY = 150 - (row * cellSize);
+
+                const renderOptions = {
+                    fillStyle: color,
+                    textColor: color
+                };
+
+                if (marbleImages[n]) {
+                    renderOptions.sprite = {
+                        texture: marbleImages[n],
+                        xScale: (marbleRadius * 2) / 128,
+                        yScale: (marbleRadius * 2) / 128
+                    };
+                }
+
                 return Bodies.circle(startX, startY, marbleRadius, {
                     restitution: 0.4,
                     friction: 0,
                     frictionAir: 0,
                     label: n,
-                    render: {
-                        fillStyle: color,
-                        textColor: color
-                    },
+                    render: renderOptions,
                     isFinished: false,
                     finishTime: null
                 });
