@@ -2530,7 +2530,8 @@
                 gateWidth = 780,
                 marblesPerRow = Math.floor(gateWidth / cellSize);
 
-            const rotationLock = document.getElementById('rotationLockToggle').checked;
+            const useCustomMarbles = document.getElementById('marbleImagesToggle').checked;
+            const rotationLock = useCustomMarbles && document.getElementById('rotationLockToggle').checked;
             const imageCache = new Map();
             if (rotationLock) {
                 names.forEach(n => {
@@ -2543,7 +2544,8 @@
             }
 
             marbles = names.map((n, i) => {
-                const color = marbleColors[n] || `hsl(${i * (360/names.length)}, 70%, 55%)`;
+                const defaultColor = `hsl(${i * (360/names.length)}, 70%, 55%)`;
+                const color = useCustomMarbles ? (marbleColors[n] || defaultColor) : defaultColor;
                 const row = Math.floor(i / marblesPerRow),
                     col = i % marblesPerRow;
                 const marblesInThisRow = Math.min(marblesPerRow, names.length - (row * marblesPerRow));
@@ -2556,7 +2558,7 @@
                     textColor: color
                 };
 
-                if (marbleImages[n] && !rotationLock) {
+                if (useCustomMarbles && marbleImages[n] && !rotationLock) {
                     renderOptions.sprite = {
                         texture: marbleImages[n],
                         xScale: (marbleRadius * 2) / 128,
@@ -2708,7 +2710,7 @@
                                 y = (m.position.y - render.bounds.min.y) * scale;
                             
                             // Draw Rotation Locked Image
-                            if (rotationLock) {
+                            if (useCustomMarbles && rotationLock) {
                                 const img = imageCache.get(m.label);
                                 if (img && img.complete) {
                                     const r = m.circleRadius * scale;
