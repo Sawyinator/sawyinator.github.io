@@ -2030,6 +2030,7 @@
             document.getElementById('dotsMenu').style.display = 'none';
             document.getElementById('recent-victors-container').style.display = 'none';
             document.getElementById('results-modal').style.display = 'none';
+            startTime = null;
         }
 
         function initiateRace(names) {
@@ -2206,6 +2207,7 @@
         }
 
         function setupRace(names) {
+            startTime = null;
             engine = Engine.create({
                 positionIterations: 10,
                 velocityIterations: 10
