@@ -157,7 +157,8 @@
 
         /* MODALS */
         #modal-overlay,
-        #profile-overlay {
+        #profile-overlay,
+        #custom-timer-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -175,7 +176,8 @@
         }
 
         #modal-overlay.active,
-        #profile-overlay.active {
+        #profile-overlay.active,
+        #custom-timer-overlay.active {
             opacity: 1;
             pointer-events: auto;
         }
@@ -612,6 +614,7 @@
             border-radius: 4px;
             text-align: center;
             margin-left: 5px;
+            padding: 8px 0;
         }
 
         .manual-input::-webkit-inner-spin-button,
@@ -657,6 +660,18 @@
         </div>
     </div>
 
+    <div id="custom-timer-overlay" onclick="closeCustomTimerModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3>Custom Quiz Timer</h3>
+            <p>Enter the time limit for quiz mode (seconds):</p>
+            <input type="number" id="custom-timer-input" class="manual-input" min="1" max="3600" value="10" style="width: 100%; margin-bottom: 20px;">
+            <div style="display:flex; gap:10px;">
+                <button class="secondary-btn" style="flex:1" onclick="closeCustomTimerModal()">Cancel</button>
+                <button class="primary-btn" style="flex:1" onclick="saveCustomTimer()">Save</button>
+            </div>
+        </div>
+    </div>
+
     <div id="profile-overlay" onclick="closeProfile(event)">
         <div class="modal" onclick="event.stopPropagation()">
             <div class="profile-pic" id="profile-img-container">
@@ -694,7 +709,7 @@
 
     <div class="container">
         <div id="main-menu" class="view-section">
-            <h1>Arabic-Indic Number Trainer</h1>
+            <h1 id="main-title">Arabic-Indic Number Trainer</h1>
             <div class="credit">By <span onclick="openProfile()">Sawyinator</span></div>
             <div class="controls">
                 <label>Digit Length: </label>
@@ -709,6 +724,7 @@
                 <button class="time-btn" data-time="5" onclick="setTimeLimit(5)">5</button>
                 <button class="time-btn active" data-time="10" onclick="setTimeLimit(10)">10</button>
                 <button class="time-btn" data-time="20" onclick="setTimeLimit(20)">20</button>
+                <button class="time-btn" id="custom-time-btn" onclick="openCustomTimerModal()">Custom</button>
             </div>
             <button class="menu-btn" onclick="showLeaderboard()">Best Scores</button>
             <button class="secondary-btn" style="width:100%" onclick="showSettings()">Settings</button>
@@ -819,6 +835,15 @@
             allowedDigits = JSON.parse(localStorage.getItem('allowed_digits')) || [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
             learningScript = localStorage.getItem('learning_script') || 'arabic-indic';
             basisScript = localStorage.getItem('basis_script') || 'western-arabic';
+
+            updateTitle();
+
+            const savedCustomTime = localStorage.getItem('custom_timer');
+            if (savedCustomTime) {
+                const customBtn = document.getElementById('custom-time-btn');
+                customBtn.dataset.time = savedCustomTime;
+                customBtn.innerText = `Custom (${savedCustomTime}s)`;
+            }
         }
 
         // Enter key, Shake, and numerals only within quiz
@@ -971,10 +996,46 @@
             });
         }
 
+        function updateTitle() {
+            const scriptName = digitScripts[learningScript].name;
+            const title = `${scriptName} Number Trainer`;
+            document.title = `A-INT | ${title}`;
+            const mainTitle = document.getElementById('main-title');
+            if (mainTitle) mainTitle.innerText = title;
+        }
+
         function setTimeLimit(s) {
             selectedTime = s;
-            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.time) === s));
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                const btnTime = parseInt(btn.dataset.time);
+                btn.classList.toggle('active', btnTime === s);
+            });
             document.getElementById('quiz-start-btn').innerText = `Quiz Mode (${s}s)`;
+        }
+
+        function openCustomTimerModal() {
+            const savedCustomTime = localStorage.getItem('custom_timer') || 10;
+            document.getElementById('custom-timer-input').value = savedCustomTime;
+            document.getElementById('custom-timer-overlay').classList.add('active');
+        }
+
+        function closeCustomTimerModal(event) {
+            document.getElementById('custom-timer-overlay').classList.remove('active');
+        }
+
+        function saveCustomTimer() {
+            const input = document.getElementById('custom-timer-input');
+            const val = parseInt(input.value);
+            if (isNaN(val) || val < 1) {
+                triggerShake();
+                return;
+            }
+            localStorage.setItem('custom_timer', val);
+            const customBtn = document.getElementById('custom-time-btn');
+            customBtn.dataset.time = val;
+            customBtn.innerText = `Custom (${val}s)`;
+            setTimeLimit(val);
+            closeCustomTimerModal();
         }
 
         function showMenu() {
@@ -1099,6 +1160,7 @@
             localStorage.setItem('allowed_digits', JSON.stringify(allowedDigits));
             localStorage.setItem('learning_script', learningScript);
             localStorage.setItem('basis_script', basisScript);
+            updateTitle();
             showMenu();
         }
 
