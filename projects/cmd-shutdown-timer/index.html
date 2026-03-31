@@ -89,6 +89,104 @@
             color: #fff;
         }
 
+        #profile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #profile-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .profile-pic {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .profile-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .profile-link {
+            background: rgba(255, 255, 255, 0.05);
+            color: #eee;
+            padding: 14px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .profile-link svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .profile-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .credit {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: -20px;
+            margin-bottom: 30px;
+            font-weight: normal;
+            letter-spacing: 0.5px;
+        }
+
+        .credit span {
+            cursor: pointer;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+
+        .credit span:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
         /* Timer Input Layout */
         .timer-inputs {
             display: flex;
@@ -323,7 +421,8 @@
 
     <div class="glass-card">
         <h2>Shutdown Timer</h2>
-
+        <div class="credit">By <span onclick="openProfile()">Sawyinator</span></div>
+        
         <div class="timer-inputs">
             <div class="input-group">
                 <div class="label">Hours</div>
@@ -372,7 +471,44 @@
         </div>
     </div>
 
+    <div id="profile-overlay" onclick="closeProfile(event)">
+        <div class="glass-card" onclick="event.stopPropagation()" style="max-width: 380px; padding: 40px;">
+            <div class="profile-pic">
+                <img src="https://github.com/Sawyinator.png" alt="Sawyinator" onerror="this.parentElement.style.display='none';">
+            </div>
+            <h3 style="margin: 0; font-weight: 400; font-family: 'Consolas', monospace;">Sawyinator</h3>
+            <p style="margin: 5px 0 15px; font-size: 0.85rem; color: #666;">silly guy</p>
+            <p style="font-size: 0.9rem; margin-bottom: 25px; line-height: 1.5; color: #aaa;">
+                [PLACEHOLDER]
+            </p>
+
+            <div class="profile-links">
+                <a href="https://github.com/Sawyinator" target="_blank" class="profile-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    GitHub
+                </a>
+                <a href="https://youtube.com/@sawyinator" target="_blank" class="profile-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                    </svg>
+                    YouTube
+                </a>
+            </div>
+            <button class="action-btn" style="width:100%; margin-top:30px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #aaa;" onclick="closeProfile()">CLOSE</button>
+        </div>
+    </div>
+
     <script>
+        function openProfile() {
+            document.getElementById('profile-overlay').classList.add('active');
+        }
+
+        function closeProfile() {
+            document.getElementById('profile-overlay').classList.remove('active');
+        }
+
         const hrs = document.getElementById('hrs')
         const min = document.getElementById('min')
         const sec = document.getElementById('sec')
