@@ -932,6 +932,14 @@
                             <span class="slider"></span>
                         </label>
                     </button>
+                    <button class="dropdown-item" style="display: flex; justify-content: space-between; align-items: center;" onclick="document.getElementById('showNamesToggle').click()">
+                        <span>SHOW NAMES</span>
+                        <label class="switch" style="margin-right: 10px; pointer-events: none;">
+                            <input type="checkbox" id="showNamesToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </button>
+                    <button class="dropdown-item" style="color: var(--danger);" onclick="confirmClearMarbleData()">CLEAR MARBLE DATA</button>
                     <button class="dropdown-item" style="color: var(--danger);" onclick="confirmClearStorage()">CLEAR LOCAL STORAGE</button>
                 </div>
             </div>
@@ -976,6 +984,17 @@
         </div>
         <p>Please select modules to be used in the race generation.</p>
         <div class="module-grid" id="module-grid"></div>
+    </div>
+
+    <div id="clear-marble-data-modal" style="display: none; position: fixed; inset: 0; z-index: 1500; background: rgba(1, 10, 1, 0.9); align-items: center; justify-content: center; padding: 20px;">
+        <div class="editor-box" style="max-width: 400px; text-align: center;">
+            <h2 style="color: var(--danger); margin-top: 0;">CLEAR MARBLE DATA?</h2>
+            <p style="color: white; margin-bottom: 25px;">This will permanently delete all marble names, custom colours and uploaded images.<br><br>All other data, such as custom modules and race history, will remain untouched.<br><br>Are you sure you want to proceed?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="ui-btn reset-btn" style="flex: 1;" onclick="clearMarbleData()">YES, CLEAR MARBLES</button>
+                <button class="ui-btn toggle-btn" style="flex: 1;" onclick="document.getElementById('clear-marble-data-modal').style.display='none'">CANCEL</button>
+            </div>
+        </div>
     </div>
 
     <div id="clear-storage-modal" style="display: none; position: fixed; inset: 0; z-index: 1500; background: rgba(1, 10, 1, 0.9); align-items: center; justify-content: center; padding: 20px;">
@@ -1531,6 +1550,21 @@
             }
         }
 
+        function confirmClearMarbleData() {
+            document.getElementById('clear-marble-data-modal').style.display = 'flex';
+        }
+
+        function clearMarbleData() {
+            localStorage.removeItem('marbleRacerNames');
+            localStorage.removeItem('marbleColors');
+            localStorage.removeItem('marbleImages');
+            marbleColors = {};
+            marbleImages = {};
+            const nameInput = document.getElementById('nameInput');
+            if (nameInput) nameInput.value = '';
+            window.location.reload();
+        }
+
         function confirmClearStorage() {
             document.getElementById('clear-storage-modal').style.display = 'flex';
         }
@@ -1872,6 +1906,15 @@
             }
             marbleImagesToggle.onchange = (e) => {
                 localStorage.setItem('marbleImagesToggle', e.target.checked);
+            };
+
+            const showNamesToggle = document.getElementById('showNamesToggle');
+            const savedShowNames = localStorage.getItem('showNamesToggle');
+            if (savedShowNames !== null) {
+                showNamesToggle.checked = savedShowNames === 'true';
+            }
+            showNamesToggle.onchange = (e) => {
+                localStorage.setItem('showNamesToggle', e.target.checked);
             };
 
             const savedColors = localStorage.getItem('marbleColors');
@@ -2450,6 +2493,7 @@
                     Render.world(render);
                     const ctx = render.context;
                     const scale = render.canvas.width / (render.bounds.max.x - render.bounds.min.x);
+                    const showNames = document.getElementById('showNamesToggle').checked;
                     ctx.font = `bold ${Math.max(12, 20 * scale)}px "Segoe UI"`;
                     ctx.textAlign = 'center';
                     const minY = render.bounds.min.y - 50,
@@ -2458,8 +2502,10 @@
                         if (!m.isFinished && m.position.y > minY && m.position.y < maxY) {
                             const x = (m.position.x - render.bounds.min.x) * scale,
                                 y = (m.position.y - render.bounds.min.y) * scale;
-                            ctx.fillStyle = m.render.textColor;
-                            ctx.fillText(m.label, x, y - (25 * scale));
+                            if (showNames) {
+                                ctx.fillStyle = m.render.textColor;
+                                ctx.fillText(m.label, x, y - (25 * scale));
+                            }
                         }
                     });
                     lastTime = time;
