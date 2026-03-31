@@ -2341,7 +2341,8 @@
                     label: n,
                     render: renderOptions,
                     isFinished: false,
-                    finishTime: null
+                    finishTime: null,
+                    stuckFrames: 0
                 });
             });
             Composite.add(engine.world, marbles);
@@ -2425,6 +2426,25 @@
             function update(time) {
                 if (time - lastTime >= (1000 / 60)) {
                     Engine.update(engine, 1000 / 60);
+
+                    // Anti-stuck nudge logic
+                    if (startTime) {
+                        marbles.forEach(m => {
+                            if (m.isFinished) return;
+                            const speedSq = m.velocity.x * m.velocity.x + m.velocity.y * m.velocity.y;
+                            if (speedSq < 0.01) { // Very slow or stopped
+                                m.stuckFrames++;
+                                if (m.stuckFrames > 45) { // ~1s = 60fps
+                                    const nudgeX = (Math.random() - 0.5) * 0.005;
+                                    Body.applyForce(m, m.position, { x: nudgeX, y: 0 });
+                                    m.stuckFrames = 0;
+                                }
+                            } else {
+                                m.stuckFrames = 0;
+                            }
+                        });
+                    }
+
                     const followTargets = marbles.filter(m => !m.isFinished);
                     const minViewWidth = 1000; // Ensure full track width (820) + padding is visible
                     const viewWidth = Math.max(window.innerWidth, minViewWidth);
