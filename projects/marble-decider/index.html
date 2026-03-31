@@ -926,7 +926,7 @@
                 </button>
                 <div id="bottomDropdown" class="dropdown-content" style="bottom: 100%; top: auto; right: 0; margin-bottom: 10px;">
                     <button class="dropdown-item" style="display: flex; justify-content: space-between; align-items: center;" onclick="document.getElementById('marbleImagesToggle').click()">
-                        <span>MARBLE IMAGES</span>
+                        <span>CUSTOM MARBLES</span>
                         <label class="switch" style="margin-right: 10px; pointer-events: none;">
                             <input type="checkbox" id="marbleImagesToggle">
                             <span class="slider"></span>
@@ -940,10 +940,9 @@
 
     <div id="marble-images-modal">
         <div class="upload-grid-container">
-            <h2 style="color: var(--acc); margin-top: 0; text-align: center;">MARBLE IMAGES</h2>
+            <h2 style="color: var(--acc); margin-top: 0; text-align: center;">MARBLE CUSTOMISER</h2>
             <p style="text-align: center; font-size: 0.9rem; opacity: 0.8; margin-bottom: 20px;">
                 Click a marble to upload, or drag & drop / paste an image.<br>
-                <span style="font-size: 0.75rem;">(Images are center-cropped and resized for optimization)</span>
             </p>
             <div id="uploadGrid" class="upload-grid">
                 <!-- Cards will be injected here -->
@@ -967,8 +966,6 @@
                         <button class="dropdown-item" onclick="addCustomModule()">+ NEW CUSTOM MODULE</button>
                         <button class="dropdown-item" style="color: var(--acc);" onclick="enableAllModules()">ENABLE ALL</button>
                         <button class="dropdown-item" style="color: var(--danger);" onclick="disableAllModules()">DISABLE ALL</button>
-                        <button class="dropdown-item" onclick="importModules()">IMPORT JSON</button>
-                        <button class="dropdown-item" onclick="exportModules()">EXPORT JSON</button>
                     </div>
                 </div>
 
@@ -1805,39 +1802,6 @@
             renderModuleGrid();
         }
 
-        function exportModules() {
-            const data = JSON.stringify({
-                custom: customModules,
-                enabled: enabledModules
-            });
-            const blob = new Blob([data], {
-                type: 'application/json'
-            });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'marble_modules.json';
-            a.click();
-        }
-
-        function importModules() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.onchange = e => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = event => {
-                    const data = JSON.parse(event.target.result);
-                    customModules = data.custom || [];
-                    enabledModules = data.enabled || [];
-                    saveModuleData();
-                    renderModuleGrid();
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        }
-
         // Helper to turn strings into executable functions safely-ish
         // Updated helper to handle both raw code and object-style strings
         function getModuleLogic(m) {
@@ -1900,6 +1864,20 @@
 
             const saved = localStorage.getItem('marbleRacerNames');
             if (saved) nameBox.value = saved;
+
+            const marbleImagesToggle = document.getElementById('marbleImagesToggle');
+            const savedImagesToggle = localStorage.getItem('marbleImagesToggle');
+            if (savedImagesToggle !== null) {
+                marbleImagesToggle.checked = savedImagesToggle === 'true';
+            }
+            marbleImagesToggle.onchange = (e) => {
+                localStorage.setItem('marbleImagesToggle', e.target.checked);
+            };
+
+            const savedColors = localStorage.getItem('marbleColors');
+            if (savedColors) marbleColors = JSON.parse(savedColors);
+            const savedImages = localStorage.getItem('marbleImages');
+            if (savedImages) marbleImages = JSON.parse(savedImages);
 
             let shuffleInterval = null;
             const shuffle = () => {
@@ -2068,6 +2046,7 @@
                 removeBtn.onclick = (e) => {
                     e.stopPropagation();
                     delete marbleImages[name];
+                    localStorage.setItem('marbleImages', JSON.stringify(marbleImages));
                     card.classList.remove('has-image');
                     preview.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
                     skipLabel.innerText = 'Will use color';
@@ -2116,6 +2095,7 @@
 
                 colorInput.oninput = (e) => {
                     marbleColors[name] = e.target.value;
+                    localStorage.setItem('marbleColors', JSON.stringify(marbleColors));
                 };
 
                 colorContainer.appendChild(colorLabel);
@@ -2141,6 +2121,7 @@
                     }
                     processImage(file, (dataUrl) => {
                         marbleImages[name] = dataUrl;
+                        localStorage.setItem('marbleImages', JSON.stringify(marbleImages));
                         preview.innerHTML = `<img src="${dataUrl}">`;
                         card.classList.add('has-image');
                         skipLabel.innerText = 'Ready';
