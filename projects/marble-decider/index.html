@@ -794,6 +794,13 @@
         transform: scale(1.02);
     }
 
+    .upload-card.selected {
+        border-color: var(--gold) !important;
+        box-shadow: 0 0 15px rgba(252, 211, 77, 0.3);
+        background: rgba(252, 211, 77, 0.1);
+        outline: none;
+    }
+
     .upload-preview {
         width: 60px;
         height: 60px;
@@ -1005,6 +1012,7 @@
         <a href="/" class="back-home">↩ Back to main website</a>
         <div class="lobby-top-right">
             <button class="ui-btn toggle-btn" onclick="openHistory()">RACE HISTORY</button>
+            <button class="ui-btn toggle-btn" onclick="openMarbleBrowser()">MARBLE BROWSER</button>
             <button class="module-browser-btn" style="position: static;" onclick="openModuleBrowser()">MODULE BROWSER</button>
         </div>
         <div class="lobby-box">
@@ -1096,6 +1104,17 @@
         <div class="module-grid" id="module-grid"></div>
     </div>
 
+    <div id="marble-browser-overlay" style="display: none; position: fixed; inset: 0; z-index: 1000; background: var(--bg); flex-direction: column; padding: 40px; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="color: var(--acc); margin: 0;">MARBLE BROWSER</h1>
+            <button class="ui-btn reset-btn" onclick="closeMarbleBrowser()">CLOSE</button>
+        </div>
+        <p style="margin-bottom: 20px; opacity: 0.8;">Manage all your saved marble customizations. Changes are saved automatically.</p>
+        <div id="marble-browser-grid" class="upload-grid">
+            <!-- Saved marbles will be injected here -->
+        </div>
+    </div>
+
     <div id="clear-marble-data-modal" style="display: none; position: fixed; inset: 0; z-index: 1500; background: rgba(1, 10, 1, 0.9); align-items: center; justify-content: center; padding: 20px;">
         <div class="editor-box" style="max-width: 400px; text-align: center;">
             <h2 style="color: var(--danger); margin-top: 0;">CLEAR MARBLE DATA?</h2>
@@ -1104,6 +1123,25 @@
                 <button class="ui-btn reset-btn" style="flex: 1;" onclick="clearMarbleData()">YES, CLEAR MARBLES</button>
                 <button class="ui-btn toggle-btn" style="flex: 1;" onclick="document.getElementById('clear-marble-data-modal').style.display='none'">CANCEL</button>
             </div>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal" style="display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(1, 10, 1, 0.9); align-items: center; justify-content: center; padding: 20px;">
+        <div class="editor-box" style="max-width: 400px; text-align: center;">
+            <h2 id="confirm-title" style="color: var(--acc); margin-top: 0;">CONFIRM</h2>
+            <p id="confirm-msg" style="color: white; margin-bottom: 25px;"></p>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button class="ui-btn toggle-btn" style="flex: 1;" id="confirm-cancel-btn">CANCEL</button>
+                <button class="ui-btn reset-btn" style="flex: 1;" id="confirm-ok-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" style="display: none; position: fixed; inset: 0; z-index: 2100; background: rgba(1, 10, 1, 0.9); align-items: center; justify-content: center; padding: 20px;">
+        <div class="editor-box" style="max-width: 400px; text-align: center;">
+            <h2 id="alert-title" style="color: var(--acc); margin-top: 0;">ALERT</h2>
+            <p id="alert-msg" style="color: white; margin-bottom: 25px;"></p>
+            <button class="ui-btn toggle-btn" style="width: 100%;" onclick="document.getElementById('custom-alert-modal').style.display='none'">OK</button>
         </div>
     </div>
 
@@ -1254,6 +1292,35 @@
     </div>
 
     <script>
+        function showCustomConfirm(title, msg, onConfirm) {
+            const modal = document.getElementById('custom-confirm-modal');
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = msg;
+            modal.style.display = 'flex';
+
+            const okBtn = document.getElementById('confirm-ok-btn');
+            const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+            const cleanup = () => {
+                modal.style.display = 'none';
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+            };
+
+            okBtn.onclick = () => {
+                onConfirm();
+                cleanup();
+            };
+            cancelBtn.onclick = cleanup;
+        }
+
+        function showCustomAlert(title, msg) {
+            const modal = document.getElementById('custom-alert-modal');
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-msg').innerText = msg;
+            modal.style.display = 'flex';
+        }
+
         const {
             Engine,
             Render,
@@ -1736,15 +1803,15 @@
                 reader.onload = event => {
                     try {
                         const data = JSON.parse(event.target.result);
-                        if (confirm('This will overwrite your current data. Are you sure you want to proceed?')) {
+                        showCustomConfirm('OVERWRITE DATA?', 'This will overwrite your current data. Are you sure you want to proceed?', () => {
                             localStorage.clear();
                             for (const key in data) {
                                 localStorage.setItem(key, data[key]);
                             }
                             window.location.reload();
-                        }
+                        });
                     } catch (err) {
-                        alert('Error parsing JSON file.');
+                        showCustomAlert('IMPORT ERROR', 'Error parsing JSON file.');
                     }
                 };
                 reader.readAsText(file);
@@ -2049,7 +2116,7 @@
             if (!name) name = "Custom Module";
 
             if (!code) {
-                alert("Please enter some code!");
+                showCustomAlert('EMPTY CODE', "Please enter some code!");
                 return;
             }
 
@@ -2110,9 +2177,17 @@
             };
 
             const savedColors = localStorage.getItem('marbleColors');
-            if (savedColors) marbleColors = JSON.parse(savedColors);
+            if (savedColors) {
+                const parsed = JSON.parse(savedColors);
+                marbleColors = {};
+                for (let k in parsed) marbleColors[k.toLowerCase()] = parsed[k];
+            }
             const savedImages = localStorage.getItem('marbleImages');
-            if (savedImages) marbleImages = JSON.parse(savedImages);
+            if (savedImages) {
+                const parsed = JSON.parse(savedImages);
+                marbleImages = {};
+                for (let k in parsed) marbleImages[k.toLowerCase()] = parsed[k];
+            }
 
             let shuffleInterval = null;
             const shuffle = () => {
@@ -2270,9 +2345,10 @@
             modal.style.display = 'flex';
 
             names.forEach((name, i) => {
+                const lowerName = name.toLowerCase();
                 const card = document.createElement('div');
                 card.className = 'upload-card';
-                if (marbleImages[name]) card.classList.add('has-image');
+                if (marbleImages[lowerName]) card.classList.add('has-image');
 
                 // Remove Button
                 const removeBtn = document.createElement('button');
@@ -2280,7 +2356,7 @@
                 removeBtn.innerHTML = '×';
                 removeBtn.onclick = (e) => {
                     e.stopPropagation();
-                    delete marbleImages[name];
+                    delete marbleImages[lowerName];
                     localStorage.setItem('marbleImages', JSON.stringify(marbleImages));
                     card.classList.remove('has-image');
                     preview.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
@@ -2290,7 +2366,7 @@
 
                 const preview = document.createElement('div');
                 preview.className = 'upload-preview';
-                preview.innerHTML = marbleImages[name] ? `<img src="${marbleImages[name]}">` : 
+                preview.innerHTML = marbleImages[lowerName] ? `<img src="${marbleImages[lowerName]}">` : 
                     `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
 
                 const nameLabel = document.createElement('div');
@@ -2299,7 +2375,7 @@
 
                 const skipLabel = document.createElement('div');
                 skipLabel.className = 'skip-indicator';
-                skipLabel.innerText = marbleImages[name] ? 'Ready' : 'Will use color';
+                skipLabel.innerText = marbleImages[lowerName] ? 'Ready' : 'Will use color';
 
                 // Color Picker
                 const colorContainer = document.createElement('div');
@@ -2325,11 +2401,11 @@
                     return h.length === 1 ? "0" + h : h;
                 }).join("") : "#64ff4e";
 
-                colorInput.value = marbleColors[name] || hex;
-                marbleColors[name] = colorInput.value;
+                colorInput.value = marbleColors[lowerName] || hex;
+                marbleColors[lowerName] = colorInput.value;
 
                 colorInput.oninput = (e) => {
-                    marbleColors[name] = e.target.value;
+                    marbleColors[lowerName] = e.target.value;
                     localStorage.setItem('marbleColors', JSON.stringify(marbleColors));
                 };
 
@@ -2351,11 +2427,11 @@
                 const handleFile = (file) => {
                     if (!file) return;
                     if (file.size > 20 * 1024 * 1024) {
-                        alert("File too large (Max 20MB)");
+                        showCustomAlert('FILE TOO LARGE', "File too large (Max 20MB)");
                         return;
                     }
                     processImage(file, (dataUrl) => {
-                        marbleImages[name] = dataUrl;
+                        marbleImages[lowerName] = dataUrl;
                         localStorage.setItem('marbleImages', JSON.stringify(marbleImages));
                         preview.innerHTML = `<img src="${dataUrl}">`;
                         card.classList.add('has-image');
@@ -2420,6 +2496,184 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+
+        // --- MARBLE BROWSER LOGIC ---
+        function openMarbleBrowser() {
+            document.getElementById('marble-browser-overlay').style.display = 'flex';
+            populateMarbleBrowser();
+        }
+
+        function closeMarbleBrowser() {
+            document.getElementById('marble-browser-overlay').style.display = 'none';
+        }
+
+        function populateMarbleBrowser() {
+            const grid = document.getElementById('marble-browser-grid');
+            grid.innerHTML = '';
+            
+            const allKeys = new Set([...Object.keys(marbleColors), ...Object.keys(marbleImages)]);
+            const sortedKeys = Array.from(allKeys).sort();
+            
+            if (sortedKeys.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; opacity: 0.5;">No saved marbles found. Add some in the customiser!</div>';
+                return;
+            }
+
+            sortedKeys.forEach(key => {
+                const card = createMarbleBrowserCard(key);
+                grid.appendChild(card);
+            });
+        }
+
+        function createMarbleBrowserCard(key) {
+            const card = document.createElement('div');
+            card.className = 'upload-card';
+            card.tabIndex = 0; // Make focusable for paste
+            if (marbleImages[key]) card.classList.add('has-image');
+
+            // Clear Image Button (X)
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-upload-btn';
+            removeBtn.innerHTML = '×';
+            removeBtn.title = 'Clear Marble Image';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (marbleImages[key]) {
+                    delete marbleImages[key];
+                    localStorage.setItem('marbleImages', JSON.stringify(marbleImages));
+                    populateMarbleBrowser();
+                }
+            };
+            card.appendChild(removeBtn);
+
+            const preview = document.createElement('div');
+            preview.className = 'upload-preview';
+            preview.innerHTML = marbleImages[key] ? `<img src="${marbleImages[key]}">` : 
+                `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+
+            // Rename Input
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'upload-name';
+            nameInput.value = key;
+            nameInput.style.background = 'transparent';
+            nameInput.style.border = '1px solid rgba(100, 255, 78, 0.2)';
+            nameInput.style.borderRadius = '4px';
+            nameInput.style.padding = '2px 5px';
+            nameInput.style.width = '90%';
+            nameInput.style.textAlign = 'center';
+            nameInput.style.color = 'inherit';
+            
+            nameInput.onchange = (e) => {
+                const newName = e.target.value.trim();
+                if (!newName) {
+                    nameInput.value = key;
+                    return;
+                }
+                const newKey = newName.toLowerCase();
+                if (newKey === key) return;
+                
+                if (marbleColors[newKey] || marbleImages[newKey]) {
+                    showCustomAlert("DUPLICATE NAME", "A marble with this name already exists!");
+                    nameInput.value = key;
+                    return;
+                }
+                
+                // Move data
+                if (marbleColors[key]) marbleColors[newKey] = marbleColors[key];
+                if (marbleImages[key]) marbleImages[newKey] = marbleImages[key];
+                delete marbleColors[key];
+                delete marbleImages[key];
+                
+                localStorage.setItem('marbleColors', JSON.stringify(marbleColors));
+                localStorage.setItem('marbleImages', JSON.stringify(marbleImages));
+                populateMarbleBrowser();
+            };
+
+            // Color Picker
+            const colorContainer = document.createElement('div');
+            colorContainer.className = 'color-picker-container';
+            const colorLabel = document.createElement('span');
+            colorLabel.innerText = 'Color:';
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.className = 'color-input';
+            colorInput.value = marbleColors[key] || '#64ff4e';
+            
+            colorInput.oninput = (e) => {
+                marbleColors[key] = e.target.value;
+                localStorage.setItem('marbleColors', JSON.stringify(marbleColors));
+            };
+
+            colorContainer.appendChild(colorLabel);
+            colorContainer.appendChild(colorInput);
+
+            // Delete Button (Full Data)
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'ui-btn reset-btn';
+            deleteBtn.innerText = 'DELETE';
+            deleteBtn.style.fontSize = '10px';
+            deleteBtn.style.padding = '4px 8px';
+            deleteBtn.style.marginTop = '5px';
+            deleteBtn.style.width = '100%';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                showCustomConfirm('DELETE MARBLE?', `Are you sure you want to delete all data for "${key}"?`, () => {
+                    delete marbleColors[key];
+                    delete marbleImages[key];
+                    localStorage.setItem('marbleColors', JSON.stringify(marbleColors));
+                    localStorage.setItem('marbleImages', JSON.stringify(marbleImages));
+                    populateMarbleBrowser();
+                });
+            };
+
+            // Hidden file input
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.style.display = 'none';
+            
+            const handleFile = (file) => {
+                if (!file) return;
+                processImage(file, (dataUrl) => {
+                    marbleImages[key] = dataUrl;
+                    localStorage.setItem('marbleImages', JSON.stringify(marbleImages));
+                    preview.innerHTML = `<img src="${dataUrl}">`;
+                    card.classList.add('has-image');
+                    populateMarbleBrowser(); // Refresh to update all instances if needed
+                });
+            };
+
+            preview.onclick = () => input.click();
+            input.onchange = (e) => handleFile(e.target.files[0]);
+
+            // Selection Logic
+            card.onclick = () => {
+                document.querySelectorAll('.upload-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                card.focus();
+            };
+
+            // Paste Logic
+            card.onpaste = (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        const blob = items[i].getAsFile();
+                        handleFile(blob);
+                        break;
+                    }
+                }
+            };
+
+            card.appendChild(preview);
+            card.appendChild(nameInput);
+            card.appendChild(colorContainer);
+            card.appendChild(deleteBtn);
+            card.appendChild(input);
+
+            return card;
         }
 
         function setupRace(names) {
@@ -2535,17 +2789,19 @@
             const imageCache = new Map();
             if (rotationLock) {
                 names.forEach(n => {
-                    if (marbleImages[n]) {
+                    const lowerN = n.toLowerCase();
+                    if (marbleImages[lowerN]) {
                         const img = new Image();
-                        img.src = marbleImages[n];
-                        imageCache.set(n, img);
+                        img.src = marbleImages[lowerN];
+                        imageCache.set(lowerN, img);
                     }
                 });
             }
 
             marbles = names.map((n, i) => {
+                const lowerN = n.toLowerCase();
                 const defaultColor = `hsl(${i * (360/names.length)}, 70%, 55%)`;
-                const color = useCustomMarbles ? (marbleColors[n] || defaultColor) : defaultColor;
+                const color = useCustomMarbles ? (marbleColors[lowerN] || defaultColor) : defaultColor;
                 const row = Math.floor(i / marblesPerRow),
                     col = i % marblesPerRow;
                 const marblesInThisRow = Math.min(marblesPerRow, names.length - (row * marblesPerRow));
@@ -2558,9 +2814,9 @@
                     textColor: color
                 };
 
-                if (useCustomMarbles && marbleImages[n] && !rotationLock) {
+                if (useCustomMarbles && marbleImages[lowerN] && !rotationLock) {
                     renderOptions.sprite = {
-                        texture: marbleImages[n],
+                        texture: marbleImages[lowerN],
                         xScale: (marbleRadius * 2) / 128,
                         yScale: (marbleRadius * 2) / 128
                     };
@@ -2711,7 +2967,7 @@
                             
                             // Draw Rotation Locked Image
                             if (useCustomMarbles && rotationLock) {
-                                const img = imageCache.get(m.label);
+                                const img = imageCache.get(m.label.toLowerCase());
                                 if (img && img.complete) {
                                     const r = m.circleRadius * scale;
                                     ctx.drawImage(img, x - r, y - r, r * 2, r * 2);
