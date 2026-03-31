@@ -1048,16 +1048,26 @@
 
     <div id="marble-images-modal">
         <div class="upload-grid-container">
-            <h2 style="color: var(--acc); margin-top: 0; text-align: center;">MARBLE CUSTOMISER</h2>
+            <div style="position: relative; margin-bottom: 5px;">
+                <h2 style="color: var(--acc); margin: 0; text-align: center;">MARBLE CUSTOMISER</h2>
+                <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 10px; color: white; font-size: 0.7rem;">
+                    <span style="letter-spacing: 1px; font-weight: bold; opacity: 0.6;">LOCK IMAGE ROTATION</span>
+                    <label class="switch" style="transform: scale(0.8);">
+                        <input type="checkbox" id="rotationLockToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
             <p style="text-align: center; font-size: 0.9rem; opacity: 0.8; margin-bottom: 20px;">
                 Click a marble to upload, or drag & drop / paste an image.<br>
             </p>
+
             <div id="uploadGrid" class="upload-grid">
                 <!-- Cards will be injected here -->
             </div>
             <div style="display: flex; gap: 15px; margin-top: 10px;">
                 <button class="start-btn" style="flex: 2;" id="confirmImagesBtn">START RACE</button>
-                <button class="ui-btn reset-btn" style="flex: 1;" id="cancelImagesBtn">CANCEL</button>
+                <button class="start-btn reset-btn" style="flex: 1; padding: 15px 20px; color: white;" id="cancelImagesBtn">CANCEL</button>
             </div>
         </div>
     </div>
@@ -2090,6 +2100,15 @@
                 localStorage.setItem('showNamesToggle', e.target.checked);
             };
 
+            const rotationLockToggle = document.getElementById('rotationLockToggle');
+            const savedRotationLock = localStorage.getItem('rotationLockToggle');
+            if (savedRotationLock !== null) {
+                rotationLockToggle.checked = savedRotationLock === 'true';
+            }
+            rotationLockToggle.onchange = (e) => {
+                localStorage.setItem('rotationLockToggle', e.target.checked);
+            };
+
             const savedColors = localStorage.getItem('marbleColors');
             if (savedColors) marbleColors = JSON.parse(savedColors);
             const savedImages = localStorage.getItem('marbleImages');
@@ -2511,6 +2530,18 @@
                 gateWidth = 780,
                 marblesPerRow = Math.floor(gateWidth / cellSize);
 
+            const rotationLock = document.getElementById('rotationLockToggle').checked;
+            const imageCache = new Map();
+            if (rotationLock) {
+                names.forEach(n => {
+                    if (marbleImages[n]) {
+                        const img = new Image();
+                        img.src = marbleImages[n];
+                        imageCache.set(n, img);
+                    }
+                });
+            }
+
             marbles = names.map((n, i) => {
                 const color = marbleColors[n] || `hsl(${i * (360/names.length)}, 70%, 55%)`;
                 const row = Math.floor(i / marblesPerRow),
@@ -2525,7 +2556,7 @@
                     textColor: color
                 };
 
-                if (marbleImages[n]) {
+                if (marbleImages[n] && !rotationLock) {
                     renderOptions.sprite = {
                         texture: marbleImages[n],
                         xScale: (marbleRadius * 2) / 128,
@@ -2675,6 +2706,16 @@
                         if (!m.isFinished && m.position.y > minY && m.position.y < maxY) {
                             const x = (m.position.x - render.bounds.min.x) * scale,
                                 y = (m.position.y - render.bounds.min.y) * scale;
+                            
+                            // Draw Rotation Locked Image
+                            if (rotationLock) {
+                                const img = imageCache.get(m.label);
+                                if (img && img.complete) {
+                                    const r = m.circleRadius * scale;
+                                    ctx.drawImage(img, x - r, y - r, r * 2, r * 2);
+                                }
+                            }
+
                             if (showNames) {
                                 ctx.fillStyle = m.render.textColor;
                                 ctx.fillText(m.label, x, y - (25 * scale));
