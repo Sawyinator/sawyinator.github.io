@@ -1113,7 +1113,13 @@
     <div id="marble-browser-overlay" style="display: none; position: fixed; inset: 0; z-index: 1000; background: var(--bg); flex-direction: column; padding: 40px; overflow-y: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h1 style="color: var(--acc); margin: 0;">MARBLE BROWSER</h1>
-            <button class="ui-btn reset-btn" onclick="closeMarbleBrowser()">CLOSE</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="ui-btn toggle-btn" onclick="addMarbleToBrowser()" style="display: flex; align-items: center; gap: 5px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    ADD MARBLE
+                </button>
+                <button class="ui-btn reset-btn" onclick="closeMarbleBrowser()">CLOSE</button>
+            </div>
         </div>
         <p style="margin-bottom: 20px; opacity: 0.8;">Manage all your saved marble customizations. Changes are saved automatically.</p>
         <div id="marble-browser-grid" class="upload-grid">
@@ -2416,7 +2422,6 @@
                 }).join("") : "#64ff4e";
 
                 colorInput.value = marbleColors[upperName] || hex;
-                marbleColors[upperName] = colorInput.value;
 
                 colorInput.oninput = (e) => {
                     marbleColors[upperName] = e.target.value;
@@ -2534,7 +2539,32 @@
             document.getElementById('marble-browser-overlay').style.display = 'none';
         }
 
-        function populateMarbleBrowser() {
+        function addMarbleToBrowser() {
+            let baseName = "NEW MARBLE";
+            let name = baseName;
+            let counter = 1;
+            
+            while (marbleColors[name] || marbleImages[name]) {
+                name = `${baseName} ${counter}`;
+                counter++;
+            }
+            
+            // Default neon green
+            marbleColors[name] = "#64ff4e";
+            localStorage.setItem('marbleColors', JSON.stringify(marbleColors));
+            populateMarbleBrowser(name);
+            
+            // Scroll to the new marble card
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.upload-card');
+                const newCard = Array.from(cards).find(c => c.querySelector('.upload-name')?.innerText === name);
+                if (newCard) {
+                    newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+        }
+
+        function populateMarbleBrowser(keyToSelect = null) {
             const overlay = document.getElementById('marble-browser-overlay');
             const grid = document.getElementById('marble-browser-grid');
             grid.innerHTML = '';
@@ -2557,6 +2587,22 @@
             sortedKeys.forEach(key => {
                 const card = createMarbleBrowserCard(key);
                 grid.appendChild(card);
+                
+                if (key === keyToSelect) {
+                    card.classList.add('selected');
+                    const nameInput = card.querySelector('.upload-name');
+                    if (nameInput) {
+                        setTimeout(() => {
+                            nameInput.focus();
+                            // Select all text in contentEditable
+                            const range = document.createRange();
+                            range.selectNodeContents(nameInput);
+                            const sel = window.getSelection();
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        }, 200);
+                    }
+                }
             });
         }
 
