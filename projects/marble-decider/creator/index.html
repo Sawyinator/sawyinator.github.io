@@ -6,6 +6,7 @@
     <title>Module Creator | Marble Decider</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
+        * { box-sizing: border-box; }
         :root {
             --bg: #010a01;
             --ui: #052e16;
@@ -409,7 +410,7 @@
                 BACK
             </a>
         </div>
-        <h1 class="app-title">MODULE CREATOR (FLIP X/Y IS CURRENTLY BROKEN)</h1>
+        <h1 class="app-title">MODULE CREATOR</h1>
         <div class="header-right">
             <button onclick="showImportPrompt()" class="ui-btn">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -549,11 +550,11 @@
         </div>
     </div>
 
-    <div id="import-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:1000; display:none; align-items:center; justify-content:center; padding:40px;">
-        <div style="background: var(--panel); border: 1px solid var(--acc); padding: 30px; border-radius: 12px; width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 20px;">
+    <div id="import-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:1000; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
+        <div style="background: var(--panel); border: 1px solid var(--acc); padding: 30px; border-radius: 12px; width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 20px; margin: auto;">
             <h2 style="margin: 0;">Import Module Code</h2>
             <p style="font-size: 0.8rem; opacity: 0.7; margin: 0;">Paste the code generated from the Module Creator to load it back for editing.</p>
-            <textarea id="import-area" style="width:100%; height:300px; background:#000; color:var(--acc); border:1px solid var(--border); font-family:monospace; padding:15px; border-radius: 8px; resize: none;"></textarea>
+            <textarea id="import-area" style="width:100%; height:300px; background:#000; color:var(--acc); border:1px solid var(--border); font-family:monospace; padding:15px; border-radius: 8px; resize: none; box-sizing: border-box;"></textarea>
             <div style="display:flex; gap:10px; justify-content: flex-end;">
                 <button class="ui-btn" onclick="document.getElementById('import-overlay').style.display='none'">CANCEL</button>
                 <button class="ui-btn primary" onclick="processImport()">LOAD MODULE</button>
@@ -622,7 +623,16 @@
                 }
 
                 if (body) {
-                    if (s.flipX !== 1 || s.flipY !== 1) Body.scale(body, s.flipX, s.flipY);
+                    if (s.flipX !== 1 || s.flipY !== 1) {
+                        Body.scale(body, s.flipX, s.flipY);
+                        // Fix winding order for selection/collision if flipped
+                        if (!Matter.Vertices.clockwise(body.vertices)) {
+                            const reversed = [...body.vertices].reverse();
+                            const pos = { x: body.position.x, y: body.position.y };
+                            Body.setVertices(body, reversed);
+                            Body.setPosition(body, pos);
+                        }
+                    }
                     body.creatorData = s;
                     body.behaviorData = { behavior: s.behavior, speed: s.speed, origX: rx, origY: ry };
                     if (s.behavior === 'rotate') {
@@ -833,7 +843,18 @@
                 }
 
                 if (body) {
-                    Body.scale(body, s.flipX || 1, s.flipY || 1);
+                    const fx = s.flipX || 1;
+                    const fy = s.flipY || 1;
+                    if (fx !== 1 || fy !== 1) {
+                        Body.scale(body, fx, fy);
+                        // Fix winding order for selection/collision if flipped
+                        if (!Matter.Vertices.clockwise(body.vertices)) {
+                            const reversed = [...body.vertices].reverse();
+                            const pos = { x: body.position.x, y: body.position.y };
+                            Body.setVertices(body, reversed);
+                            Body.setPosition(body, pos);
+                        }
+                    }
                     body.restitution = parseFloat(s.bouncy);
                     body.originalRadius = s.w;
                     body.behaviorData = {

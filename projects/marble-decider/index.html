@@ -1253,7 +1253,7 @@
     <div id="profile-overlay" onclick="closeProfile(event)">
         <div class="editor-box" onclick="event.stopPropagation()" style="max-width: 400px; text-align: center;">
             <div class="profile-pic">
-                <img src="https://github.com/Sawyinator.png" alt="Sawyinator" onerror="this.parentElement.style.display='none';">
+                <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-pfp.png" alt="Sawyinator" onerror="this.parentElement.style.display='none';">
             </div>
             <h2 style="margin-bottom:5px; color: var(--acc);">Sawyinator</h2>
             <p style="margin-top:0; font-size:0.9rem; color:#888;">silly guy</p>
@@ -1418,7 +1418,18 @@
                 }
 
                 if (body) {
-                    if (s.flipX !== 1 || s.flipY !== 1) Body.scale(body, s.flipX, s.flipY);
+                    const fx = s.flipX || 1;
+                    const fy = s.flipY || 1;
+                    if (fx !== 1 || fy !== 1) {
+                        Body.scale(body, fx, fy);
+                        // Fix winding order for selection/collision if flipped
+                        if (!Matter.Vertices.clockwise(body.vertices)) {
+                            const reversed = [...body.vertices].reverse();
+                            const pos = { x: body.position.x, y: body.position.y };
+                            Body.setVertices(body, reversed);
+                            Body.setPosition(body, pos);
+                        }
+                    }
                     body.creatorData = s;
                     body.behaviorData = { behavior: s.behavior, speed: s.speed, origX: rx, origY: ry };
                     if (s.behavior === 'rotate') {
