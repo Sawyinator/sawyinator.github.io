@@ -1054,9 +1054,17 @@
     <div id="lobby">
         <a href="/" class="back-home">↩ Back to main website</a>
         <div class="lobby-top-right">
+            <div class="dropdown">
+                <button class="ui-btn toggle-btn" onclick="toggleDropdown(event, 'browseDropdown')" style="display: flex; align-items: center; gap: 8px;">
+                    BROWSERS
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="browseDropdown" class="dropdown-content dropdown-down dropdown-left">
+                    <button class="dropdown-item" onclick="openMarbleBrowser()">MARBLE BROWSER</button>
+                    <button class="dropdown-item" onclick="openModuleBrowser()">MODULE BROWSER</button>
+                </div>
+            </div>
             <button class="ui-btn toggle-btn" onclick="openHistory()">RACE HISTORY</button>
-            <button class="ui-btn toggle-btn" onclick="openMarbleBrowser()">MARBLE BROWSER</button>
-            <button class="module-browser-btn" style="position: static;" onclick="openModuleBrowser()">MODULE BROWSER</button>
         </div>
         <div class="lobby-box">
             <h1 style="color:var(--acc)">MARBLE DECIDER</h1>
