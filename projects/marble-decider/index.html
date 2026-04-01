@@ -492,14 +492,11 @@
     }
 
     .results-btn {
-        background: var(--gold) !important;
-        color: #020617 !important;
-        border: 1px solid var(--gold) !important;
+        display: none;
     }
 
     .results-btn:hover {
-        background: transparent !important;
-        color: var(--gold) !important;
+        /* Inherits from .ui-btn:hover */
     }
 
     /* History Modal */
@@ -1323,7 +1320,7 @@
     </div>
 
     <div id="controls">
-        <div class="dots-menu" id="dotsMenu">
+        <div class="dots-menu" id="dotsMenu" style="display: none;">
             <button class="dots-btn" id="dotsBtn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
             </button>
@@ -1338,7 +1335,7 @@
                 </button>
             </div>
         </div>
-        <button class="ui-btn results-btn" id="resBtn">FULL RESULTS</button>
+        <button class="ui-btn results-btn" id="resBtn" style="display: none;">FULL RESULTS</button>
         <button class="ui-btn toggle-btn" id="toggleBoard">HIDE/SHOW LEADERBOARDS</button>
         <button class="ui-btn reset-btn" id="reloadBtn">BACK TO LOBBY</button>
     </div>
@@ -3195,7 +3192,7 @@
             } else {
                 list.innerHTML = history.map(entry => `
                     <div class="history-item" style="position: relative;">
-                        <button class="ui-btn" style="position: absolute; right: 10px; top: 10px; font-size: 0.65rem; padding: 5px 10px; background: var(--gold); color: #020617;" onclick="showHistoryFullResults('${entry.id}')">FULL RESULTS</button>
+                        <button class="ui-btn" style="position: absolute; right: 10px; top: 10px; font-size: 0.65rem; padding: 5px 10px;" onclick="showHistoryFullResults('${entry.id}')">FULL RESULTS</button>
                         <div class="history-header" style="padding-right: 90px;">
                             <span>${entry.participants || '?'} Participants | ${entry.date}</span>
                         </div>
