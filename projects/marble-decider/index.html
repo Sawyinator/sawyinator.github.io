@@ -1389,6 +1389,50 @@
             Body
         } = Matter;
 
+        function MatterModuleBuilder(world, y, cx, engine, data) {
+            const { Bodies, Body, Composite, Events } = Matter;
+            (data || []).forEach(s => {
+                const rx = cx + s.relX, ry = y + s.relY;
+                const radAngle = s.angle * (Math.PI / 180);
+                const opts = { 
+                    label: s.name, 
+                    isStatic: s.isStatic, 
+                    restitution: s.bouncy, 
+                    friction: 0, 
+                    frictionAir: 0,
+                    render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, 
+                    angle: radAngle 
+                };
+                if (s.type === 'rectangle') opts.chamfer = { radius: 15 };
+
+                let body;
+                if (s.type === 'rectangle') body = Bodies.rectangle(rx, ry, s.w, s.h, opts);
+                else if (s.type === 'circle') body = Bodies.circle(rx, ry, s.w, opts);
+                else if (s.type === 'triangle') body = Bodies.polygon(rx, ry, 3, s.w, opts);
+                else if (s.type === 'diamond') {
+                    const verts = [{ x: 0, y: -s.h/2 }, { x: s.w/2, y: 0 }, { x: 0, y: s.h/2 }, { x: -s.w/2, y: 0 }];
+                    body = Bodies.fromVertices(rx, ry, [verts], opts);
+                } else if (s.type === 'right_triangle') {
+                    const verts = [{ x: -s.w/2, y: s.h/2 }, { x: s.w/2, y: s.h/2 }, { x: -s.w/2, y: -s.h/2 }];
+                    body = Bodies.fromVertices(rx, ry, [verts], opts);
+                }
+
+                if (body) {
+                    if (s.flipX !== 1 || s.flipY !== 1) Body.scale(body, s.flipX, s.flipY);
+                    body.creatorData = s;
+                    body.behaviorData = { behavior: s.behavior, speed: s.speed, origX: rx, origY: ry };
+                    if (s.behavior === 'rotate') {
+                        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(body, body.angle + s.speed); });
+                    } else if (s.behavior === 'oscillate') {
+                        Events.on(engine, 'beforeUpdate', (e) => { 
+                            Body.setPosition(body, { x: rx + Math.sin(e.timestamp * 0.003) * s.speed * 100, y: ry }); 
+                        });
+                    }
+                    Composite.add(world, body);
+                }
+            });
+        }
+
         let engine, render, runner, animationFrameId;
         let marbles = [],
             finishedMarbles = [],
@@ -2154,7 +2198,10 @@
                 let codeToEval = m.code.trim();
                 // Wrap in parentheses to treat the string as an expression
                 const moduleObj = eval(`(${codeToEval})`);
-                return moduleObj.create;
+                if (typeof moduleObj.create === 'function') {
+                    return moduleObj.create.bind(moduleObj);
+                }
+                return () => {};
             } catch (e) {
                 console.error("Failed to parse module: " + m.name, e);
                 return () => {}; // Return empty function on failure

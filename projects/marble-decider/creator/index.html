@@ -592,6 +592,51 @@
             Body,
             Events
         } = Matter;
+
+        function MatterModuleBuilder(world, y, cx, engine, data) {
+            const { Bodies, Body, Composite, Events } = Matter;
+            (data || []).forEach(s => {
+                const rx = cx + s.relX, ry = y + s.relY;
+                const radAngle = s.angle * (Math.PI / 180);
+                const opts = { 
+                    label: s.name, 
+                    isStatic: s.isStatic, 
+                    restitution: s.bouncy, 
+                    friction: 0, 
+                    frictionAir: 0,
+                    render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, 
+                    angle: radAngle 
+                };
+                if (s.type === 'rectangle') opts.chamfer = { radius: 15 };
+
+                let body;
+                if (s.type === 'rectangle') body = Bodies.rectangle(rx, ry, s.w, s.h, opts);
+                else if (s.type === 'circle') body = Bodies.circle(rx, ry, s.w, opts);
+                else if (s.type === 'triangle') body = Bodies.polygon(rx, ry, 3, s.w, opts);
+                else if (s.type === 'diamond') {
+                    const verts = [{ x: 0, y: -s.h/2 }, { x: s.w/2, y: 0 }, { x: 0, y: s.h/2 }, { x: -s.w/2, y: 0 }];
+                    body = Bodies.fromVertices(rx, ry, [verts], opts);
+                } else if (s.type === 'right_triangle') {
+                    const verts = [{ x: -s.w/2, y: s.h/2 }, { x: s.w/2, y: s.h/2 }, { x: -s.w/2, y: -s.h/2 }];
+                    body = Bodies.fromVertices(rx, ry, [verts], opts);
+                }
+
+                if (body) {
+                    if (s.flipX !== 1 || s.flipY !== 1) Body.scale(body, s.flipX, s.flipY);
+                    body.creatorData = s;
+                    body.behaviorData = { behavior: s.behavior, speed: s.speed, origX: rx, origY: ry };
+                    if (s.behavior === 'rotate') {
+                        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(body, body.angle + s.speed); });
+                    } else if (s.behavior === 'oscillate') {
+                        Events.on(engine, 'beforeUpdate', (e) => { 
+                            Body.setPosition(body, { x: rx + Math.sin(e.timestamp * 0.003) * s.speed * 100, y: ry }); 
+                        });
+                    }
+                    Composite.add(world, body);
+                }
+            });
+        }
+
         const engine = Engine.create();
 
         const MARBLE_RADIUS = 20;
@@ -992,58 +1037,31 @@
         });
 
         function generateCode() {
-            let code = `{\n    name: "Custom Module",\n    create: (world, y, cx, engine) => {\n`;
+            const shapesData = shapes.map(s => ({
+                id: s.id,
+                name: s.name,
+                type: s.type,
+                relX: Math.round(s.x - CX),
+                relY: Math.round(s.y - CY) + 450,
+                w: s.w,
+                h: s.h,
+                angle: s.angle,
+                isStatic: s.isStatic,
+                bouncy: s.bouncy,
+                behavior: s.behavior,
+                speed: s.speed,
+                flipX: s.flipX || 1,
+                flipY: s.flipY || 1
+            }));
 
-            selectedShape = null;
-            document.getElementById('inspector').style.display = 'none';
-            rebuildWorld();
+            const dataJson = JSON.stringify(shapesData, null, 4);
 
-            shapes.forEach(s => {
-                const safeName = "obj_" + s.id;
-
-                const relX = `cx + (${Math.round(s.x - CX)})`;
-                const relY = `y + (${Math.round(s.y - CY)} + 450)`;
-                const radAngle = (s.angle * (Math.PI / 180)).toFixed(3);
-
-                const chamferValue = (s.type === 'rectangle') ? `, chamfer: { radius: 15 }` : '';
-                const style = `{ label: '${s.name}', isStatic: ${s.isStatic}${chamferValue}, render: { fillStyle: '#052e16', strokeStyle: '#64ff4e', lineWidth: 4 }, angle: ${radAngle} }`;
-
-                if (s.type === 'rectangle') {
-                    code += `        const ${safeName} = Bodies.rectangle(${relX}, ${relY}, ${s.w}, ${s.h}, ${style});\n`;
-                    code += `        ${safeName}.originalWidth = ${s.w};\n`;
-                    code += `        ${safeName}.originalHeight = ${s.h};\n`;
-                } else if (s.type === 'circle') {
-                    code += `        const ${safeName} = Bodies.circle(${relX}, ${relY}, ${s.w}, ${style});\n`;
-                } else if (s.type === 'triangle') {
-                    code += `        const ${safeName} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
-                    code += `        ${safeName}.originalRadius = ${s.w};\n`;
-                } else if (s.type === 'diamond') {
-                    code += `        const ${safeName}_verts = [{ x: 0, y: -${s.h/2} }, { x: ${s.w/2}, y: 0 }, { x: 0, y: ${s.h/2} }, { x: -${s.w/2}, y: 0 }];\n`;
-                    code += `        const ${safeName} = Bodies.fromVertices(${relX}, ${relY}, [${safeName}_verts], ${style});\n`;
-                } else if (s.type === 'right_triangle') {
-                    code += `        const ${safeName}_verts = [{ x: -${s.w/2}, y: ${s.h/2} }, { x: ${s.w/2}, y: ${s.h/2} }, { x: -${s.w/2}, y: -${s.h/2} }];\n`;
-                    code += `        const ${safeName} = Bodies.fromVertices(${relX}, ${relY}, [${safeName}_verts], ${style});\n`;
-                }
-
-                if (s.flipX !== 1 || s.flipY !== 1) {
-                    code += `        Body.scale(${safeName}, ${s.flipX}, ${s.flipY});\n`;
-                }
-
-                code += `        ${safeName}.restitution = ${s.bouncy};\n`;
-                code += `        ${safeName}.friction = 0;\n`;
-                code += `        ${safeName}.frictionStatic = 0;\n`;
-                code += `        ${safeName}.behaviorData = { behavior: '${s.behavior}', speed: ${s.speed}, origX: ${relX}, origY: ${relY} };\n`;
-
-                if (s.behavior === 'rotate') {
-                    code += `        Events.on(engine, 'beforeUpdate', () => { Body.setAngle(${safeName}, ${safeName}.angle + ${s.speed}); });\n`;
-                } else if (s.behavior === 'oscillate') {
-                    code += `        Events.on(engine, 'beforeUpdate', (e) => { Body.setPosition(${safeName}, { x: ${relX} + Math.sin(e.timestamp * 0.003) * ${s.speed * 100}, y: ${relY} }); });\n`;
-                }
-
-                code += `        Composite.add(world, ${safeName});\n\n`;
-            });
-
+            let code = `{\n    name: "Custom Module",\n`;
+            code += `    shapesData: ${dataJson.replace(/\n/g, '\n    ')},\n`;
+            code += `    create: function(world, y, cx, engine) {\n`;
+            code += `        MatterModuleBuilder(world, y, cx, engine, this.shapesData);\n`;
             code += `    }\n}`;
+
             navigator.clipboard.writeText(code).then(() => {
                 showToast("CODE COPIED!");
             });
@@ -1064,111 +1082,31 @@
                 } catch (e) {
                     throw new Error("Syntax error in pasted code.");
                 }
-                const capturedBodies = [];
-                const originalAdd = Composite.add;
-                const originalEventsOn = Events.on;
-                Composite.add = (world, body) => {
-                    if (Array.isArray(body)) capturedBodies.push(...body);
-                    else capturedBodies.push(body);
-                };
-                Events.on = () => {}; // Disable events during import execution
 
-                moduleObj.create({
-                    bodies: []
-                }, CY - 450, CX, engine);
-
-                Composite.add = originalAdd;
-                Events.on = originalEventsOn;
-
-                shapes = capturedBodies.map(body => {
-                    let type = 'rectangle';
-                    if (body.circleRadius) type = 'circle';
-                    else if (body.vertices.length === 3) type = 'triangle';
-                    const bodyName = (body.label && !body.label.includes('Body')) ? body.label : (type + "_" + Math.floor(Math.random() * 1000));
-
-                    // Regex search specifically for the restitution value assigned to this specific object in the string
-                    const restRegex = new RegExp(`${bodyName}.*?restitution:\\s*([0-9.]+)`);
-                    const restMatch = sanitizedInput.match(restRegex);
-                    const capturedRest = restMatch ? parseFloat(restMatch[1]) : (body.restitution || 0.4);
-
-                    const shapeData = {
-                        id: Date.now() + Math.random(),
-                        name: bodyName,
-                        type: type,
-                        x: body.position.x,
-                        y: body.position.y,
-                        w: body.circleRadius || body.originalRadius || body.originalWidth || calculateWidth(body),
-                        h: type === 'rectangle' ? (body.originalHeight || calculateHeight(body)) : 0,
-                        angle: Math.round(body.angle * (180 / Math.PI)),
-                        isStatic: body.isStatic,
-                        bouncy: capturedRest,
-                        behavior: body.behaviorData?.behavior || 'static',
-                        speed: body.behaviorData?.speed || 0.05
-                    };
-
-                    if (shapeData.behavior === 'static') {
-                        const normalizedText = sanitizedInput.replace(/\s+/g, ' ');
-                        const searchName = bodyName;
-                        if (normalizedText.includes(`Body.setAngle(${searchName}`)) {
-                            shapeData.behavior = 'rotate';
-                            const speedMatch = normalizedText.match(new RegExp(`${searchName}\\.angle\\s*\\+\\s*([0-9.]+)`));
-                            if (speedMatch) shapeData.speed = parseFloat(speedMatch[1]);
-                        } else if (normalizedText.includes(`Body.setPosition(${searchName}`)) {
-                            shapeData.behavior = 'oscillate';
-                            const ampMatch = normalizedText.match(new RegExp(`Math.sin\\(.*?\\)\\s*\\*\\s*([0-9.]+)`));
-                            if (ampMatch) shapeData.speed = parseFloat(ampMatch[1]) / 100;
-                        }
-                    }
-                    return shapeData;
-                });
-                rebuildWorld();
-                document.getElementById('import-overlay').style.display = 'none';
-                showToast("MODULE IMPORTED!");
+                if (moduleObj.shapesData && Array.isArray(moduleObj.shapesData)) {
+                    shapes = moduleObj.shapesData.map(s => ({
+                        ...s,
+                        id: s.id || (Date.now() + Math.random()),
+                        x: s.relX + CX,
+                        y: s.relY + CY - 450
+                    }));
+                    rebuildWorld();
+                    document.getElementById('import-overlay').style.display = 'none';
+                    showToast("MODULE IMPORTED!");
+                } else {
+                    throw new Error("Invalid module format. Please use code generated by the current Module Creator.");
+                }
             } catch (e) {
-                console.error("Import Error:", e);
-                alert("Import Error: " + e.message);
+                console.error("Import error:", e);
+                showCustomAlert("IMPORT FAILED", e.message);
             }
         }
 
-        function calculateWidth(body) {
-            if (body.circleRadius) return body.circleRadius;
-
-            // If it's a triangle, we want the radius (distance from center to vertex)
-            if (body.vertices.length === 3) {
-                const v = body.vertices[0];
-                return Math.sqrt(Math.pow(v.x - body.position.x, 2) + Math.pow(v.y - body.position.y, 2));
-            }
-
-            // For rectangles, rotate vertices back to calculate original width
-            const angle = -body.angle;
-            const cos = Math.cos(angle);
-            const sin = Math.sin(angle);
-            const cx = body.position.x;
-            const cy = body.position.y;
-
-            const xs = body.vertices.map(v => {
-                const dx = v.x - cx;
-                const dy = v.y - cy;
-                return (dx * cos - dy * sin);
-            });
-            return Math.max(...xs) - Math.min(...xs);
-        }
-
-        function calculateHeight(body) {
-            if (body.circleRadius || body.vertices.length === 3) return 0;
-
-            const angle = -body.angle;
-            const cos = Math.cos(angle);
-            const sin = Math.sin(angle);
-            const cx = body.position.x;
-            const cy = body.position.y;
-
-            const ys = body.vertices.map(v => {
-                const dx = v.x - cx;
-                const dy = v.y - cy;
-                return (dx * sin + dy * cos);
-            });
-            return Math.max(...ys) - Math.min(...ys);
+        function showCustomAlert(title, msg) {
+            const modal = document.getElementById('custom-alert-modal');
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-msg').innerText = msg;
+            modal.style.display = 'flex';
         }
 
         function showToast(msg) {
@@ -1214,6 +1152,13 @@
             selectShape(newShape.id);
         }
     </script>
+    <div id="custom-alert-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+        <div class="ui-card" style="max-width:400px; width:100%; text-align:center;">
+            <h2 id="alert-title" style="margin-bottom:10px; color:#64ff4e;"></h2>
+            <p id="alert-msg" style="margin-bottom:20px; opacity:0.8;"></p>
+            <button class="ui-btn" onclick="document.getElementById('custom-alert-modal').style.display='none'">OK</button>
+        </div>
+    </div>
 </body>
 
 </html>
