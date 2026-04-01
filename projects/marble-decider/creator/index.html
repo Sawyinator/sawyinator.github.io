@@ -406,7 +406,7 @@
         <div class="header-left">
             <a href="/projects/marble-decider/" class="back-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                LOBBY
+                BACK
             </a>
         </div>
         <h1 class="app-title">MODULE CREATOR</h1>
@@ -445,6 +445,14 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 22h20L12 2z"></path></svg>
                             TRIANGLE
                         </button>
+                        <button onclick="addShape('diamond'); toggleDropdown(event, 'shape-dropdown')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 10-9 10-9-10z"></path></svg>
+                            DIAMOND
+                        </button>
+                        <button onclick="addShape('right_triangle'); toggleDropdown(event, 'shape-dropdown')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5v14h14z"></path></svg>
+                            RIGHT TRIANGLE
+                        </button>
                     </div>
                 </div>
             </div>
@@ -482,6 +490,12 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
                         CENTER OBJECT
                     </button>
+
+                    <div class="section-header">FLIP</div>
+                    <div class="btn-group">
+                        <button class="ui-btn" onclick="toggleFlip('X')" style="flex: 1;">FLIP X</button>
+                        <button class="ui-btn" onclick="toggleFlip('Y')" style="flex: 1;">FLIP Y</button>
+                    </div>
 
                     <div class="section-header">PHYSICS</div>
                     <div class="coord-row">
@@ -693,18 +707,36 @@
                 type,
                 x: CX,
                 y: CY,
-                w: type === 'circle' ? 60 : 200,
-                h: 60,
+                w: (type === 'circle' || type === 'diamond') ? 80 : 100,
+                h: (type === 'circle' || type === 'diamond') ? 80 : 100,
                 angle: 0,
                 behavior: 'static',
                 speed: 0.05,
                 name: type + "_" + (shapes.length + 1),
                 bouncy: 0.4,
-                isStatic: true
+                isStatic: true,
+                flipX: 1,
+                flipY: 1
             };
+            
+            // Adjust defaults for specific shapes
+            if (type === 'rectangle') {
+                newShape.w = 200;
+                newShape.h = 60;
+            }
+            
             shapes.push(newShape);
             rebuildWorld();
             selectShape(newShape.id);
+        }
+
+        function getDiamondVertices(w, h) {
+            return [
+                { x: 0, y: -h/2 },
+                { x: w/2, y: 0 },
+                { x: 0, y: h/2 },
+                { x: -w/2, y: 0 }
+            ];
         }
 
         function rebuildWorld() {
@@ -732,24 +764,40 @@
                     },
                     angle: s.angle * (Math.PI / 180)
                 };
+                
                 let body;
-                if (s.type === 'rectangle') body = Bodies.rectangle(s.x, s.y, s.w, s.h, {
-                    ...opts,
-                    chamfer: {
-                        radius: 15
-                    }
-                });
-                else if (s.type === 'circle') body = Bodies.circle(s.x, s.y, s.w, opts);
-                else if (s.type === 'triangle') body = Bodies.polygon(s.x, s.y, 3, s.w, opts);
+                if (s.type === 'rectangle') {
+                    body = Bodies.rectangle(s.x, s.y, s.w, s.h, {
+                        ...opts,
+                        chamfer: { radius: 15 }
+                    });
+                } else if (s.type === 'circle') {
+                    body = Bodies.circle(s.x, s.y, s.w, opts);
+                } else if (s.type === 'triangle') {
+                    body = Bodies.polygon(s.x, s.y, 3, s.w, opts);
+                } else if (s.type === 'diamond') {
+                    const vertices = getDiamondVertices(s.w, s.h);
+                    body = Bodies.fromVertices(s.x, s.y, [vertices], opts);
+                } else if (s.type === 'right_triangle') {
+                    const vertices = [
+                        { x: -s.w/2, y: s.h/2 },
+                        { x: s.w/2, y: s.h/2 },
+                        { x: -s.w/2, y: -s.h/2 }
+                    ];
+                    body = Bodies.fromVertices(s.x, s.y, [vertices], opts);
+                }
 
-                body.restitution = parseFloat(s.bouncy);
-                body.originalRadius = s.w;
-                body.behaviorData = {
-                    ...s,
-                    origX: s.x,
-                    origY: s.y
-                };
-                Composite.add(engine.world, body);
+                if (body) {
+                    Body.scale(body, s.flipX || 1, s.flipY || 1);
+                    body.restitution = parseFloat(s.bouncy);
+                    body.originalRadius = s.w;
+                    body.behaviorData = {
+                        ...s,
+                        origX: s.x,
+                        origY: s.y
+                    };
+                    Composite.add(engine.world, body);
+                }
             });
             currentMarbles.forEach(m => Composite.add(engine.world, m));
             marbles = currentMarbles;
@@ -869,15 +917,36 @@
             rebuildWorld();
         }
 
+        let dragStartTime = 0;
+        const DRAG_DELAY = 200;
+        const DRAG_DIST_THRESHOLD = 50;
+        let isActuallyDragging = false;
+        let clickOffset = { x: 0, y: 0 };
+        let startMousePos = { x: 0, y: 0 };
+
         render.canvas.addEventListener('mousedown', (e) => {
             if (isSimulating) return;
             const rect = render.canvas.getBoundingClientRect();
             const mx = e.clientX - rect.left,
                 my = e.clientY - rect.top;
-            const clicked = [...shapes].reverse().find(s => Math.abs(s.x - mx) < 50 && Math.abs(s.y - my) < 50);
-            if (clicked) {
-                selectShape(clicked.id);
-                isDragging = true;
+            
+            // Improved selection: click anywhere on shape
+            const allBodies = Composite.allBodies(engine.world).filter(b => b.label && !b.label.includes('wall'));
+            const clickedBodies = Matter.Query.point(allBodies, { x: mx, y: my });
+            
+            if (clickedBodies.length > 0) {
+                // Find the shape corresponding to the clicked body (highest in draw order)
+                const body = clickedBodies[clickedBodies.length - 1];
+                const shape = shapes.find(s => s.name === body.label);
+                
+                if (shape) {
+                    selectShape(shape.id);
+                    isDragging = true;
+                    dragStartTime = Date.now();
+                    isActuallyDragging = false;
+                    startMousePos = { x: mx, y: my };
+                    clickOffset = { x: mx - shape.x, y: my - shape.y };
+                }
             } else {
                 selectedShape = null;
                 document.getElementById('inspector').style.display = 'none';
@@ -885,16 +954,22 @@
             }
         });
 
-        let isDragging = false;
         render.canvas.addEventListener('mousemove', (e) => {
             const rect = render.canvas.getBoundingClientRect();
             mousePos.x = e.clientX - rect.left;
             mousePos.y = e.clientY - rect.top;
+            
             if (isDragging && selectedShape && !isSimulating) {
-                selectedShape.x = Math.round(mousePos.x);
-                selectedShape.y = Math.round(mousePos.y);
-                rebuildWorld();
-                updateInspectorInputs();
+                const timeHeld = Date.now() - dragStartTime;
+                const distMoved = Math.hypot(mousePos.x - startMousePos.x, mousePos.y - startMousePos.y);
+                
+                if (timeHeld > DRAG_DELAY || distMoved > DRAG_DIST_THRESHOLD) {
+                    isActuallyDragging = true;
+                    selectedShape.x = Math.round(mousePos.x - clickOffset.x);
+                    selectedShape.y = Math.round(mousePos.y - clickOffset.y);
+                    rebuildWorld();
+                    updateInspectorInputs();
+                }
             }
         });
         window.addEventListener('mouseup', () => isDragging = false);
@@ -942,6 +1017,16 @@
                 } else if (s.type === 'triangle') {
                     code += `        const ${safeName} = Bodies.polygon(${relX}, ${relY}, 3, ${s.w}, ${style});\n`;
                     code += `        ${safeName}.originalRadius = ${s.w};\n`;
+                } else if (s.type === 'diamond') {
+                    code += `        const ${safeName}_verts = [{ x: 0, y: -${s.h/2} }, { x: ${s.w/2}, y: 0 }, { x: 0, y: ${s.h/2} }, { x: -${s.w/2}, y: 0 }];\n`;
+                    code += `        const ${safeName} = Bodies.fromVertices(${relX}, ${relY}, [${safeName}_verts], ${style});\n`;
+                } else if (s.type === 'right_triangle') {
+                    code += `        const ${safeName}_verts = [{ x: -${s.w/2}, y: ${s.h/2} }, { x: ${s.w/2}, y: ${s.h/2} }, { x: -${s.w/2}, y: -${s.h/2} }];\n`;
+                    code += `        const ${safeName} = Bodies.fromVertices(${relX}, ${relY}, [${safeName}_verts], ${style});\n`;
+                }
+
+                if (s.flipX !== 1 || s.flipY !== 1) {
+                    code += `        Body.scale(${safeName}, ${s.flipX}, ${s.flipY});\n`;
                 }
 
                 code += `        ${safeName}.restitution = ${s.bouncy};\n`;
@@ -1103,6 +1188,13 @@
             selectedShape.y = CY;
             rebuildWorld();
             updateInspectorInputs();
+        }
+
+        function toggleFlip(axis) {
+            if (!selectedShape) return;
+            if (axis === 'X') selectedShape.flipX = (selectedShape.flipX || 1) * -1;
+            if (axis === 'Y') selectedShape.flipY = (selectedShape.flipY || 1) * -1;
+            rebuildWorld();
         }
 
         function duplicateSelected() {
