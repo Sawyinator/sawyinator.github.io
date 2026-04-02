@@ -1458,6 +1458,7 @@
         let camY = 0,
             autoResultsShown = false,
             startTime = null,
+            raceTime = 0,
             winnerName = null,
             currentRaceId = null;
 
@@ -2888,6 +2889,7 @@
 
         function setupRace(names) {
             startTime = null;
+            raceTime = 0;
             engine = Engine.create({
                 positionIterations: 10,
                 velocityIterations: 10
@@ -3084,7 +3086,7 @@
                     const marble = p.bodyA.label === 'finish' ? p.bodyB : (p.bodyB.label === 'finish' ? p.bodyA : null);
                     if (marble && !marble.isFinished && marble.label && !marble.label.includes('Body')) {
                         marble.isFinished = true;
-                        marble.finishTime = ((performance.now() - startTime) / 1000).toFixed(2);
+                        marble.finishTime = raceTime.toFixed(2);
                         finishedMarbles.push(marble);
                         saveRaceSnapshot();
                         document.getElementById('resBtn').style.display = 'block';
@@ -3108,6 +3110,7 @@
             let count = 3;
             countDisplay.innerText = count;
             const timer = setInterval(() => {
+                if (document.hidden) return;
                 count--;
                 if (count <= 0) {
                     clearInterval(timer);
@@ -3124,6 +3127,9 @@
             function update(time) {
                 if (time - lastTime >= (1000 / 60)) {
                     Engine.update(engine, 1000 / 60);
+                    if (startTime) {
+                        raceTime += 1 / 60;
+                    }
 
                     // Anti-stuck nudge logic
                     if (startTime) {
