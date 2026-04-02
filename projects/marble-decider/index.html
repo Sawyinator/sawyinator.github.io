@@ -1406,30 +1406,37 @@
                 if (s.type === 'rectangle') opts.chamfer = { radius: 15 };
 
                 let body;
-                if (s.type === 'rectangle') body = Bodies.rectangle(rx, ry, s.w, s.h, opts);
-                else if (s.type === 'circle') body = Bodies.circle(rx, ry, s.w, opts);
-                else if (s.type === 'triangle') body = Bodies.polygon(rx, ry, 3, s.w, opts);
-                else if (s.type === 'diamond') {
-                    const verts = [{ x: 0, y: -s.h/2 }, { x: s.w/2, y: 0 }, { x: 0, y: s.h/2 }, { x: -s.w/2, y: 0 }];
-                    body = Bodies.fromVertices(rx, ry, [verts], opts);
-                } else if (s.type === 'right_triangle') {
-                    const verts = [{ x: -s.w/2, y: s.h/2 }, { x: s.w/2, y: s.h/2 }, { x: -s.w/2, y: -s.h/2 }];
-                    body = Bodies.fromVertices(rx, ry, [verts], opts);
+                const fx = s.flipX || 1;
+                const fy = s.flipY || 1;
+
+                if (s.type === 'rectangle') {
+                    body = Bodies.rectangle(rx, ry, s.w, s.h, opts);
+                } else if (s.type === 'circle') {
+                    body = Bodies.circle(rx, ry, s.w, opts);
+                } else {
+                    let vertices;
+                    if (s.type === 'triangle') {
+                        const sides = 3;
+                        const theta = 2 * Math.PI / sides;
+                        vertices = [];
+                        for (let i = 0; i < sides; i++) {
+                            const angle = i * theta - Math.PI / 2;
+                            vertices.push({ x: s.w * Math.cos(angle), y: s.w * Math.sin(angle) });
+                        }
+                    } else if (s.type === 'diamond') {
+                        vertices = [{ x: 0, y: -s.h/2 }, { x: s.w/2, y: 0 }, { x: 0, y: s.h/2 }, { x: -s.w/2, y: 0 }];
+                    } else if (s.type === 'right_triangle') {
+                        vertices = [{ x: -s.w/2, y: s.h/2 }, { x: s.w/2, y: s.h/2 }, { x: -s.w/2, y: -s.h/2 }];
+                    }
+
+                    if (vertices) {
+                        // Apply flip to vertices before creating body to avoid Body.scale bugs
+                        const flippedVertices = vertices.map(v => ({ x: v.x * fx, y: v.y * fy }));
+                        body = Bodies.fromVertices(rx, ry, [flippedVertices], opts);
+                    }
                 }
 
                 if (body) {
-                    const fx = s.flipX || 1;
-                    const fy = s.flipY || 1;
-                    if (fx !== 1 || fy !== 1) {
-                        Body.scale(body, fx, fy);
-                        // Fix winding order for selection/collision if flipped
-                        if (!Matter.Vertices.clockwise(body.vertices)) {
-                            const reversed = [...body.vertices].reverse();
-                            const pos = { x: body.position.x, y: body.position.y };
-                            Body.setVertices(body, reversed);
-                            Body.setPosition(body, pos);
-                        }
-                    }
                     body.creatorData = s;
                     body.behaviorData = { behavior: s.behavior, speed: s.speed, origX: rx, origY: ry };
                     if (s.behavior === 'rotate') {

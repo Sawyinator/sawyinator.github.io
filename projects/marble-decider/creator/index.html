@@ -627,9 +627,12 @@
                         Body.scale(body, s.flipX, s.flipY);
                         // Fix winding order for selection/collision if flipped
                         if (!Matter.Vertices.clockwise(body.vertices)) {
-                            const reversed = [...body.vertices].reverse();
                             const pos = { x: body.position.x, y: body.position.y };
-                            Body.setVertices(body, reversed);
+                            const relativeVertices = body.vertices.map(v => ({ 
+                                x: v.x - pos.x, 
+                                y: v.y - pos.y 
+                            })).reverse();
+                            Body.setVertices(body, relativeVertices);
                             Body.setPosition(body, pos);
                         }
                     }
@@ -821,6 +824,9 @@
                 };
                 
                 let body;
+                const fx = s.flipX || 1;
+                const fy = s.flipY || 1;
+
                 if (s.type === 'rectangle') {
                     body = Bodies.rectangle(s.x, s.y, s.w, s.h, {
                         ...opts,
@@ -828,33 +834,34 @@
                     });
                 } else if (s.type === 'circle') {
                     body = Bodies.circle(s.x, s.y, s.w, opts);
-                } else if (s.type === 'triangle') {
-                    body = Bodies.polygon(s.x, s.y, 3, s.w, opts);
-                } else if (s.type === 'diamond') {
-                    const vertices = getDiamondVertices(s.w, s.h);
-                    body = Bodies.fromVertices(s.x, s.y, [vertices], opts);
-                } else if (s.type === 'right_triangle') {
-                    const vertices = [
-                        { x: -s.w/2, y: s.h/2 },
-                        { x: s.w/2, y: s.h/2 },
-                        { x: -s.w/2, y: -s.h/2 }
-                    ];
-                    body = Bodies.fromVertices(s.x, s.y, [vertices], opts);
+                } else {
+                    let vertices;
+                    if (s.type === 'triangle') {
+                        const sides = 3;
+                        const theta = 2 * Math.PI / sides;
+                        vertices = [];
+                        for (let i = 0; i < sides; i++) {
+                            const angle = i * theta - Math.PI / 2;
+                            vertices.push({ x: s.w * Math.cos(angle), y: s.w * Math.sin(angle) });
+                        }
+                    } else if (s.type === 'diamond') {
+                        vertices = getDiamondVertices(s.w, s.h);
+                    } else if (s.type === 'right_triangle') {
+                        vertices = [
+                            { x: -s.w/2, y: s.h/2 },
+                            { x: s.w/2, y: s.h/2 },
+                            { x: -s.w/2, y: -s.h/2 }
+                        ];
+                    }
+
+                    if (vertices) {
+                        // Apply flip to vertices before creating body to avoid Body.scale bugs
+                        const flippedVertices = vertices.map(v => ({ x: v.x * fx, y: v.y * fy }));
+                        body = Bodies.fromVertices(s.x, s.y, [flippedVertices], opts);
+                    }
                 }
 
                 if (body) {
-                    const fx = s.flipX || 1;
-                    const fy = s.flipY || 1;
-                    if (fx !== 1 || fy !== 1) {
-                        Body.scale(body, fx, fy);
-                        // Fix winding order for selection/collision if flipped
-                        if (!Matter.Vertices.clockwise(body.vertices)) {
-                            const reversed = [...body.vertices].reverse();
-                            const pos = { x: body.position.x, y: body.position.y };
-                            Body.setVertices(body, reversed);
-                            Body.setPosition(body, pos);
-                        }
-                    }
                     body.restitution = parseFloat(s.bouncy);
                     body.originalRadius = s.w;
                     body.behaviorData = {
