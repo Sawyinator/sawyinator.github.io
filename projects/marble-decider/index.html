@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/favicons/marble-decider-favicon.png">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/favicons/marble-decider.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Bascially just the wheel of names with a fancy way of deciding. Thought it was a fun idea.">
@@ -14,14 +14,14 @@
 <meta property="og:url" content="https://sawyinator.uk/projects/marble-decider">
 <meta property="og:title" content="Marble Decider">
 <meta property="og:description" content="Bascially just the wheel of names with a fancy way of deciding. Thought it was a fun idea.">
-<meta property="og:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/marble-decider-logo.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/marble-decider.png">
 <meta name="theme-color" content="#64ff4e">
 
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="https://sawyinator.uk/projects/marble-decider">
 <meta property="twitter:title" content="Marble Decider">
 <meta property="twitter:description" content="Bascially just the wheel of names with a fancy way of deciding. Thought it was a fun idea.">
-<meta property="twitter:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/marble-decider-logo.png">
+<meta property="twitter:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/marble-decider.png">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -1895,12 +1895,25 @@
             document.getElementById('clear-storage-modal').style.display = 'flex';
         }
 
+        const marbleKeys = [
+            'marbleCustomModules',
+            'marbleEnabledModules',
+            'marbleRacerNames',
+            'marbleColors',
+            'marbleImages',
+            'marbleImagesToggle',
+            'showNamesToggle',
+            'rotationLockToggle',
+            'marbleRaceHistory',
+            'showHistoryTimes'
+        ];
+
         function exportData() {
             const data = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                data[key] = localStorage.getItem(key);
-            }
+            marbleKeys.forEach(key => {
+                const val = localStorage.getItem(key);
+                if (val !== null) data[key] = val;
+            });
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1923,10 +1936,12 @@
                 reader.onload = event => {
                     try {
                         const data = JSON.parse(event.target.result);
-                        showCustomConfirm('OVERWRITE DATA?', 'This will overwrite your current data. Are you sure you want to proceed?', () => {
-                            localStorage.clear();
+                        showCustomConfirm('OVERWRITE DATA?', 'This will overwrite your current Marble Decider data. Are you sure you want to proceed?', () => {
+                            marbleKeys.forEach(key => localStorage.removeItem(key));
                             for (const key in data) {
-                                localStorage.setItem(key, data[key]);
+                                if (marbleKeys.includes(key)) {
+                                    localStorage.setItem(key, data[key]);
+                                }
                             }
                             window.location.reload();
                         });
@@ -1940,7 +1955,7 @@
         }
 
         function clearStorage() {
-            localStorage.clear();
+            marbleKeys.forEach(key => localStorage.removeItem(key));
             window.location.reload();
         }
 

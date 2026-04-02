@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/favicons/a-int-favicon.png">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/favicons/a-int.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A trainer to help with learning different numeral types such as Arabic-Indic and Devanagari.">
@@ -15,14 +15,14 @@
     <meta property="og:url" content="https://sawyinator.uk/projects/a-int">
     <meta property="og:title" content="Arabic Indic Number Trainer (A-INT)">
     <meta property="og:description" content="A trainer to help with learning different numeral types such as Arabic-Indic and Devanagari.">
-    <meta property="og:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/a-int-logo.png">
+    <meta property="og:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/a-int.png">
     <meta name="theme-color" content="#52368B">
 
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://sawyinator.uk/projects/a-int">
     <meta property="twitter:title" content="Arabic Indic Number Trainer (A-INT)">
     <meta property="twitter:description" content="A trainer to help with learning different numeral types such as Arabic-Indic and Devanagari.">
-    <meta property="twitter:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/a-int-logo.png">
+    <meta property="twitter:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/a-int.png">
     <style>
         :root {
             --bg: #121212;
@@ -822,11 +822,11 @@
             body.classList.toggle('light-mode');
             const isLight = body.classList.contains('light-mode');
             toggle.innerText = isLight ? "☀️" : "🌙";
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            localStorage.setItem('aint_theme', isLight ? 'light' : 'dark');
         }
 
         function loadSettings() {
-            const savedTheme = localStorage.getItem('theme');
+            const savedTheme = localStorage.getItem('aint_theme');
             if (savedTheme === 'light') {
                 document.body.classList.add('light-mode');
                 document.getElementById('theme-toggle').innerText = "☀️";
@@ -1173,16 +1173,26 @@
             });
         }
 
+        function isAintKey(key) {
+            const aintKeys = ['aint_theme', 'allowed_digits', 'learning_script', 'basis_script', 'custom_timer'];
+            return aintKeys.includes(key) || key.startsWith('best_len');
+        }
+
         function wipeAllLocalStorage() {
-            openModal("Factory Reset?", "This will permanently delete ALL settings, high scores, and preferences. The app will reload.", () => {
-                localStorage.clear();
+            openModal("Factory Reset?", "This will permanently delete ALL A-INT settings, high scores, and preferences. The app will reload.", () => {
+                Object.keys(localStorage).forEach(key => {
+                    if (isAintKey(key)) localStorage.removeItem(key);
+                });
                 location.reload();
             });
         }
 
         function exportData() {
-            const data = JSON.stringify(localStorage);
-            const blob = new Blob([data], {
+            const data = {};
+            Object.keys(localStorage).forEach(key => {
+                if (isAintKey(key)) data[key] = localStorage.getItem(key);
+            });
+            const blob = new Blob([JSON.stringify(data)], {
                 type: "application/json"
             });
             const url = URL.createObjectURL(blob);
@@ -1207,9 +1217,13 @@
             reader.onload = (e) => {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    openModal("Import Data?", "This will overwrite your current scores and settings. Continue?", () => {
-                        localStorage.clear();
-                        Object.keys(imported).forEach(k => localStorage.setItem(k, imported[k]));
+                    openModal("Import Data?", "This will overwrite your current A-INT scores and settings. Continue?", () => {
+                        Object.keys(localStorage).forEach(key => {
+                            if (isAintKey(key)) localStorage.removeItem(key);
+                        });
+                        Object.keys(imported).forEach(k => {
+                            if (isAintKey(k)) localStorage.setItem(k, imported[k]);
+                        });
                         location.reload();
                     });
                 } catch (err) {
