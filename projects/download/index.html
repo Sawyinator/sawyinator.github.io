@@ -155,17 +155,15 @@
 
                     const title = item.querySelector('.project-title').innerText;
                     const icon = item.querySelector('.project-icon').src;
-                    const desc = item.querySelector('.project-description').innerText;
 
                     const card = document.createElement('div');
                     card.className = 'glass p-6 rounded-2xl project-card border border-white/10 transition-all flex flex-col justify-between';
                     card.innerHTML = `
                         <div>
-                            <div class="flex items-center gap-4 mb-4">
-                                <img src="${icon}" alt="${title}" class="w-12 h-12 rounded-xl object-contain bg-white/5 p-2">
-                                <h3 class="font-bold text-lg leading-tight">${title}</h3>
+                            <div class="flex flex-col items-center text-center gap-4 mb-6">
+                                <img src="${icon}" alt="${title}" class="w-24 h-24 rounded-2xl object-contain bg-white/5 p-3">
+                                <h3 class="font-bold text-xl leading-tight">${title}</h3>
                             </div>
-                            <p class="text-sm opacity-60 line-clamp-2 mb-6">${desc}</p>
                         </div>
                         <button onclick="downloadProject('${href}', '${title}')" class="btn-primary w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                             <i data-lucide="download" class="w-4 h-4"></i>
@@ -268,6 +266,12 @@
             container.innerHTML = `<button onclick="navigateToAssetPath('')" class="hover:text-[#007DFF]">assets</button>`;
             
             if (!assetPath) return;
+
+            // Add a slash after the root "assets"
+            const slash = document.createElement('span');
+            slash.className = 'mx-2 opacity-50';
+            slash.innerText = '/';
+            container.appendChild(slash);
 
             const parts = assetPath.split('/');
             let currentPath = '';
