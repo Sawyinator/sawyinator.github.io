@@ -145,27 +145,56 @@
                 const projectsGrid = document.getElementById('projects-grid');
                 projectsGrid.innerHTML = '';
 
-                const projectItems = doc.querySelectorAll('nav ul li');
-                projectItems.forEach(item => {
+                const projectItems = Array.from(doc.querySelectorAll('nav ul li'));
+                
+                // Fetch all project data including favicons in parallel
+                const projectData = await Promise.all(projectItems.map(async item => {
                     const link = item.querySelector('a');
-                    const href = link.getAttribute('href');
+                    if (!link) return null;
                     
-                    // Filter out non-project links
-                    if (href.startsWith('http') || href === '/projects/download/' || href === '/') return;
+                    const href = link.getAttribute('href');
+                    if (href.startsWith('http') || href === '/projects/download/' || href === '/') return null;
 
                     const title = item.querySelector('.project-title').innerText;
-                    const icon = item.querySelector('.project-icon').src;
+                    const fallbackIcon = item.querySelector('.project-icon').src;
+                    
+                    let icon = fallbackIcon;
+                    try {
+                        // Peek into the project's index.html to find its favicon
+                        const projectUrl = href.endsWith('/') ? href : href + '/';
+                        const pResp = await fetch(projectUrl + 'index.html');
+                        if (pResp.ok) {
+                            const pHtml = await pResp.text();
+                            const pDoc = parser.parseFromString(pHtml, 'text/html');
+                            const fav = pDoc.querySelector('link[rel*="icon"]');
+                            if (fav) {
+                                let favHref = fav.getAttribute('href');
+                                // Resolve relative paths
+                                if (!favHref.startsWith('http') && !favHref.startsWith('/')) {
+                                    icon = projectUrl + favHref;
+                                } else {
+                                    icon = favHref;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Favicon fetch failed for', title);
+                    }
 
+                    return { title, icon, href };
+                }));
+
+                projectData.filter(p => p !== null).forEach(p => {
                     const card = document.createElement('div');
                     card.className = 'glass p-6 rounded-2xl project-card border border-white/10 transition-all flex flex-col justify-between';
                     card.innerHTML = `
                         <div>
                             <div class="flex flex-col items-center text-center gap-4 mb-6">
-                                <img src="${icon}" alt="${title}" class="w-24 h-24 rounded-2xl object-contain bg-white/5 p-3">
-                                <h3 class="font-bold text-xl leading-tight">${title}</h3>
+                                <img src="${p.icon}" alt="${p.title}" class="w-24 h-24 rounded-2xl object-contain bg-white/5 p-3">
+                                <h3 class="font-bold text-xl leading-tight">${p.title}</h3>
                             </div>
                         </div>
-                        <button onclick="downloadProject('${href}', '${title}')" class="btn-primary w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <button onclick="downloadProject('${p.href}', '${p.title}')" class="btn-primary w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                             <i data-lucide="download" class="w-4 h-4"></i>
                             Download index.html
                         </button>
