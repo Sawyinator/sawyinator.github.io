@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Downloads | Sawyinator.uk</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/placeholder.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -58,7 +58,7 @@
             <a href="/" class="p-2 hover:bg-white/10 rounded-full transition-colors">
                 <i data-lucide="arrow-left" class="w-6 h-6"></i>
             </a>
-            <h1 class="text-xl font-bold tracking-tight">Downloads</h1>
+            <h1 class="text-xl font-bold tracking-tight">Downloads Hub</h1>
         </div>
         <div class="flex items-center gap-2 text-sm opacity-60">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
@@ -73,7 +73,7 @@
                 Projects
             </button>
             <button onclick="switchTab('assets')" id="tab-assets" class="px-4 py-2 rounded-lg font-medium transition-all text-white/60 hover:text-white">
-                Assets
+                Assets Repository
             </button>
         </div>
 
@@ -145,56 +145,29 @@
                 const projectsGrid = document.getElementById('projects-grid');
                 projectsGrid.innerHTML = '';
 
-                const projectItems = Array.from(doc.querySelectorAll('nav ul li'));
-                
-                // Fetch all project data including favicons in parallel
-                const projectData = await Promise.all(projectItems.map(async item => {
+                const projectItems = doc.querySelectorAll('nav ul li');
+                projectItems.forEach(item => {
                     const link = item.querySelector('a');
-                    if (!link) return null;
-                    
                     const href = link.getAttribute('href');
-                    if (href.startsWith('http') || href === '/projects/download/' || href === '/') return null;
+                    
+                    // Filter out non-project links
+                    if (href.startsWith('http') || href === '/projects/download/' || href === '/') return;
 
                     const title = item.querySelector('.project-title').innerText;
-                    const fallbackIcon = item.querySelector('.project-icon').src;
-                    
-                    let icon = fallbackIcon;
-                    try {
-                        // Peek into the project's index.html to find its favicon
-                        const projectUrl = href.endsWith('/') ? href : href + '/';
-                        const pResp = await fetch(projectUrl + 'index.html');
-                        if (pResp.ok) {
-                            const pHtml = await pResp.text();
-                            const pDoc = parser.parseFromString(pHtml, 'text/html');
-                            const fav = pDoc.querySelector('link[rel*="icon"]');
-                            if (fav) {
-                                let favHref = fav.getAttribute('href');
-                                // Resolve relative paths
-                                if (!favHref.startsWith('http') && !favHref.startsWith('/')) {
-                                    icon = projectUrl + favHref;
-                                } else {
-                                    icon = favHref;
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        console.warn('Favicon fetch failed for', title);
-                    }
+                    const icon = item.querySelector('.project-icon').src;
+                    const desc = item.querySelector('.project-description').innerText;
 
-                    return { title, icon, href };
-                }));
-
-                projectData.filter(p => p !== null).forEach(p => {
                     const card = document.createElement('div');
                     card.className = 'glass p-6 rounded-2xl project-card border border-white/10 transition-all flex flex-col justify-between';
                     card.innerHTML = `
                         <div>
-                            <div class="flex flex-col items-center text-center gap-4 mb-6">
-                                <img src="${p.icon}" alt="${p.title}" class="w-24 h-24 rounded-2xl object-contain bg-white/5 p-3">
-                                <h3 class="font-bold text-xl leading-tight">${p.title}</h3>
+                            <div class="flex items-center gap-4 mb-4">
+                                <img src="${icon}" alt="${title}" class="w-12 h-12 rounded-xl object-contain bg-white/5 p-2">
+                                <h3 class="font-bold text-lg leading-tight">${title}</h3>
                             </div>
+                            <p class="text-sm opacity-60 line-clamp-2 mb-6">${desc}</p>
                         </div>
-                        <button onclick="downloadProject('${p.href}', '${p.title}')" class="btn-primary w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <button onclick="downloadProject('${href}', '${title}')" class="btn-primary w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                             <i data-lucide="download" class="w-4 h-4"></i>
                             Download index.html
                         </button>
@@ -295,12 +268,6 @@
             container.innerHTML = `<button onclick="navigateToAssetPath('')" class="hover:text-[#007DFF]">assets</button>`;
             
             if (!assetPath) return;
-
-            // Add a slash after the root "assets"
-            const slash = document.createElement('span');
-            slash.className = 'mx-2 opacity-50';
-            slash.innerText = '/';
-            container.appendChild(slash);
 
             const parts = assetPath.split('/');
             let currentPath = '';
