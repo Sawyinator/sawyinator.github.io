@@ -92,6 +92,7 @@
                 </h2>
                 <a id="video-link" href="#" target="_blank" class="flex flex-col sm:flex-row gap-4 group">
                     <div class="relative w-full sm:w-48 aspect-video rounded-xl overflow-hidden border border-white/10">
+                        <div id="new-badge" class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider z-20 hidden shadow-[0_0_10px_rgba(220,38,38,0.5)]">New</div>
                         <img id="video-thumb" src="" alt="Video Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         <div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/0 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 opacity-80"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -177,6 +178,14 @@
                     document.getElementById('video-link').href = latestVideo.link;
                     
                     const pubDate = new Date(latestVideo.pubDate);
+                    const now = new Date();
+                    const diffTime = Math.abs(now - pubDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays <= 30) {
+                        document.getElementById('new-badge').classList.remove('hidden');
+                    }
+
                     document.getElementById('video-date').innerText = pubDate.toLocaleDateString('en-GB', {
                         day: 'numeric',
                         month: 'long',
