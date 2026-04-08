@@ -56,7 +56,7 @@
     <!-- Header -->
     <header class="sticky top-0 z-50 glass px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <a href="/" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <a href="../../" class="p-2 hover:bg-white/10 rounded-full transition-colors">
                 <i data-lucide="arrow-left" class="w-6 h-6"></i>
             </a>
             <h1 class="text-xl font-bold tracking-tight">Downloads</h1>
@@ -149,7 +149,7 @@
 
         async function loadProjects() {
             try {
-                const response = await fetch('/');
+                const response = await fetch('../../');
                 const html = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
@@ -165,7 +165,7 @@
                     if (!link) return null;
                     
                     const href = link.getAttribute('href');
-                    if (href.startsWith('http') || href === '/projects/download/' || href === '/') return null;
+                    if (href.startsWith('http') || href.includes('/projects/download/') || href === '/' || href === './' || href === '../' || href === '../../') return null;
 
                     const title = item.querySelector('.project-title').innerText;
                     const fallbackIcon = item.querySelector('.project-icon').src;
