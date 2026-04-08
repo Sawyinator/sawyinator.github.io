@@ -6,7 +6,7 @@
     <title>By Sawyinator | Sawyinator.uk</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator.svg">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.473.0/dist/umd/lucide.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -44,6 +44,12 @@
             background: rgba(255, 255, 255, 0.1);
             border-color: rgba(255, 255, 255, 0.3);
         }
+        /* Icon Fallback */
+        svg.lucide {
+            stroke: white !important;
+            width: 24px !important;
+            height: 24px !important;
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-6">
@@ -65,14 +71,12 @@
         </div>
 
         <!-- Social Links (Moved to top) -->
-        <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-            <a href="https://youtube.com/@sawyinator" target="_blank" class="glass p-4 rounded-2xl social-link flex flex-col items-center gap-2 border border-white/10">
+        <div class="flex justify-center gap-4">
+            <a href="https://youtube.com/@sawyinator" target="_blank" class="glass p-4 rounded-2xl social-link flex items-center justify-center border border-white/10" title="YouTube">
                 <i data-lucide="youtube" class="w-6 h-6 text-white"></i>
-                <span class="text-xs font-medium uppercase tracking-wider">YouTube</span>
             </a>
-            <a href="https://github.com/Sawyinator" target="_blank" class="glass p-4 rounded-2xl social-link flex flex-col items-center gap-2 border border-white/10">
+            <a href="https://github.com/Sawyinator" target="_blank" class="glass p-4 rounded-2xl social-link flex items-center justify-center border border-white/10" title="GitHub">
                 <i data-lucide="github" class="w-6 h-6 text-white"></i>
-                <span class="text-xs font-medium uppercase tracking-wider">GitHub</span>
             </a>
         </div>
 
@@ -109,7 +113,7 @@
                 <p class="opacity-70 leading-relaxed">
                     Yo, I'm Sawyinator. My real name, though, is Brook. I'm based in Yorkshire, England, and I'm big on playing video games. If you want to see them, I post clips and highlights from all of the games I play with my friends on my <a href="https://youtube.com/@sawyinator" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">YouTube channel</a> (linked on the main page and above).
                     <br><br>
-                    Everything here is open-source and available on <a href="https://github.com/Sawyinator" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">GitHub</a>. Explore it at your own leisure.
+                    Everything here is open-source and available on <a href="https://github.com/Sawyinator/sawyinator.github.io/" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">GitHub</a>. Explore it at your own leisure.
                 </p>
             </div>
 
@@ -152,10 +156,21 @@
     </div>
 
     <script>
-        // Initialize icons on load
-        window.addEventListener('load', () => {
-            lucide.createIcons();
-        });
+        // Function to safely initialize icons
+        function initIcons() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                // If lucide isn't ready, wait 100ms and try again
+                setTimeout(initIcons, 100);
+            }
+        }
+
+        // Try immediately
+        initIcons();
+
+        // Also try on load to be safe
+        window.addEventListener('load', initIcons);
 
         // Fetch Latest YouTube Video
         async function fetchLatestVideo() {
@@ -183,7 +198,7 @@
 
                     document.getElementById('latest-video-container').classList.remove('hidden');
                     // Re-run icon creation for the newly visible section
-                    lucide.createIcons();
+                    initIcons();
                 }
             } catch (error) {
                 console.error('Error fetching latest video:', error);
