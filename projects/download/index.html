@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -68,13 +69,23 @@
 
     <main class="max-w-6xl mx-auto px-6 mt-12">
         <!-- Tabs -->
-        <div class="flex gap-4 mb-8 border-b border-white/10 pb-4">
-            <button onclick="switchTab('projects')" id="tab-projects" class="px-4 py-2 rounded-lg font-medium transition-all bg-white/10 text-white">
-                Projects
-            </button>
-            <button onclick="switchTab('assets')" id="tab-assets" class="px-4 py-2 rounded-lg font-medium transition-all text-white/60 hover:text-white">
-                Assets
-            </button>
+        <div class="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
+            <div class="flex gap-4">
+                <button onclick="switchTab('projects')" id="tab-projects" class="px-4 py-2 rounded-lg font-medium transition-all bg-white/10 text-white">
+                    Projects
+                </button>
+                <button onclick="switchTab('assets')" id="tab-assets" class="px-4 py-2 rounded-lg font-medium transition-all text-white/60 hover:text-white">
+                    Assets
+                </button>
+            </div>
+
+            <div id="legacy-toggle-container" class="flex items-center gap-6">
+                <label class="relative inline-flex items-center cursor-pointer group">
+                    <input type="checkbox" id="toggle-legacy" class="sr-only peer">
+                    <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#007DFF]"></div>
+                    <span class="ms-3 text-sm font-medium opacity-70 group-hover:opacity-100 transition-opacity">Include Legacy Versions</span>
+                </label>
+            </div>
         </div>
 
         <!-- Projects Section -->
@@ -125,6 +136,7 @@
             currentTab = tab;
             document.getElementById('section-projects').classList.toggle('hidden', tab !== 'projects');
             document.getElementById('section-assets').classList.toggle('hidden', tab !== 'assets');
+            document.getElementById('legacy-toggle-container').classList.toggle('hidden', tab !== 'projects');
             
             document.getElementById('tab-projects').className = tab === 'projects' 
                 ? 'px-4 py-2 rounded-lg font-medium transition-all bg-white/10 text-white'
@@ -194,9 +206,9 @@
                                 <h3 class="font-bold text-xl leading-tight">${p.title}</h3>
                             </div>
                         </div>
-                        <button onclick="downloadProject('${p.href}', '${p.title}')" class="btn-primary w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                            Download index.html
+                        <button onclick="downloadProjectBundle('${p.href}', '${p.title}')" class="btn-primary w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 group">
+                            <i data-lucide="folder-archive" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                            Download Bundle (.zip)
                         </button>
                     `;
                     projectsGrid.appendChild(card);
@@ -313,6 +325,86 @@
                 btn.onclick = () => navigateToAssetPath(targetPath);
                 container.appendChild(btn);
             });
+        }
+
+        async function downloadProjectBundle(path, name) {
+            const includeLegacy = document.getElementById('toggle-legacy').checked;
+            const zip = new JSZip();
+            const projectFolder = zip.folder(name.toLowerCase().replace(/\s+/g, '-'));
+            
+            // Show loading state on button
+            const btn = event.currentTarget;
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Bundling...`;
+            lucide.createIcons();
+
+            try {
+                // Base path normalization
+                const baseUrl = path.endsWith('/') ? path : path + '/';
+                
+                // Files to attempt to fetch
+                const tasks = [];
+                
+                // 1. Root index.html
+                tasks.push(fetchFile(baseUrl + 'index.html').then(data => {
+                    if (data) projectFolder.file('index.html', data);
+                }));
+
+                // 2. Legacy folder (if enabled)
+                if (includeLegacy) {
+                    tasks.push(fetchFile(baseUrl + 'legacy/index.html').then(data => {
+                        if (data) projectFolder.folder('legacy').file('index.html', data);
+                    }));
+                }
+
+                // 3. Subfolders (like 'creator' for marble-decider)
+                // We'll try to detect 'creator' specifically as requested
+                tasks.push(fetchFile(baseUrl + 'creator/index.html').then(async data => {
+                    if (data) {
+                        const creatorFolder = projectFolder.folder('creator');
+                        creatorFolder.file('index.html', data);
+                        
+                        // Check for creator's legacy if enabled
+                        if (includeLegacy) {
+                            const legacyData = await fetchFile(baseUrl + 'creator/legacy/index.html');
+                            if (legacyData) {
+                                creatorFolder.folder('legacy').file('index.html', legacyData);
+                            }
+                        }
+                    }
+                }));
+
+                await Promise.all(tasks);
+
+                const content = await zip.generateAsync({ type: 'blob' });
+                const url = window.URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${name.toLowerCase().replace(/\s+/g, '-')}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                console.error('Bundling failed:', error);
+                alert('Failed to create project bundle.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                lucide.createIcons();
+            }
+        }
+
+        async function fetchFile(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) return null;
+                return await response.blob();
+            } catch (e) {
+                return null;
+            }
         }
 
         async function downloadProject(path, name) {
