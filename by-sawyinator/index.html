@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>By Sawyinator | Sawyinator.uk</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #0a0e17, #05070a, #020203);
+            color: #e5e5e5;
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .profile-pic-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin: 0 auto;
+        }
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .social-link {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .social-link:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-6">
+    
+    <a href="/" class="fixed top-8 left-8 p-3 glass rounded-full hover:bg-white/10 transition-colors group">
+        <i data-lucide="arrow-left" class="w-6 h-6 group-hover:-translate-x-1 transition-transform"></i>
+    </a>
+
+    <div class="max-w-2xl w-full text-center space-y-8">
+        <!-- Profile Header -->
+        <div class="space-y-4">
+            <div class="profile-pic-container">
+                <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator-youtube.svg" alt="Sawyinator" class="profile-pic">
+            </div>
+            <div>
+                <h1 class="text-4xl font-bold tracking-tight text-white">Sawyinator</h1>
+                <p class="text-lg opacity-50 font-light mt-1">silly guy</p>
+            </div>
+        </div>
+
+        <!-- Social Links (Moved to top) -->
+        <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+            <a href="https://youtube.com/@sawyinator" target="_blank" class="glass p-4 rounded-2xl social-link flex flex-col items-center gap-2 border border-white/10">
+                <i data-lucide="youtube" class="w-6 h-6 text-[#FF0000]"></i>
+                <span class="text-xs font-medium uppercase tracking-wider">YouTube</span>
+            </a>
+            <a href="https://github.com/Sawyinator" target="_blank" class="glass p-4 rounded-2xl social-link flex flex-col items-center gap-2 border border-white/10">
+                <i data-lucide="github" class="w-6 h-6 text-white"></i>
+                <span class="text-xs font-medium uppercase tracking-wider">GitHub</span>
+            </a>
+        </div>
+
+        <!-- Latest Video Section -->
+        <div id="latest-video-container" class="hidden">
+            <div class="glass p-6 rounded-3xl text-left space-y-4">
+                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                    <i data-lucide="play-circle" class="w-5 h-5 text-[#FF0000]"></i>
+                    Latest Upload
+                </h2>
+                <a id="video-link" href="#" target="_blank" class="flex flex-col sm:flex-row gap-4 group">
+                    <div class="relative w-full sm:w-48 aspect-video rounded-xl overflow-hidden border border-white/10">
+                        <img id="video-thumb" src="" alt="Video Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/0 transition-colors">
+                            <i data-lucide="play" class="w-8 h-8 text-white fill-white opacity-80"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 space-y-2 py-1">
+                        <h3 id="video-title" class="font-bold text-lg leading-tight group-hover:text-[#007DFF] transition-colors line-clamp-2">Loading...</h3>
+                        <p id="video-date" class="text-xs opacity-40 uppercase tracking-widest font-medium"></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bio Sections -->
+        <div class="space-y-6">
+            <!-- About Me -->
+            <div class="glass p-8 rounded-3xl text-left space-y-4">
+                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                    <i data-lucide="user" class="w-5 h-5 text-[#007DFF]"></i>
+                    About Me
+                </h2>
+                <p class="opacity-70 leading-relaxed">
+                    Yo, I'm Sawyinator. My real name, though, is Brook. I'm based in Yorkshire, England, and I'm big on playing video games. If you want to see them, I post clips and highlights from all of the games I play with my friends on my <a href="https://youtube.com/@sawyinator" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">YouTube channel</a> (linked on the main page and above).
+                    <br><br>
+                    Everything here is open-source and available on <a href="https://github.com/Sawyinator" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">GitHub</a>. Explore it at your own leisure.
+                </p>
+            </div>
+
+            <div class="glass p-8 rounded-3xl text-left space-y-4">
+                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                    <i data-lucide="book-open" class="w-5 h-5 text-[#007DFF]"></i>
+                    The Story of Sawyinator.uk
+                </h2>
+                <div class="opacity-70 leading-relaxed space-y-4">
+                    <p>
+                        Most of this website is just a passion project that I started because of one simple thing, and that thing is <a href="/projects/a-int/" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">A-INT</a>. So, story-time.
+                    </p>
+                    <p>
+                        When I was in high school, I was in my business class, and I was bored as all hell. Naturally, I started doing everything in my power to pay less attention to the teacher, and that resulted in me fiddling around with the Apple Watch I had on at the time. I started flicking through the different face styles you could have, messing around with the complications, and I landed on the Numerals Duo style. While doing this, I managed to stumble across the different numeral styles available, and at the time I think there was only Arabic-Indic and Devanagari. At this point in my life, I didn't even know that there were different styles for numbers; I had thought that everyone used the Western Arabic digits, so I ended up being quite intrigued. I decided "fuck it," flipped on the Arabic-Indic digits, and let it stick. Anything to get away from the boredom of business—and learning this fascinating new number system seemed like a good way to do that.
+                    </p>
+                    <p>
+                        So over the course of the next year, I learned these numbers using my watch. I had a full grasp on what each number was (minus some periodic confusion over 2 and 6, or 7 and 8), but then Apple dropped the update which allowed you to customise your home screen, including changing the digit style. This meant that after about a year of learning these numerals from my watch, I was also able to have them on my phone. This was groundbreaking to me, and I started seeing the lack of fluency in my reading of those digits now that I had no other way to read the time.
+                    </p>
+                    <p>
+                        After a long while (maybe a couple of years? I'm pretty bad with time, to be honest), I decided that because my fluency hadn't improved at all, I needed to do something. So I hopped on Gemini and generated a simple basis for A-INT.
+                    </p>
+                    <p>
+                        I got sick of throwing this HTML file I had downloaded on my PC around, so I bit the bullet, made a GitHub account, and uploaded A-INT. This made it click in my head: "Oh shit, this is public now, and if people need it, they can use it." I began working on making the page appealing and selling this HTML file (metaphorically selling—the file was and is free). Things spiralled; I added a feature to A-INT, then another, and then another, and I ended up with a pretty solid program. But I still had one issue: I was sick of this damn HTML file. That led me to GitHub Pages, a free way to have the project be accessible from any browser. Therefore, I began work on a <a href="/legacy/legacy-v2/" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">basic landing page</a> and uploaded A-INT to GitHub Pages (this was still sawyinator.github.io at the time).
+                    </p>
+                    <p>
+                        Something about having a website that everyone in the world could access lit a fire under me, and the urge to build, and build, and build just overtook me. After improving A-INT to a point where I didn't think it had much more room for improvement, I decided to buy a domain. I looked across Cloudflare and found that '<a href="/" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">sawyinator.uk</a>' was pretty damn cheap. (To be honest, I don't remember if the <a href="/projects/cmd-shutdown-timer/" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">CMD Shutdown Timer</a> or the new domain name came first, so we're just going with the story that the domain name came first.)
+                    </p>
+                    <p>
+                        So, I bought it.
+                    </p>
+                    <p>
+                        And with that, we're at the conception of sawyinator.uk as it is today. Long story, but nonetheless, that's the entire series of events that led us here. Now that I look back at this description, I realise how warranted an ASD diagnosis was, lol.
+                    </p>
+                    <p>
+                        Thank you for reading this. I don't quite even know why I wanted to tell this whole story, but you reading it—even if it was only you—made it all worth it. Now you know me a little better, and it's a nice thought that someone who could be across the globe, someone I don't even know, now understands me even if just a little. I hope you have a lovely day. This will be Sawyinator signing off.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Fetch Latest YouTube Video
+        async function fetchLatestVideo() {
+            const channelId = 'UCGwRfnjAfRDenCvBIbidRvA';
+            const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.status === 'ok' && data.items.length > 0) {
+                    const latestVideo = data.items[0];
+                    
+                    document.getElementById('video-title').innerText = latestVideo.title;
+                    document.getElementById('video-thumb').src = latestVideo.thumbnail;
+                    document.getElementById('video-link').href = latestVideo.link;
+                    
+                    const pubDate = new Date(latestVideo.pubDate);
+                    document.getElementById('video-date').innerText = pubDate.toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+
+                    document.getElementById('latest-video-container').classList.remove('hidden');
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                console.error('Error fetching latest video:', error);
+            }
+        }
+
+        fetchLatestVideo();
+    </script>
+</body>
+</html>
