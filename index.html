@@ -27,6 +27,7 @@
     <meta property="twitter:title" content="Sawyinator.uk">
     <meta property="twitter:description" content="A website of all of my projects and some relevant profiles.">
     <meta property="twitter:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator.svg">
+    <script src="https://unpkg.com/lucide@latest"></script>
 <style>
     body {
         margin: 0;
@@ -118,6 +119,10 @@
         /* Keeps the logo perfectly centered regardless of text */
         margin-bottom: 50px; 
         transition: transform 0.3s ease;
+    }
+
+    img.project-icon {
+        filter: brightness(0) invert(1);
     }
 
     /* Special handling for the placeholder emojis */
@@ -320,7 +325,7 @@
                 <a href="https://youtube.com/@sawyinator" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator.svg" alt="Sawyinator Logo" class="project-icon">
+                    <i data-lucide="youtube" class="project-icon text-white"></i>
                     <span class="project-title">YouTube Channel</span>
                 
                     <div class="project-description" style="display:none;">
@@ -332,7 +337,7 @@
                 <a href="https://github.com/Sawyinator" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/github.png" alt="Github Logo" class="project-icon">
+                    <i data-lucide="github" class="project-icon text-white"></i>
                     <span class="project-title">GitHub Page</span>
                 
                     <div class="project-description" style="display:none;">
@@ -468,6 +473,15 @@ function closeModal(event) {
         document.getElementById('infoModal').style.display = 'none';
     }
 }
+
+// Initialize Lucide icons
+function initIcons() {
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+}
+document.addEventListener('DOMContentLoaded', initIcons);
+initIcons();
 </script>
 </body>
 </html>
