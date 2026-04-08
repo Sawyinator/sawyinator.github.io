@@ -120,6 +120,25 @@
         transition: transform 0.3s ease;
     }
 
+    /* NEW Badge Styling */
+    .new-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(50%, -50%);
+        background: #dc2626;
+        color: white;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        z-index: 30;
+        box-shadow: 0 0 15px rgba(220, 38, 38, 0.6);
+        pointer-events: none;
+    }
+
     img.project-icon {
         /* Removed filter to show original icon colors */
     }
@@ -323,7 +342,7 @@
             <li>
                 <a href="https://youtube.com/@sawyinator" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
+                    <div id="youtube-new-badge" class="new-badge" style="display: none;">New</div>
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator.svg" alt="YouTube Icon" class="project-icon">
                     <span class="project-title">YouTube Channel</span>
                 
@@ -472,6 +491,33 @@ function closeModal(event) {
         document.getElementById('infoModal').style.display = 'none';
     }
 }
+
+// Fetch Latest YouTube Video for NEW badge
+async function checkYouTubeNew() {
+    const channelId = 'UCGwRfnjAfRDenCvBIbidRvA';
+    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+    try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.status === 'ok' && data.items.length > 0) {
+            const latestVideo = data.items[0];
+            const pubDate = new Date(latestVideo.pubDate);
+            const now = new Date();
+            const diffTime = Math.abs(now - pubDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays <= 500) {
+                document.getElementById('youtube-new-badge').style.display = 'block';
+            }
+        }
+    } catch (error) {
+        console.error('Error checking YouTube status:', error);
+    }
+}
+checkYouTubeNew();
 </script>
 </body>
 </html>
