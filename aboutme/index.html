@@ -55,7 +55,7 @@
             top: 0;
             left: 0;
             transform: translate(-20%, -20%);
-            background: #dc2626;
+            background: #ff0000;
             color: white;
             font-size: 12px;
             font-weight: 800;
@@ -64,7 +64,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             z-index: 30;
-            box-shadow: 0 0 15px rgba(220, 38, 38, 0.6);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
             pointer-events: none;
         }
     </style>
@@ -200,7 +200,7 @@
                     const diffTime = Math.abs(now - pubDate);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                    if (diffDays <= 500) {
+                    if (diffDays <= 30) {
                         document.getElementById('new-badge').classList.remove('hidden');
                     }
 
