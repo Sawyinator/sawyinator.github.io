@@ -2,6 +2,23 @@
 <html lang="en">
 
 <head>
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                if (window.location.pathname.endsWith('/')) window.location.href = 'index.html';
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/favicons/sawyinator-old.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -340,13 +357,13 @@
 </head>
 
 <body>
-    <a href="../index.html" class="legacy-top-btn">
+    <a href="../" class="legacy-top-btn">
         <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" alt="" class="legacy-btn">
         <span>go back to the fuckin legacy finder</span>
     </a>
 
     <header>
-      <h1>Not this one <a href="../../../aboutme/index.html">dipshit</a></h1>
+      <h1>Not this one <a href="../../../aboutme/">dipshit</a></h1>
       <p>I mean, <i>come on</i> dude,</p>
       <p>this is a website to <i>find</i> the legacy versions</p>
       <p>why, of all of the projects on here, would you choose to look at the legacy version for <i>this</i> page</p>

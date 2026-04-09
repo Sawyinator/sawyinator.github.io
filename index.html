@@ -27,6 +27,33 @@
     <meta property="twitter:title" content="Sawyinator.uk">
     <meta property="twitter:description" content="A website of all of my projects and some relevant profiles.">
     <meta property="twitter:image" content="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator.svg">
+
+    <script>
+        // Local file path support: Fixes links to work without a web server
+        (function() {
+            if (window.location.protocol === 'file:') {
+                // 1. If we are at a directory root, try to redirect (only works if the browser actually loads this script)
+                if (window.location.pathname.endsWith('/')) {
+                    window.location.href = 'index.html';
+                }
+
+                // 2. The real fix: Intercept all link clicks and append 'index.html' if needed
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        
+                        // If it's a relative link ending in / and not an external URL
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
+    
 <style>
     body {
         margin: 0;
@@ -326,13 +353,13 @@
 </style>
 </head>
 <body>
-    <a href="./legacy/legacy-finder/index.html" class="legacy-top-btn">
+    <a href="./legacy/legacy-finder/" class="legacy-top-btn">
         <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" alt="" class="legacy-btn">
         <span>Legacy Finder</span>
     </a>
     
     <header>
-        <h1><a href="./aboutme/index.html">Sawyinator</a>.uk</h1>
+        <h1><a href="./aboutme/">Sawyinator</a>.uk</h1>
         <p>A website for my projects and links</p>
     </header>
 
@@ -363,7 +390,7 @@
                 </a>
             </li>
             <li>
-                <a href="./projects/download/index.html">
+                <a href="./projects/download/">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg" alt="Downloads Icon" class="project-icon">
@@ -375,7 +402,7 @@
                 </a>
             </li>
             <li>
-                <a href="./projects/a-int/index.html">
+                <a href="./projects/a-int/">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/a-int.svg" alt="A-INT Logo" class="project-icon">
@@ -387,7 +414,7 @@
                 </a>
             </li>
             <li>
-                <a href="./projects/cmd-shutdown-timer/index.html">
+                <a href="./projects/cmd-shutdown-timer/">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/cmd-shutdown-timer.svg" alt="cmd Shutdown Timer Logo" class="project-icon">
@@ -399,7 +426,7 @@
                 </a>
             </li>
             <li>
-                <a href="./projects/marble-decider/index.html">
+                <a href="./projects/marble-decider/">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider.svg" alt="Marble Decider Logo" class="project-icon">
@@ -411,7 +438,7 @@
                 </a>
             </li>
             <li>
-                <a href="./projects/capitaliser/index.html">
+                <a href="./projects/capitaliser/">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/capitaliser.svg" alt="Capitaliser Logo" class="project-icon">
@@ -423,7 +450,7 @@
                 </a>
             </li>
             <li>
-                <a href="./projects/sub-and-sup-to-html/index.html">
+                <a href="./projects/sub-and-sup-to-html/">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sasth.svg" alt="SaStH Logo" class="project-icon">

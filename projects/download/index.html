@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                if (window.location.pathname.endsWith('/')) window.location.href = 'index.html';
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Downloads | Sawyinator.uk</title>
@@ -56,7 +73,7 @@
     <!-- Header -->
     <header class="sticky top-0 z-50 glass px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <a href="../../index.html" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <a href="../../" class="p-2 hover:bg-white/10 rounded-full transition-colors">
                 <i data-lucide="arrow-left" class="w-6 h-6"></i>
             </a>
             <h1 class="text-xl font-bold tracking-tight">Downloads</h1>

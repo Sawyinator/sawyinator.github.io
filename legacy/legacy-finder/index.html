@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                if (window.location.pathname.endsWith('/')) window.location.href = 'index.html';
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/favicons/sawyinator-old.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -308,13 +325,13 @@
 </head>
 <body>
 <body>
-    <a href="../../index.html" class="legacy-top-btn">
+    <a href="../../" class="legacy-top-btn">
         <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator.svg" alt="" class="legacy-btn">
         <span>Main Page</span>
     </a>
     
     <header>
-        <h1><a href="../../aboutme/index.html">Sawyinator</a>.uk | LEGACY FINDER</h1>
+        <h1><a href="../../aboutme/">Sawyinator</a>.uk | LEGACY FINDER</h1>
         <p>This is a subpage where you can view the first versions of all of my projects.</p>
         <p>(all of these projects can be accessed by simply adding 'legacy' to the end of any page url)</p>
     </header>
@@ -322,7 +339,7 @@
     <nav>
         <ul>
             <li>
-                <a href="../index.html" target="_blank" rel="noopener noreferrer">
+                <a href="../" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" alt="Old Sawyinator Logo" class="project-icon">
@@ -334,7 +351,7 @@
                 </a>
             </li>
             <li>
-                <a href="../legacy-v2/index.html" target="_blank" rel="noopener noreferrer">
+                <a href="../legacy-v2/" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" alt="Old Sawyinator Logo" class="project-icon">
@@ -346,7 +363,7 @@
                 </a>
             </li>
             <li>
-                <a href="../../projects/download/legacy/index.html">
+                <a href="../../projects/download/legacy/" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg" alt="Downloads Icon" class="project-icon">
@@ -358,7 +375,7 @@
                 </a>
             </li>
             <li>
-                <a href="../../projects/a-int/legacy/index.html" target="_blank" rel="noopener noreferrer">
+                <a href="../../projects/a-int/legacy/" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/a-int.svg" alt="A-INT Logo" class="project-icon">
@@ -370,7 +387,7 @@
                 </a>
             </li>
             <li>
-                <a href="../../projects/cmd-shutdown-timer/legacy/index.html" target="_blank" rel="noopener noreferrer">
+                <a href="../../projects/cmd-shutdown-timer/legacy/" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/cmd-shutdown-timer.svg" alt="cmd Shutdown Timer Logo" class="project-icon">
@@ -382,7 +399,7 @@
                 </a>
             </li>
             <li>
-                <a href="../../projects/marble-decider/legacy/index.html" target="_blank" rel="noopener noreferrer">
+                <a href="../../projects/marble-decider/legacy/" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider.svg" alt="Marble Decider Logo" class="project-icon">
@@ -394,7 +411,7 @@
                 </a>
             </li>
             <li>
-                <a href="../../projects/marble-decider/creator/legacy/index.html" target="_blank" rel="noopener noreferrer">
+                <a href="../../projects/marble-decider/creator/legacy/" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider-favicon.svg" alt="Marble Decider Logo" class="project-icon">
@@ -406,7 +423,7 @@
                 </a>
             </li>
             <li>
-                <a href="../../projects/sub-and-sup-to-html/legacy/index.html" target="_blank" rel="noopener noreferrer">
+                <a href="../../projects/sub-and-sup-to-html/legacy/" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sasth.svg" alt="SaStH Logo" class="project-icon">
@@ -418,7 +435,7 @@
                 </a>
             </li>
             <li>
-                <a href="../../projects/capitaliser/legacy/index.html" target="_blank" rel="noopener noreferrer">
+                <a href="../../projects/capitaliser/legacy/" target="_blank" rel="noopener noreferrer">
                  <button class="info-btn" onclick="openModal(event, this)">i</button>
                     
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/capitaliser.svg" alt="Capitaliser Logo" class="project-icon">

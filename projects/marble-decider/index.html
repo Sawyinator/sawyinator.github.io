@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                if (window.location.pathname.endsWith('/')) window.location.href = 'index.html';
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider-favicon.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1052,7 +1069,7 @@
 <body>
 
     <div id="lobby">
-        <a href="../../index.html" class="back-home">↩ Back to main website</a>
+        <a href="../../" class="back-home">↩ Back to main website</a>
         <div class="lobby-top-right">
             <div class="dropdown">
                 <button class="ui-btn toggle-btn" onclick="toggleDropdown(event, 'browseDropdown')" style="display: flex; align-items: center; gap: 8px;">
@@ -1262,7 +1279,7 @@
             </p>
 
             <div class="profile-links">
-                <a href="../../aboutme/index.html" class="profile-link">
+                <a href="../../aboutme/" class="profile-link">
                     <svg viewBox="0 0 24 24">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>

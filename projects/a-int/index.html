@@ -2,6 +2,23 @@
 <html lang="en">
 
 <head>
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                if (window.location.pathname.endsWith('/')) window.location.href = 'index.html';
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/a-int.svg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -643,7 +660,7 @@
 </head>
 
 <body>
-    <a href="../../index.html" class="back-link">
+    <a href="../../" class="back-link">
         <svg viewBox="0 0 24 24">
             <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
         </svg>
@@ -684,7 +701,7 @@
             </p>
 
             <div class="profile-links">
-                <a href="../../aboutme/index.html" class="profile-link">
+                <a href="../../aboutme/" class="profile-link">
                     <svg viewBox="0 0 24 24">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>

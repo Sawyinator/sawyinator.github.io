@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                if (window.location.pathname.endsWith('/')) window.location.href = 'index.html';
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Capitaliser</title>
@@ -16,7 +33,7 @@
     <div class="max-w-3xl mx-auto">
         <header class="mb-8 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <a href="../../../index.html" class="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200 rounded-lg transition-colors">
+                <a href="../../../" class="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200 rounded-lg transition-colors">
                     <i data-lucide="home" class="w-5 h-5"></i>
                 </a>
                 <h1 class="text-2xl font-bold tracking-tight">Capital<span class="text-orange-600">iser</span></h1>

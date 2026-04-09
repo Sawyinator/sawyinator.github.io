@@ -2,6 +2,23 @@
 <html lang="en">
 
 <head>
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                if (window.location.pathname.endsWith('/')) window.location.href = 'index.html';
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A quick way to turn unicode or other format sub/superscripts into HTML.">
@@ -142,7 +159,7 @@
 </head>
 
 <body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 min-h-screen p-8 pt-16">
-    <a href="../../index.html" class="fixed top-4 left-4 flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors z-50">
+    <a href="../../" class="fixed top-4 left-4 flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors z-50">
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
         Back to main website
     </a>
@@ -230,7 +247,7 @@
             </p>
 
             <div class="profile-links">
-                <a href="../../aboutme/index.html" class="profile-link">
+                <a href="../../aboutme/" class="profile-link">
                     <svg viewBox="0 0 24 24">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>

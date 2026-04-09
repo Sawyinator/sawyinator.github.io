@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                if (window.location.pathname.endsWith('/')) window.location.href = 'index.html';
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VERSION 2 | Sawyinator.uk</title>
@@ -102,13 +119,13 @@
     <nav>
         <ul>
             <li>
-                <a href="../../index.html" class="home-link">
+                <a href="../../" class="home-link">
                     <span class="project-title">🏠 Home</span>
                     <span class="project-desc">Return to the main dashboard.</span>
                 </a>
             </li>
             <li>
-                <a href="../../projects/a-int/legacy/index.html">
+                <a href="../../projects/a-int/legacy/">
                     <span class="project-title">🔢 Arabic Indic Trainer</span>
                     <span class="project-desc">Learn and practice Arabic-Indic numerals.</span>
                 </a>
