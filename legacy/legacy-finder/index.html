@@ -1187,7 +1187,7 @@ const blobColors = [
     '#6366f1'  // Indigo/Purple
 ];
 
-function createBlob() {
+function createBlob(initialX = null) {
     if (document.body.getAttribute('data-theme') !== 'default') return;
     
     const container = document.getElementById('bgBlobs');
@@ -1196,33 +1196,46 @@ function createBlob() {
     const blob = document.createElement('div');
     blob.className = 'blob';
     
-    const size = Math.random() * 500 + 400; // Even larger blobs
+    const size = Math.random() * 500 + 400;
     const color = blobColors[Math.floor(Math.random() * blobColors.length)];
     const startTop = Math.random() * 100;
-    const duration = Math.random() * 40000 + 40000; // 40-80s
+    const duration = Math.random() * 10000 + 25000; // 25-35s
+    
+    // If initialX is provided, adjust duration proportionally
+    const startX = initialX !== null ? initialX : 110;
+    const travelDistance = startX + 50; // Distance to -50vw
+    const adjustedDuration = initialX !== null ? (duration * (travelDistance / 160)) : duration;
 
     blob.style.width = `${size}px`;
     blob.style.height = `${size}px`;
     blob.style.background = color;
     blob.style.top = `${startTop}%`;
-    blob.style.left = '110%';
+    blob.style.left = `${startX}%`;
     blob.style.opacity = '0';
-    blob.style.transition = `transform ${duration}ms linear, opacity 3s ease`;
+    blob.style.transition = `transform ${adjustedDuration}ms linear, opacity 3s ease`;
     
     container.appendChild(blob);
 
     // Trigger animation
     setTimeout(() => {
-        blob.style.transform = `translateX(-150vw)`;
-        blob.style.opacity = '0.35'; // Increased opacity for visibility
+        blob.style.transform = `translateX(-250vw)`; // Travel further left
+        blob.style.opacity = '0.35';
     }, 100);
 
-    // Remove after animation
+    // Start fade out before removal
+    const fadeOutTime = 5000; // 5 seconds fade out
+    setTimeout(() => {
+        if (blob.parentNode) {
+            blob.style.opacity = '0';
+        }
+    }, adjustedDuration - fadeOutTime);
+
+    // Remove after animation and fade out
     setTimeout(() => {
         if (blob.parentNode) {
             blob.parentNode.removeChild(blob);
         }
-    }, duration + 100);
+    }, adjustedDuration + 100);
 }
 
 // Spawn blobs periodically
@@ -1230,11 +1243,13 @@ setInterval(() => {
     if (document.body.getAttribute('data-theme') === 'default') {
         createBlob();
     }
-}, 12000); // Every 12 seconds
+}, 6000); // Slightly faster spawn rate
 
 // Initial blobs
-for(let i=0; i<3; i++) {
-    setTimeout(createBlob, i * 2000);
+for(let i=0; i<4; i++) {
+    // Spread some blobs across the screen initially
+    const randomX = Math.random() * 100;
+    setTimeout(() => createBlob(randomX), i * 500);
 }
 
 // Theme System
