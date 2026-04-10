@@ -55,16 +55,92 @@
     </script>
     
 <style>
+    :root {
+        --bg-gradient: radial-gradient(circle at top right, #0f172a, #020617);
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --text-main: #ffffff;
+        --text-dim: #94a3b8;
+        --accent: #007DFF;
+        --accent-hover: #0088FF;
+        --glass-blur: 12px;
+        --modal-bg: linear-gradient(145deg, #0a0e17, #020203);
+        --menu-bg: rgba(15, 23, 42, 0.9);
+        --radius-card: 24px;
+        --radius-btn: 12px;
+        --font-main: 'Inter', -apple-system, sans-serif;
+        --bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        --card-shadow: none;
+    }
+
+    /* Legacy Theme */
+    [data-theme="legacy"] {
+        --bg-gradient: radial-gradient(circle at top right, #1a1a2e, #16213e, #0f3460);
+        --card-bg: rgba(255, 255, 255, 0.05);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --accent: #4facfe;
+        --accent-hover: #00f2fe;
+        --modal-bg: linear-gradient(145deg, #16213e, #0f3460);
+    }
+
+    [data-theme="legacy"] h1 {
+        background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Frutiger Aero Theme */
+    [data-theme="frutiger"] {
+        --bg-gradient: linear-gradient(180deg, #3b82f6 0%, #60a5fa 40%, #ffffff 100%);
+        --bg-pattern: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 10%),
+                      radial-gradient(circle at 80% 70%, rgba(255,255,255,0.3) 0%, transparent 15%),
+                      radial-gradient(circle at 40% 80%, rgba(255,255,255,0.2) 0%, transparent 20%);
+        --card-bg: rgba(255, 255, 255, 0.6);
+        --card-border: rgba(255, 255, 255, 0.8);
+        --text-main: #0f172a;
+        --text-dim: #334155;
+        --accent: #22c55e;
+        --accent-hover: #16a34a;
+        --glass-blur: 25px;
+        --modal-bg: linear-gradient(180deg, #ffffff, #e2e8f0);
+        --menu-bg: rgba(255, 255, 255, 0.9);
+        --radius-card: 40px;
+        --radius-btn: 20px;
+        --card-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    /* Default Redesign (Modern/Shiny/Bouncy) */
+    [data-theme="modern"] {
+        --bg-gradient: conic-gradient(from 230.29deg at 51.63% 52.16%, #000000 0deg, #0f172a 360deg);
+        --card-bg: rgba(255, 255, 255, 0.02);
+        --card-border: rgba(255, 255, 255, 0.15);
+        --accent: #ffffff;
+        --accent-hover: #f8fafc;
+        --text-main: #ffffff;
+        --text-dim: rgba(255, 255, 255, 0.6);
+        --modal-bg: #000000;
+        --radius-card: 32px;
+        --radius-btn: 16px;
+        --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --card-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    [data-theme="modern"] .theme-option.active {
+        color: #000;
+    }
+
     body {
         margin: 0;
         padding: 0;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: radial-gradient(circle at top right, #0a0e17, #05070a, #020203);
-        color: white;
+        font-family: var(--font-main);
+        background: var(--bg-pattern, none), var(--bg-gradient);
+        background-attachment: fixed;
+        color: var(--text-main);
         display: flex;
         flex-direction: column;
         align-items: center;
         min-height: 100vh;
+        transition: background 0.5s ease;
     }
 
     header {
@@ -92,6 +168,7 @@
     p {
         opacity: 0.6;
         font-weight: 300;
+        color: var(--text-dim);
     }
 
     nav {
@@ -104,7 +181,7 @@
         padding: 0;
         display: grid;
         /* Responsive grid: buttons stay square and adjust size based on screen */
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 30px;
     }
 
@@ -113,15 +190,16 @@
         align-items: center;
         justify-content: center;
         text-decoration: none;
-        color: white;
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
+        color: var(--text-main);
+        background: var(--card-bg);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-card);
         padding: 20px;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: all 0.4s var(--bounce);
         text-align: center;
+        box-shadow: var(--card-shadow);
         
         /* The Square Constraint */
         aspect-ratio: 1 / 1; 
@@ -222,91 +300,154 @@
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: none; /* Hidden by default */
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
 }
 
 .modal-content {
-    background: #0f172a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
+    background: var(--modal-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
     width: 90%;
-    max-width: 600px;
-    padding: 40px;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 50px;
     position: relative;
     display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
+    flex-direction: row;
+    gap: 40px;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.5s var(--bounce);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1) translateY(0);
 }
 
 .modal-left { 
     flex: 1; 
     display: flex;
-    align-items: center;    /* Vertical centering */
-    justify-content: center; /* Horizontal centering */
-    
-    /* This creates the 500x500 "bounding box" */
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    max-width: 500px; 
+    max-width: 300px; 
     aspect-ratio: 1 / 1; 
-    
-    background: rgba(255, 255, 255, 0.02); /* Optional: helps you see the box */
-    border-radius: 12px;
-    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 24px;
+    padding: 20px;
 }
 
 .modal { 
-    /* The image will now scale to fit inside the 500x500 box */
     max-width: 100%; 
     max-height: 100%; 
     object-fit: contain; 
     display: block;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
 }
-.modal-right { flex: 2; min-width: 250px; }
 
-.modal-close { position: absolute; top: 20px; right: 20px; cursor: pointer; opacity: 0.5; }
+.modal-right { 
+    flex: 1.5; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.modal-close { 
+    position: absolute; 
+    top: 25px; 
+    right: 25px; 
+    cursor: pointer; 
+    opacity: 0.4; 
+    font-size: 16px; /* Adjusted for better centering */
+    transition: all 0.3s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    line-height: 1; /* Ensure text centering */
+    padding: 0;
+}
+
+.modal-close:hover { 
+    opacity: 1; 
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#modalTitle {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(to bottom right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#modalDesc {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #94a3b8;
+    margin-bottom: 30px;
+}
 
 .launch-btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 12px 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 32px;
     background: #007DFF;
     color: white;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 16px;
     font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px -5px rgba(0, 125, 255, 0.4);
+    width: fit-content;
 }
-/* Update your existing modal-content and right-side styles */
-.modal-content {
-    background: #0f172a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    width: 90%;
-    max-width: 700px; /* Slightly wider for longer text */
-    max-height: 85vh;  /* Prevent it from going off-screen */
-    overflow-y: auto;  /* Scroll if text is very long */
-    padding: 40px;
-    position: relative;
-    display: flex;
-    flex-direction: row; /* Default side-by-side */
-    gap: 30px;
+
+.launch-btn:hover {
+    transform: translateY(-2px);
+    background: #0088FF;
+    box-shadow: 0 15px 25px -5px rgba(0, 125, 255, 0.5);
 }
 
 /* Stack vertically on mobile */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .modal-content {
         flex-direction: column;
         align-items: center;
-        padding: 20px;
+        padding: 40px 25px;
+        text-align: center;
     }
     
     .modal-left {
-        max-width: 250px; /* Shrink the "500px box" to 250px on mobile */
-        margin-bottom: 20px;
+        max-width: 200px;
+        margin-bottom: 10px;
+    }
+
+    .modal-right {
+        align-items: center;
+    }
+
+    #modalTitle {
+        font-size: 1.5rem;
     }
 }
     /* Legacy Finder Floating Button */
@@ -350,9 +491,196 @@
     height: 24px;
     object-fit: contain;
 }
+
+/* Search Feature */
+.search-wrapper {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.theme-toggle {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-main);
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.theme-menu {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    background: var(--menu-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 10px;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 160px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    z-index: 1001;
+}
+
+.theme-menu.active {
+    display: flex;
+    animation: slideDown 0.3s var(--bounce);
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.theme-option {
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-dim);
+}
+
+.theme-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+}
+
+.theme-option.active {
+    background: var(--accent);
+    color: white;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-toggle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1002;
+}
+
+.search-toggle:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.search-input {
+    width: 0;
+    height: 42px;
+    opacity: 0;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 21px;
+    padding: 0;
+    margin-left: -42px;
+    color: white;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    outline: none;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.search-wrapper.active .search-input {
+    width: 240px;
+    opacity: 1;
+    padding: 0 40px 0 42px;
+    margin-left: 0;
+    pointer-events: auto;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.search-wrapper.active .search-toggle {
+    background: transparent;
+    border-color: transparent;
+}
+
+.search-clear {
+    position: absolute;
+    right: 15px;
+    color: white;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1003;
+}
+
+.search-wrapper.active .search-clear.visible {
+    opacity: 0.5;
+    pointer-events: auto;
+}
+
+.search-clear:hover {
+    opacity: 1 !important;
+}
+
+/* Project filtering */
+li.hidden {
+    display: none;
+}
 </style>
 </head>
 <body>
+    <div class="search-wrapper" id="searchWrapper">
+        <div class="theme-toggle" onclick="toggleThemeMenu(event)" title="Change Theme">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        </div>
+        <div class="theme-menu" id="themeMenu">
+            <div class="theme-option" onclick="setTheme('modern')">Modern (Default)</div>
+            <div class="theme-option" onclick="setTheme('classic')">Classic</div>
+            <div class="theme-option" onclick="setTheme('legacy')">Legacy</div>
+            <div class="theme-option" onclick="setTheme('frutiger')">Frutiger Aero</div>
+        </div>
+        <div class="search-container">
+            <div class="search-toggle" onclick="toggleSearch(event)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <input type="text" id="searchInput" placeholder="Search projects..." class="search-input" oninput="filterProjects()" autocomplete="off">
+            <div class="search-clear" id="searchClear" onclick="clearSearch(event)">✕</div>
+        </div>
+    </div>
+
     <a href="./legacy/legacy-finder/" class="legacy-top-btn">
         <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" alt="" class="legacy-btn">
         <span>Legacy Finder</span>
@@ -465,7 +793,7 @@
     </nav>
 <div id="infoModal" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <span class="modal-close" onclick="document.getElementById('infoModal').style.display='none'">✕</span>
+        <span class="modal-close" onclick="closeModal({target: {classList: {contains: (c) => c === 'modal-close'}}})">✕</span>
         
         <div class="modal-left">
             <img id="modalLogo" src="" class="modal">
@@ -473,8 +801,8 @@
         
         <div class="modal-right">
             <h2 id="modalTitle"></h2>
-            <p id="modalDesc" style="opacity: 0.8; line-height: 1.6;"></p>
-            <a id="modalLaunch" href="" class="launch-btn" target="_blank">Launch</a>
+            <p id="modalDesc"></p>
+            <a id="modalLaunch" href="" class="launch-btn" target="_blank">Launch Project</a>
         </div>
     </div>
 </div>
@@ -512,9 +840,194 @@ function openModal(event, btn) {
     document.getElementById('infoModal').style.display = 'flex';
 }
 
+// Theme System
+function toggleThemeMenu(event) {
+    event.stopPropagation();
+    document.getElementById('themeMenu').classList.toggle('active');
+}
+
+function setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('selected-theme', theme);
+    
+    // Update active state in menu
+    document.querySelectorAll('.theme-option').forEach(opt => {
+        opt.classList.remove('active');
+        if (opt.innerText.toLowerCase().includes(theme)) {
+            opt.classList.add('active');
+        }
+    });
+    
+    document.getElementById('themeMenu').classList.remove('active');
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('selected-theme') || 'modern';
+setTheme(savedTheme);
+
+// Close theme menu when clicking outside
+document.addEventListener('click', () => {
+    document.getElementById('themeMenu').classList.remove('active');
+});
+
+function toggleSearch(event) {
+    if (event) event.stopPropagation();
+    const wrapper = document.getElementById('searchWrapper');
+    const input = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('searchClear');
+    
+    wrapper.classList.toggle('active');
+    if (wrapper.classList.contains('active')) {
+        input.focus();
+    } else {
+        input.value = '';
+        clearBtn.classList.remove('visible');
+        filterProjects();
+    }
+}
+
+function clearSearch(event) {
+    if (event) event.stopPropagation();
+    const input = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('searchClear');
+    input.value = '';
+    input.focus();
+    clearBtn.classList.remove('visible');
+    filterProjects();
+}
+
+// Close search when clicking outside
+document.addEventListener('click', function(event) {
+    const wrapper = document.getElementById('searchWrapper');
+    const input = document.getElementById('searchInput');
+    const isClickInside = wrapper.contains(event.target);
+
+    // Only close if clicking outside AND the input is empty
+    if (!isClickInside && wrapper.classList.contains('active') && input.value.trim() === '') {
+        wrapper.classList.remove('active');
+        input.value = '';
+        document.getElementById('searchClear').classList.remove('visible');
+        filterProjects();
+    }
+});
+
+function filterProjects() {
+    const input = document.getElementById('searchInput');
+    const query = input.value.toLowerCase().trim();
+    const projectsList = document.querySelector('nav ul');
+    const projects = Array.from(projectsList.querySelectorAll('li'));
+    const clearBtn = document.getElementById('searchClear');
+    
+    if (query.length > 0) {
+        clearBtn.classList.add('visible');
+    } else {
+        clearBtn.classList.remove('visible');
+        // Reset order and visibility
+        projects.forEach(project => {
+            project.classList.remove('hidden');
+            project.style.order = '0';
+        });
+        return;
+    }
+    
+    // Fuzzy matching function (Levenshtein distance based similarity)
+    function getSimilarity(s1, s2) {
+        if (s1.includes(s2)) return 1.0; // Substring is high priority
+        
+        const longer = s1.length > s2.length ? s1 : s2;
+        const shorter = s1.length > s2.length ? s2 : s1;
+        if (longer.length === 0) return 1.0;
+        
+        const costs = [];
+        for (let i = 0; i <= longer.length; i++) {
+            let lastValue = i;
+            for (let j = 0; j <= shorter.length; j++) {
+                if (i === 0) costs[j] = j;
+                else if (j > 0) {
+                    let newValue = costs[j - 1];
+                    if (longer.charAt(i - 1) !== shorter.charAt(j - 1)) {
+                        newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                    }
+                    costs[j - 1] = lastValue;
+                    lastValue = newValue;
+                }
+            }
+            if (i > 0) costs[shorter.length] = lastValue;
+        }
+        return (longer.length - costs[shorter.length]) / longer.length;
+    }
+
+    const scoredProjects = projects.map(project => {
+        const title = project.querySelector('.project-title').innerText.toLowerCase();
+        const desc = project.querySelector('.project-description').innerText.toLowerCase();
+        
+        // Calculate scores
+        const titleScore = getSimilarity(title, query);
+        const descScore = getSimilarity(desc, query) * 0.8; // Description match is less important
+        const maxScore = Math.max(titleScore, descScore);
+        
+        return { project, score: maxScore };
+    });
+
+    // Sort by score descending
+    scoredProjects.sort((a, b) => b.score - a.score);
+
+    scoredProjects.forEach((item, index) => {
+        // Show if accuracy is > 30% (or substring match which returns 1.0)
+        if (item.score >= 0.3 || item.project.querySelector('.project-title').innerText.toLowerCase().includes(query)) {
+            item.project.classList.remove('hidden');
+            item.project.style.order = index + 1;
+        } else {
+            item.project.classList.add('hidden');
+        }
+    });
+}
+
+function openModal(event, btn) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const parentLink = btn.closest('a');
+    const card = btn.closest('li');
+    
+    // Extract data from the list item
+    const title = card.querySelector('.project-title').innerText;
+    const logo = card.querySelector('.project-icon').src;
+    const desc = card.querySelector('.project-description').innerHTML;
+    const link = parentLink.href;
+    const target = parentLink.getAttribute('target'); // Get target (_blank or null)
+
+    // Populate Modal
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalLogo').src = logo;
+    document.getElementById('modalDesc').innerHTML = desc;
+    
+    const launchBtn = document.getElementById('modalLaunch');
+    launchBtn.href = link;
+
+    // Apply target only if it exists in the original list item
+    if (target) {
+        launchBtn.setAttribute('target', target);
+    } else {
+        launchBtn.removeAttribute('target');
+    }
+
+    const modal = document.getElementById('infoModal');
+    modal.style.display = 'flex';
+    // Small timeout to trigger animation
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+
 function closeModal(event) {
-    if(event.target.id === 'infoModal') {
-        document.getElementById('infoModal').style.display = 'none';
+    const modal = document.getElementById('infoModal');
+    if(event.target.id === 'infoModal' || (event.target.classList && event.target.classList.contains('modal-close'))) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            if (!modal.classList.contains('active')) {
+                modal.style.display = 'none';
+            }
+        }, 400);
     }
 }
 
