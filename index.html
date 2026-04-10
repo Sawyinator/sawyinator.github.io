@@ -938,8 +938,8 @@ li.hidden {
     <nav>
         <ul>
             <li>
+                <div id="youtube-new-badge" class="new-badge" style="display: none;">New</div>
                 <a href="https://youtube.com/@sawyinator" target="_blank" rel="noopener noreferrer">
-                    <div id="youtube-new-badge" class="new-badge" style="display: none;">New</div>
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator.svg" alt="YouTube Icon" class="project-icon">
                     <span class="project-title">YouTube Channel</span>
                 
@@ -1354,7 +1354,7 @@ async function checkYouTubeNew() {
             const diffTime = Math.abs(now - pubDate);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            if (diffDays <= 3000) {
+            if (diffDays <= 30) {
                 document.getElementById('youtube-new-badge').style.display = 'block';
             }
         }

@@ -320,7 +320,7 @@
                     const diffTime = Math.abs(now - pubDate);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                    if (diffDays <= 3000) {
+                    if (diffDays <= 30) {
                         document.getElementById('new-badge').classList.remove('hidden');
                     }
 
