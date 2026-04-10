@@ -1111,7 +1111,7 @@ function createBlob(initialX = null) {
     const size = Math.random() * 500 + 400;
     const color = blobColors[Math.floor(Math.random() * blobColors.length)];
     const startTop = Math.random() * 100;
-    const duration = Math.random() * 10000 + 25000; // 25-35s
+    const duration = 40000; // 40s to cross
     
     // If initialX is provided, adjust duration proportionally
     const startX = initialX !== null ? initialX : 110;
