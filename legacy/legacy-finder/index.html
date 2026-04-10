@@ -58,7 +58,7 @@
         --radius-card: 24px;
         --radius-btn: 12px;
         --font-main: 'Inter', -apple-system, sans-serif;
-        --bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        --bounce: cubic-bezier(0.175, 0.885, 0.32, 1.1);
         --card-shadow: none;
     }
 
@@ -236,7 +236,7 @@
     }
 
     /* Default Redesign (Modern/Shiny/Bouncy) */
-    [data-theme="modern"] {
+    [data-theme="default"] {
         --bg-gradient: conic-gradient(from 230.29deg at 51.63% 52.16%, #000000 0deg, #0f172a 360deg);
         --card-bg: rgba(255, 255, 255, 0.02);
         --card-border: rgba(255, 255, 255, 0.15);
@@ -260,7 +260,7 @@
         display: none;
     }
 
-    [data-theme="modern"] .bg-blobs {
+    [data-theme="default"] .bg-blobs {
         display: block;
     }
 
@@ -273,7 +273,7 @@
         z-index: -1;
     }
 
-    [data-theme="modern"] .theme-option.active {
+    [data-theme="default"] .theme-option.active {
         color: #000;
     }
 
@@ -299,7 +299,7 @@
         padding: 60px 20px 40px;
         text-align: center;
         z-index: 900;
-        transition: all 0.4s ease-out;
+        transition: all 0.3s var(--bounce);
         pointer-events: none;
         display: flex;
         flex-direction: column;
@@ -309,8 +309,10 @@
     header * { pointer-events: auto; }
 
     .header-content {
-        display: inline-block;
-        transition: all 0.4s ease-out;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.3s var(--bounce);
         padding: 0;
         border-radius: 20px;
         position: relative;
@@ -333,7 +335,7 @@
         pointer-events: auto;
     }
 
-    [data-theme="modern"] header.scrolled .header-content {
+    [data-theme="default"] header.scrolled .header-content {
         background: rgba(255, 255, 255, 0.08);
         border-color: rgba(255, 255, 255, 0.2);
     }
@@ -343,7 +345,7 @@
         letter-spacing: -1px;
         margin: 0;
         color: #ffffff;
-        transition: all 0.4s ease-out;
+        transition: all 0.3s var(--bounce);
     }
 
     header.scrolled h1 {
@@ -365,7 +367,8 @@
         font-weight: 300;
         color: var(--text-dim);
         margin: 10px 0 0;
-        transition: all 0.4s ease;
+        transition: all 0.3s ease;
+        position: relative;
     }
 
     header.scrolled p {
@@ -373,6 +376,8 @@
         opacity: 0;
         margin: 0;
         overflow: hidden;
+        position: absolute;
+        pointer-events: none;
     }
 
     nav {
@@ -862,7 +867,7 @@ li.hidden {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
         </div>
         <div class="theme-menu" id="themeMenu">
-            <div class="theme-option" onclick="setTheme('modern')">Default</div>
+            <div class="theme-option" onclick="setTheme('default')">Default</div>
             <div class="theme-option" onclick="setTheme('classic')">Classic</div>
             <div class="theme-option" onclick="setTheme('legacy')">Legacy</div>
             <div class="theme-option" onclick="setTheme('frutiger')">Frutiger Aero</div>
@@ -1183,7 +1188,7 @@ const blobColors = [
 ];
 
 function createBlob() {
-    if (document.body.getAttribute('data-theme') !== 'modern') return;
+    if (document.body.getAttribute('data-theme') !== 'default') return;
     
     const container = document.getElementById('bgBlobs');
     if (!container) return;
@@ -1191,23 +1196,27 @@ function createBlob() {
     const blob = document.createElement('div');
     blob.className = 'blob';
     
-    const size = Math.random() * 300 + 200;
+    const size = Math.random() * 400 + 300; // Larger blobs
     const color = blobColors[Math.floor(Math.random() * blobColors.length)];
     const startTop = Math.random() * 100;
-    const duration = Math.random() * 30000 + 30000; // 30-60s
+    const duration = Math.random() * 40000 + 40000; // Slower, 40-80s
 
     blob.style.width = `${size}px`;
     blob.style.height = `${size}px`;
     blob.style.background = color;
     blob.style.top = `${startTop}%`;
     blob.style.left = '110%';
-    blob.style.transition = `transform ${duration}ms linear`;
+    blob.style.opacity = '0';
+    blob.style.transition = `transform ${duration}ms linear, opacity 2s ease`;
     
     container.appendChild(blob);
 
-    // Trigger animation
+    // Trigger animation with double RAF to ensure initial state is painted
     requestAnimationFrame(() => {
-        blob.style.transform = `translateX(-150vw)`;
+        requestAnimationFrame(() => {
+            blob.style.transform = `translateX(-150vw)`;
+            blob.style.opacity = '0.2';
+        });
     });
 
     // Remove after animation
@@ -1220,10 +1229,10 @@ function createBlob() {
 
 // Spawn blobs periodically
 setInterval(() => {
-    if (document.body.getAttribute('data-theme') === 'modern') {
+    if (document.body.getAttribute('data-theme') === 'default') {
         createBlob();
     }
-}, 8000); // Every 8 seconds
+}, 12000); // Every 12 seconds
 
 // Initial blobs
 for(let i=0; i<3; i++) {
@@ -1269,7 +1278,8 @@ function setTheme(theme) {
 }
 
 // Load saved theme
-const savedTheme = localStorage.getItem('selected-theme') || 'modern';
+// Load saved theme
+const savedTheme = localStorage.getItem('selected-theme') || 'default';
 setTheme(savedTheme);
 
 // Close theme menu when clicking outside
