@@ -267,8 +267,8 @@
     .blob {
         position: absolute;
         border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.2;
+        filter: blur(100px);
+        opacity: 0;
         pointer-events: none;
         z-index: -1;
     }
@@ -1180,11 +1180,11 @@ window.addEventListener('scroll', () => {
 
 // Dynamic Blobs for Default Theme
 const blobColors = [
-    '#1e1b4b', // Navy
-    '#312e81', // Darker Navy
-    '#3b0764', // Dark Purple
-    '#2e1065', // Deep Purple
-    '#1e293b'  // Dark Desaturated Blue
+    '#2563eb', // Vibrant Blue
+    '#4f46e5', // Indigo
+    '#7c3aed', // Violet
+    '#3b82f6', // Light Blue
+    '#6366f1'  // Indigo/Purple
 ];
 
 function createBlob() {
@@ -1196,10 +1196,10 @@ function createBlob() {
     const blob = document.createElement('div');
     blob.className = 'blob';
     
-    const size = Math.random() * 400 + 300; // Larger blobs
+    const size = Math.random() * 500 + 400; // Even larger blobs
     const color = blobColors[Math.floor(Math.random() * blobColors.length)];
     const startTop = Math.random() * 100;
-    const duration = Math.random() * 40000 + 40000; // Slower, 40-80s
+    const duration = Math.random() * 40000 + 40000; // 40-80s
 
     blob.style.width = `${size}px`;
     blob.style.height = `${size}px`;
@@ -1207,24 +1207,22 @@ function createBlob() {
     blob.style.top = `${startTop}%`;
     blob.style.left = '110%';
     blob.style.opacity = '0';
-    blob.style.transition = `transform ${duration}ms linear, opacity 2s ease`;
+    blob.style.transition = `transform ${duration}ms linear, opacity 3s ease`;
     
     container.appendChild(blob);
 
-    // Trigger animation with double RAF to ensure initial state is painted
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            blob.style.transform = `translateX(-150vw)`;
-            blob.style.opacity = '0.2';
-        });
-    });
+    // Trigger animation
+    setTimeout(() => {
+        blob.style.transform = `translateX(-150vw)`;
+        blob.style.opacity = '0.35'; // Increased opacity for visibility
+    }, 100);
 
     // Remove after animation
     setTimeout(() => {
         if (blob.parentNode) {
             blob.parentNode.removeChild(blob);
         }
-    }, duration);
+    }, duration + 100);
 }
 
 // Spawn blobs periodically
