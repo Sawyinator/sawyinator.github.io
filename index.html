@@ -87,9 +87,16 @@
         background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+
+    [data-theme="legacy"] h1 a {
+        color: inherit;
+        -webkit-text-fill-color: inherit;
     }
 
     [data-theme="legacy"] h1 a:hover {
+        -webkit-text-fill-color: #4facfe !important;
         opacity: 1 !important;
         filter: brightness(1.2);
     }
@@ -102,11 +109,14 @@
     }
 
     [data-theme="legacy"] li a {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
         aspect-ratio: auto;
-        padding: 25px;
+        padding: 30px;
         border-radius: 16px;
-        text-align: center;
+        text-align: left;
         height: 100%;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -121,17 +131,17 @@
 
     [data-theme="legacy"] .project-icon, 
     [data-theme="legacy"] .icon-placeholder {
-        width: 60px; 
-        height: 60px;
-        margin-bottom: 15px;
-        display: inline-block;
+        width: 40px; 
+        height: 40px;
+        margin-bottom: 0;
+        flex-shrink: 0;
     }
 
     [data-theme="legacy"] .project-title {
         position: static;
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: 600;
-        margin-bottom: 8px;
+        margin-bottom: 0;
         display: block;
         opacity: 1;
         text-transform: none;
@@ -141,11 +151,7 @@
     }
 
     [data-theme="legacy"] .project-description {
-        display: block !important;
-        font-size: 0.85rem;
-        opacity: 0.6;
-        color: white;
-        line-height: 1.4;
+        display: none !important;
     }
 
     /* Frutiger Aero Theme */
@@ -161,11 +167,47 @@
         --accent: #22c55e;
         --accent-hover: #16a34a;
         --glass-blur: 15px;
-        --modal-bg: linear-gradient(180deg, #ffffff, #e2e8f0);
+        --modal-bg: rgba(255, 255, 255, 0.7);
         --menu-bg: rgba(255, 255, 255, 0.9);
         --radius-card: 50%;
         --radius-btn: 20px;
         --card-shadow: inset 0 2px 4px rgba(255,255,255,0.4), 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    [data-theme="frutiger"] .modal-overlay {
+        background: rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(5px);
+    }
+
+    [data-theme="frutiger"] .modal-content {
+        border-radius: 24px;
+        backdrop-filter: blur(20px);
+        color: #000000;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    [data-theme="frutiger"] #modalTitle {
+        background: none;
+        -webkit-text-fill-color: #000000;
+        color: #000000;
+    }
+
+    [data-theme="frutiger"] #modalDesc {
+        color: #000000;
+    }
+
+    [data-theme="frutiger"] .modal-close {
+        color: #000000;
+        background: rgba(0,0,0,0.05);
+    }
+
+    [data-theme="frutiger"] .info-btn {
+        top: 30px;
+        right: 30px;
+        background: rgba(255, 255, 255, 0.8);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
     [data-theme="frutiger"] li a:hover {
@@ -278,6 +320,21 @@
         /* Responsive grid: buttons stay square and adjust size based on screen */
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 30px;
+    }
+
+    li {
+        position: relative;
+        list-style: none;
+    }
+
+    li {
+        position: relative;
+        list-style: none;
+    }
+
+    li {
+        position: relative;
+        list-style: none;
     }
 
     li a {
@@ -795,7 +852,6 @@ li.hidden {
         <ul>
             <li>
                 <a href="https://youtube.com/@sawyinator" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
                     <div id="youtube-new-badge" class="new-badge" style="display: none;">New</div>
                     <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator.svg" alt="YouTube Icon" class="project-icon">
                     <span class="project-title">YouTube Channel</span>
@@ -804,90 +860,84 @@ li.hidden {
                         My YouTube Channel. I play games n stuff. Dunno what else to say about it tbh.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="https://github.com/Sawyinator" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/github.png" alt="GitHub Icon" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/github.png" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/github.png" alt="GitHub Icon" class="project-icon">
                     <span class="project-title">GitHub Page</span>
                 
                     <div class="project-description" style="display:none;">
                         My GitHub Page. No idea what else to say. I have an exe download for A-INT on there though if you want it (that is only if i havent added a downloads section to this file where you can download my A-INT exe)
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="./projects/download/">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg" alt="Downloads Icon" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg" alt="Downloads Icon" class="project-icon">
                     <span class="project-title">Downloads</span>
                 
                     <div class="project-description" style="display:none;">
                         A page where you can download any projects on the site, and also download any assets used across the site.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="./projects/a-int/">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/a-int.svg" alt="A-INT Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/a-int.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/a-int.svg" alt="A-INT Logo" class="project-icon">
                     <span class="project-title">Arabic-Indic Number Trainer (A-INT)</span>
                 
                     <div class="project-description" style="display:none;">
                         The Arabic-Indic Number Trainer (or A-INT for short) is a software i created to help me learn Arabic-Indic numerals, though it kind of ended up spiralling into creating an almost universal trainer for different number types, and i made it public. Hope this helps you in some way or another.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="./projects/cmd-shutdown-timer/">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/cmd-shutdown-timer.svg" alt="cmd Shutdown Timer Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/cmd-shutdown-timer.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/cmd-shutdown-timer-favicon.svg" alt="cmd Shutdown Timer Logo" class="project-icon">
                     <span class="project-title">cmd Shutdown Timer</span>
                 
                     <div class="project-description" style="display:none;">
                         A project i made that will give you a command prompt command that will set a shutdown timer for your pc. You can already manually do this, but with this itll automatically convert your hours, minutes and seconds into just seconds (what is required for the command to work) and then you can just paste that into cmd and press enter. Pretty simple idea, but it was mainly cause: A- It annoyed me opening up an hours to seconds converter and adding on minutes and whatnot and then typing out the command (if i remembered it) and then B- It was a project to help me learn more HTML more thoroughly.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="./projects/marble-decider/">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider.svg" alt="Marble Decider Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider-favicon.svg" alt="Marble Decider Logo" class="project-icon">
                     <span class="project-title">Marble Decider</span>
                 
                     <div class="project-description" style="display:none;">
                         Bascially just the wheel of names with a fancy way of deciding. Thought it was a fun idea.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="./projects/capitaliser/">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/capitaliser.svg" alt="Capitaliser Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/capitaliser.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/capitaliser.svg" alt="Capitaliser Logo" class="project-icon">
                     <span class="project-title">Capitaliser</span>
                 
                     <div class="project-description" style="display:none;">
                         A simple webtool to use any form of capitalisation instead of painstakingly going over each letter, also completely free of ads. I hate pages packed with ads.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="./projects/sub-and-sup-to-html/">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sasth.svg" alt="SaStH Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sasth.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sasth-favicon.svg" alt="SaStH Logo" class="project-icon">
                     <span class="project-title">Sub and Sup to HTML</span>
                 
                     <div class="project-description" style="display:none;">
                         A quick way to turn unicode or other format sub/superscripts into HTML. Was having issues with it so i made a web tool to do it for me.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
         </ul>
     </nav>
@@ -912,8 +962,8 @@ function openModal(event, btn) {
     event.preventDefault();
     event.stopPropagation();
 
-    const parentLink = btn.closest('a');
     const card = btn.closest('li');
+    const parentLink = card.querySelector('a');
     
     // Extract data from the list item
     const title = card.querySelector('.project-title').innerText;
@@ -938,6 +988,9 @@ function openModal(event, btn) {
     }
 
     document.getElementById('infoModal').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('infoModal').classList.add('active');
+    }, 10);
 }
 
 // Theme System
@@ -947,8 +1000,25 @@ function toggleThemeMenu(event) {
 }
 
 function setTheme(theme) {
+    const oldTheme = document.body.getAttribute('data-theme');
+    if (oldTheme === theme) return;
+
     document.body.setAttribute('data-theme', theme);
     localStorage.setItem('selected-theme', theme);
+    
+    // Handle icon swapping for Legacy theme
+    document.querySelectorAll('.project-icon').forEach(img => {
+        const logo = img.getAttribute('data-logo') || img.src;
+        const favicon = img.getAttribute('data-favicon');
+        
+        if (!img.getAttribute('data-logo')) {
+            img.setAttribute('data-logo', logo);
+        }
+
+        if (favicon) {
+            img.src = (theme === 'legacy') ? favicon : logo;
+        }
+    });
     
     // Update active state in menu
     document.querySelectorAll('.theme-option').forEach(opt => {
@@ -1081,41 +1151,6 @@ function filterProjects() {
             item.project.classList.add('hidden');
         }
     });
-}
-
-function openModal(event, btn) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const parentLink = btn.closest('a');
-    const card = btn.closest('li');
-    
-    // Extract data from the list item
-    const title = card.querySelector('.project-title').innerText;
-    const logo = card.querySelector('.project-icon').src;
-    const desc = card.querySelector('.project-description').innerHTML;
-    const link = parentLink.href;
-    const target = parentLink.getAttribute('target'); // Get target (_blank or null)
-
-    // Populate Modal
-    document.getElementById('modalTitle').innerText = title;
-    document.getElementById('modalLogo').src = logo;
-    document.getElementById('modalDesc').innerHTML = desc;
-    
-    const launchBtn = document.getElementById('modalLaunch');
-    launchBtn.href = link;
-
-    // Apply target only if it exists in the original list item
-    if (target) {
-        launchBtn.setAttribute('target', target);
-    } else {
-        launchBtn.removeAttribute('target');
-    }
-
-    const modal = document.getElementById('infoModal');
-    modal.style.display = 'flex';
-    // Small timeout to trigger animation
-    setTimeout(() => modal.classList.add('active'), 10);
 }
 
 

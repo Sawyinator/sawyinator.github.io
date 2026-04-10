@@ -76,9 +76,16 @@
         background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+
+    [data-theme="legacy"] h1 a {
+        color: inherit;
+        -webkit-text-fill-color: inherit;
     }
 
     [data-theme="legacy"] h1 a:hover {
+        -webkit-text-fill-color: #4facfe !important;
         opacity: 1 !important;
         filter: brightness(1.2);
     }
@@ -91,11 +98,14 @@
     }
 
     [data-theme="legacy"] li a {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
         aspect-ratio: auto;
-        padding: 25px;
+        padding: 30px;
         border-radius: 16px;
-        text-align: center;
+        text-align: left;
         height: 100%;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -110,17 +120,17 @@
 
     [data-theme="legacy"] .project-icon, 
     [data-theme="legacy"] .icon-placeholder {
-        width: 60px; 
-        height: 60px;
-        margin-bottom: 15px;
-        display: inline-block;
+        width: 32px; 
+        height: 32px;
+        margin-bottom: 0;
+        flex-shrink: 0;
     }
 
     [data-theme="legacy"] .project-title {
         position: static;
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: 600;
-        margin-bottom: 8px;
+        margin-bottom: 0;
         display: block;
         opacity: 1;
         text-transform: none;
@@ -130,11 +140,7 @@
     }
 
     [data-theme="legacy"] .project-description {
-        display: block !important;
-        font-size: 0.85rem;
-        opacity: 0.6;
-        color: white;
-        line-height: 1.4;
+        display: none !important;
     }
 
     /* Frutiger Aero Theme */
@@ -150,11 +156,47 @@
         --accent: #22c55e;
         --accent-hover: #16a34a;
         --glass-blur: 15px;
-        --modal-bg: linear-gradient(180deg, #ffffff, #e2e8f0);
+        --modal-bg: rgba(255, 255, 255, 0.7);
         --menu-bg: rgba(255, 255, 255, 0.9);
         --radius-card: 50%;
         --radius-btn: 20px;
         --card-shadow: inset 0 2px 4px rgba(255,255,255,0.4), 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    [data-theme="frutiger"] .modal-overlay {
+        background: rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(5px);
+    }
+
+    [data-theme="frutiger"] .modal-content {
+        border-radius: 24px;
+        backdrop-filter: blur(20px);
+        color: #000000;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    [data-theme="frutiger"] #modalTitle {
+        background: none;
+        -webkit-text-fill-color: #000000;
+        color: #000000;
+    }
+
+    [data-theme="frutiger"] #modalDesc {
+        color: #000000;
+    }
+
+    [data-theme="frutiger"] .modal-close {
+        color: #000000;
+        background: rgba(0,0,0,0.05);
+    }
+
+    [data-theme="frutiger"] .info-btn {
+        top: 30px;
+        right: 30px;
+        background: rgba(255, 255, 255, 0.8);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
     [data-theme="frutiger"] li a:hover {
@@ -267,6 +309,11 @@
         /* Responsive grid: buttons stay square and adjust size based on screen */
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 30px;
+    }
+
+    li {
+        position: relative;
+        list-style: none;
     }
 
     li a {
@@ -764,111 +811,102 @@ li.hidden {
         <ul>
             <li>
                 <a href="../" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" alt="Old Sawyinator Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" alt="Old Sawyinator Logo" class="project-icon">
                     <span class="project-title">LEGACY | Main Page</span>
                 
                     <div class="project-description" style="display:none;">
                         This is the first version of my home landing page. It is basically as simple as can be. Its so simple that even the description fills more space than the entire codeblock lol.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="../legacy-v2/" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" alt="Old Sawyinator Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/logos/sawyinator-old.png" alt="Old Sawyinator Logo" class="project-icon">
                     <span class="project-title">VERSION 2 | Main Page</span>
                 
                     <div class="project-description" style="display:none;">
                         This is the second version of my home landing page. I thought that maybe the first version of the landing page was *too* basic, so i included the second version where some style was added.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="../../projects/download/legacy/" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg" alt="Downloads Icon" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/download.svg" alt="Downloads Icon" class="project-icon">
                     <span class="project-title">LEGACY | Downloads</span>
                 
                     <div class="project-description" style="display:none;">
                         Hopefully, due to the nature of this page, it will look almost exactly the same. If it works how i hope it will, the page will self-update with new projects, which means that for the most part, i can just leave it like it is and not touch it.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="../../projects/a-int/legacy/" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/a-int.svg" alt="A-INT Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/a-int.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/a-int.svg" alt="A-INT Logo" class="project-icon">
                     <span class="project-title">LEGACY | Arabic-Indic Number Trainer (A-INT)</span>
                 
                     <div class="project-description" style="display:none;">
                         A-INT Started as a very, very simple way for me to practice my arabic-indic numerals. If you go to the current version, you can see just how much I frenzied and kept adding stuff. I am very glad I did keep adding stuff. I am proud of what A-INT currently is.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="../../projects/cmd-shutdown-timer/legacy/" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/cmd-shutdown-timer.svg" alt="cmd Shutdown Timer Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/cmd-shutdown-timer.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/cmd-shutdown-timer-favicon.svg" alt="cmd Shutdown Timer Logo" class="project-icon">
                     <span class="project-title">LEGACY | cmd Shutdown Timer</span>
                 
                     <div class="project-description" style="display:none;">
                         As of writing this description, this project is very barebones, and that is all it needs to be, therefore the legacy does not differ too much to the current version (if at all)
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="../../projects/marble-decider/legacy/" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider.svg" alt="Marble Decider Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider-favicon.svg" alt="Marble Decider Logo" class="project-icon">
                     <span class="project-title">LEGACY | Marble Decider</span>
                 
                     <div class="project-description" style="display:none;">
                         This was a pretty barebones race with poor quality modules that never properly challenged the marbles. You can probably see why this *NEEDED* to change.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="../../projects/marble-decider/creator/legacy/" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider-favicon.svg" alt="Marble Decider Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider-favicon.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/marble-decider-favicon.svg" alt="Marble Decider Logo" class="project-icon">
                     <span class="project-title">LEGACY | Module Creator | Marble Decider</span>
                 
                     <div class="project-description" style="display:none;">
                         The first version of the module creator. This was introduced a fair way into the development of the marble decider, therefore it has the green colour scheme that the legacy version of the marble decider does not. The changes are visually minimal but most of it is to do with how the code module is generated, how exactly the canvas sizing works, and how the object properties are generated (this gave me so much damn trouble, you have no idea (if you check the commits for the creator youll find that me fixing the restitution was worthy of full caps, i was that happy to finally fix it)). 
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="../../projects/sub-and-sup-to-html/legacy/" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sasth.svg" alt="SaStH Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sasth.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sasth-favicon.svg" alt="SaStH Logo" class="project-icon">
                     <span class="project-title">LEGACY | Sub and Sup to HTML</span>
                 
                     <div class="project-description" style="display:none;">
                         This and 'capitaliser' were both ported over from another place i was using them, so these legacy versions are pretty finished as is. These changes are probably really minimal.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
             <li>
                 <a href="../../projects/capitaliser/legacy/" target="_blank" rel="noopener noreferrer">
-                 <button class="info-btn" onclick="openModal(event, this)">i</button>
-                    
-                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/capitaliser.svg" alt="Capitaliser Logo" class="project-icon">
+                    <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/capitaliser.svg" data-favicon="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/capitaliser.svg" alt="Capitaliser Logo" class="project-icon">
                     <span class="project-title">LEGACY | Capitaliser</span>
                 
                     <div class="project-description" style="display:none;">
                         This and 'sub and sup to html' were both ported over from another place i was using them, so these legacy versions are pretty finished as is. These changes are probably really minimal.
                     </div>
                 </a>
+                <button class="info-btn" onclick="openModal(event, this)">i</button>
             </li>
         </ul>
     </nav>
@@ -893,8 +931,8 @@ function openModal(event, btn) {
     event.preventDefault();
     event.stopPropagation();
 
-    const parentLink = btn.closest('a');
     const card = btn.closest('li');
+    const parentLink = card.querySelector('a');
     
     // Extract data from the list item
     const title = card.querySelector('.project-title').innerText;
@@ -919,6 +957,9 @@ function openModal(event, btn) {
     }
 
     document.getElementById('infoModal').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('infoModal').classList.add('active');
+    }, 10);
 }
 
 function toggleSearch(event) {
@@ -1034,35 +1075,6 @@ function filterProjects() {
     });
 }
 
-function openModal(event, btn) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const parentLink = btn.closest('a');
-    const card = btn.closest('li');
-    
-    // Extract data from the list item
-    const title = card.querySelector('.project-title').innerText;
-    const logo = card.querySelector('.project-icon').src;
-    const desc = card.querySelector('.project-description').innerHTML;
-    const link = parentLink.href;
-    const target = parentLink.getAttribute('target'); // Get target (_blank or null)
-
-    // Populate Modal
-    document.getElementById('modalTitle').innerText = title;
-    document.getElementById('modalLogo').src = logo;
-    document.getElementById('modalDesc').innerHTML = desc;
-    
-    const launchBtn = document.getElementById('modalLaunch');
-    launchBtn.href = link;
-
-    // Apply target only if it exists in the original list item
-    if (target) {
-        launchBtn.setAttribute('target', target);
-    } else {
-        launchBtn.removeAttribute('target');
-    }
-
     const modal = document.getElementById('infoModal');
     modal.style.display = 'flex';
     // Small timeout to trigger animation
@@ -1076,8 +1088,25 @@ function toggleThemeMenu(event) {
 }
 
 function setTheme(theme) {
+    const oldTheme = document.body.getAttribute('data-theme');
+    if (oldTheme === theme) return;
+
     document.body.setAttribute('data-theme', theme);
     localStorage.setItem('selected-theme', theme);
+    
+    // Handle icon swapping for Legacy theme
+    document.querySelectorAll('.project-icon').forEach(img => {
+        const logo = img.getAttribute('data-logo') || img.src;
+        const favicon = img.getAttribute('data-favicon');
+        
+        if (!img.getAttribute('data-logo')) {
+            img.setAttribute('data-logo', logo);
+        }
+
+        if (favicon) {
+            img.src = (theme === 'legacy') ? favicon : logo;
+        }
+    });
     
     // Update active state in menu
     document.querySelectorAll('.theme-option').forEach(opt => {
