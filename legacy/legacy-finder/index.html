@@ -268,17 +268,9 @@
         position: absolute;
         border-radius: 50%;
         filter: blur(80px);
-        opacity: 0.3;
-        animation: float 20s infinite alternate;
-    }
-
-    .blob-1 { width: 400px; height: 400px; background: #007DFF; top: -100px; left: -100px; }
-    .blob-2 { width: 350px; height: 350px; background: #7c3aed; bottom: -50px; right: -50px; animation-delay: -5s; }
-    .blob-3 { width: 300px; height: 300px; background: #3b82f6; top: 40%; left: 60%; animation-delay: -10s; }
-
-    @keyframes float {
-        from { transform: translate(0, 0) scale(1); }
-        to { transform: translate(60px, 40px) scale(1.1); }
+        opacity: 0.2;
+        pointer-events: none;
+        z-index: -1;
     }
 
     [data-theme="modern"] .theme-option.active {
@@ -307,7 +299,7 @@
         padding: 60px 20px 40px;
         text-align: center;
         z-index: 900;
-        transition: all 0.5s var(--bounce);
+        transition: all 0.4s ease-out;
         pointer-events: none;
         display: flex;
         flex-direction: column;
@@ -318,7 +310,7 @@
 
     .header-content {
         display: inline-block;
-        transition: all 0.5s var(--bounce);
+        transition: all 0.4s ease-out;
         padding: 0;
         border-radius: 20px;
         position: relative;
@@ -351,7 +343,7 @@
         letter-spacing: -1px;
         margin: 0;
         color: #ffffff;
-        transition: all 0.5s var(--bounce);
+        transition: all 0.4s ease-out;
     }
 
     header.scrolled h1 {
@@ -529,7 +521,7 @@
     flex-direction: row;
     gap: 40px;
     transform: scale(0.9) translateY(20px);
-    transition: all 0.5s var(--bounce);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
 }
 
@@ -863,11 +855,7 @@ li.hidden {
 </style>
 </head>
 <body>
-    <div class="bg-blobs">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
+    <div class="bg-blobs" id="bgBlobs"></div>
 
     <div class="search-wrapper" id="searchWrapper">
         <div class="theme-toggle" onclick="toggleThemeMenu(event)" title="Change Theme">
@@ -1184,6 +1172,63 @@ window.addEventListener('scroll', () => {
         header.classList.remove('scrolled');
     }
 });
+
+// Dynamic Blobs for Default Theme
+const blobColors = [
+    '#1e1b4b', // Navy
+    '#312e81', // Darker Navy
+    '#3b0764', // Dark Purple
+    '#2e1065', // Deep Purple
+    '#1e293b'  // Dark Desaturated Blue
+];
+
+function createBlob() {
+    if (document.body.getAttribute('data-theme') !== 'modern') return;
+    
+    const container = document.getElementById('bgBlobs');
+    if (!container) return;
+
+    const blob = document.createElement('div');
+    blob.className = 'blob';
+    
+    const size = Math.random() * 300 + 200;
+    const color = blobColors[Math.floor(Math.random() * blobColors.length)];
+    const startTop = Math.random() * 100;
+    const duration = Math.random() * 30000 + 30000; // 30-60s
+
+    blob.style.width = `${size}px`;
+    blob.style.height = `${size}px`;
+    blob.style.background = color;
+    blob.style.top = `${startTop}%`;
+    blob.style.left = '110%';
+    blob.style.transition = `transform ${duration}ms linear`;
+    
+    container.appendChild(blob);
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+        blob.style.transform = `translateX(-150vw)`;
+    });
+
+    // Remove after animation
+    setTimeout(() => {
+        if (blob.parentNode) {
+            blob.parentNode.removeChild(blob);
+        }
+    }, duration);
+}
+
+// Spawn blobs periodically
+setInterval(() => {
+    if (document.body.getAttribute('data-theme') === 'modern') {
+        createBlob();
+    }
+}, 8000); // Every 8 seconds
+
+// Initial blobs
+for(let i=0; i<3; i++) {
+    setTimeout(createBlob, i * 2000);
+}
 
 // Theme System
 function toggleThemeMenu(event) {
