@@ -28,17 +28,107 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+    :root {
+        --bg-gradient: radial-gradient(circle at top right, #0f172a, #020617);
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --text-main: #ffffff;
+        --text-dim: #94a3b8;
+        --accent: #007DFF;
+        --accent-hover: #0088FF;
+        --glass-blur: 12px;
+        --modal-bg: linear-gradient(145deg, #0a0e17, #020203);
+        --menu-bg: rgba(15, 23, 42, 0.9);
+        --radius-card: 24px;
+        --radius-btn: 12px;
+        --font-main: 'Inter', -apple-system, sans-serif;
+        --bounce: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        --card-shadow: none;
+    }
+
+    /* Legacy Theme */
+    [data-theme="legacy"] {
+        --bg-gradient: radial-gradient(circle at top right, #1a1a2e, #16213e, #0f3460);
+        --card-bg: rgba(255, 255, 255, 0.05);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --accent: #4facfe;
+        --accent-hover: #00f2fe;
+        --modal-bg: linear-gradient(145deg, #16213e, #0f3460);
+    }
+
+    /* Frutiger Aero Theme */
+    [data-theme="frutiger"] {
+        --bg-gradient: linear-gradient(180deg, #3b82f6 0%, #60a5fa 40%, #ffffff 100%);
+        --bg-pattern: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 10%),
+                      radial-gradient(circle at 80% 70%, rgba(255,255,255,0.3) 0%, transparent 15%),
+                      radial-gradient(circle at 40% 80%, rgba(255,255,255,0.2) 0%, transparent 20%);
+        --card-bg: rgba(255, 255, 255, 0.15);
+        --card-border: rgba(255, 255, 255, 0.3);
+        --text-main: #0f172a;
+        --text-dim: #334155;
+        --accent: #22c55e;
+        --accent-hover: #16a34a;
+        --glass-blur: 15px;
+        --modal-bg: rgba(255, 255, 255, 0.7);
+        --menu-bg: rgba(255, 255, 255, 0.9);
+        --radius-card: 24px;
+        --radius-btn: 20px;
+        --card-shadow: inset 0 2px 4px rgba(255,255,255,0.4), 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    /* Default Redesign */
+    [data-theme="default"] {
+        --bg-gradient: conic-gradient(from 230.29deg at 51.63% 52.16%, #000000 0deg, #0f172a 360deg);
+        --card-bg: rgba(255, 255, 255, 0.02);
+        --card-border: rgba(255, 255, 255, 0.15);
+        --accent: #ffffff;
+        --accent-hover: #f8fafc;
+        --text-main: #ffffff;
+        --text-dim: rgba(255, 255, 255, 0.6);
+        --modal-bg: #000000;
+        --radius-card: 32px;
+        --radius-btn: 16px;
+        --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --card-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .bg-blobs {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+        display: none;
+    }
+
+    [data-theme="default"] .bg-blobs {
+        display: block;
+    }
+
+    .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0;
+        pointer-events: none;
+        z-index: -1;
+    }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at top right, #0a0e17, #05070a, #020203);
-            color: #e5e5e5;
+            font-family: var(--font-main);
+            background: var(--bg-pattern, none), var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
             min-height: 100vh;
+            transition: background 0.5s ease;
         }
         .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--card-shadow);
         }
         .profile-pic-container {
             position: relative;
@@ -90,9 +180,10 @@
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-6">
+    <div class="bg-blobs" id="bgBlobs"></div>
     
     <a href="../" class="fixed top-8 left-8 p-3 glass rounded-full hover:bg-white/10 transition-colors group">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
     </a>
 
     <div class="max-w-2xl w-full text-center space-y-8">
@@ -102,7 +193,7 @@
                 <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator-youtube.svg" alt="Sawyinator" class="profile-pic">
             </div>
             <div>
-                <h1 class="text-4xl font-bold tracking-tight text-white">Sawyinator</h1>
+                <h1 class="text-4xl font-bold tracking-tight">Sawyinator</h1>
                 <p class="text-lg opacity-50 font-light mt-1">silly guy</p>
             </div>
         </div>
@@ -110,12 +201,12 @@
         <!-- Social Links (Moved to top) -->
         <div class="flex justify-center gap-4">
             <a href="https://youtube.com/@sawyinator" target="_blank" class="glass p-4 rounded-2xl social-link flex items-center justify-center border border-white/10" title="YouTube">
-                <svg viewBox="0 0 24 24" class="w-6 h-6 fill-white">
+                <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current">
                     <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
                 </svg>
             </a>
             <a href="https://github.com/Sawyinator" target="_blank" class="glass p-4 rounded-2xl social-link flex items-center justify-center border border-white/10" title="GitHub">
-                <svg viewBox="0 0 24 24" class="w-6 h-6 fill-white">
+                <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current">
                     <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
                 </svg>
             </a>
@@ -124,8 +215,8 @@
         <!-- Latest Video Section -->
         <div id="latest-video-container" class="hidden">
             <div class="glass p-6 rounded-3xl text-left space-y-4">
-                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
                     Latest Upload
                 </h2>
                 <a id="video-link" href="#" target="_blank" class="flex flex-col sm:flex-row gap-4 group">
@@ -133,7 +224,7 @@
                         <div id="new-badge" class="new-badge hidden">New</div>
                         <img id="video-thumb" src="" alt="Video Thumbnail" class="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500">
                         <div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/0 transition-colors rounded-xl">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 opacity-80"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 opacity-80"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         </div>
                     </div>
                     <div class="flex-1 space-y-2 py-1">
@@ -148,13 +239,13 @@
         <div class="space-y-6">
             <!-- About Me -->
             <div class="glass p-8 rounded-3xl text-left space-y-4">
-                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     About Me
                 </h2>
                 <div class="opacity-70 leading-relaxed space-y-4">
                     <p>
-                        Yo, I'm Sawyinator. My real name, though, is Brook. I'm a yorkshire lad, and I'm big on playing video games. If you want to see them, I post clips and highlights from all of the games I play with my friends on my <a href="https://youtube.com/@sawyinator" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">YouTube channel</a>.
+                        Yo, I'm Sawyinator. My real name, though, is Brook. I'm a yorkshire lad, and I'm big on playing video games. If you want to see them, I post clips and highlights from all of the games I play with my friends on my <a href="https://youtube.com/@sawyinator" target="_blank" rel="noopener noreferrer" class="underline decoration-current/30 hover:decoration-current/100 transition-colors">YouTube channel</a>.
                     </p>
                     <p>
                         When it comes to games, Undertale is my favourite of any game by far. Never have I, and never will I love another game the same way i love undertale. Its just that good. Some other peak media that i need to mention in an about me would be 'Three Days of Happiness', 'Onani-Master Kurosawa' (a little weird, but god am i a sucker for a good redemption arc), 'A Silent Voice', and 'Re:Zero'. I cannot recommend any of these to be consumed enough. Some of them quite literally changed my life. Anyway, I'm getting off track.
@@ -163,19 +254,19 @@
                         I was born in the 2000s and my main hobbies are gaming. That's it, unfortunately. My dream job would be to become a youtuber, hence the channel linked. It just seems like a natural evolution of a person who enjoys playing games. I put the story for this website below, and that might give you a little more insight into me if you read it, so feel free to.
                     </p>
                     <p>
-                        Everything here is open-source and available on <a href="https://github.com/Sawyinator/sawyinator.github.io/" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">GitHub</a>. Explore it at your own leisure.
+                        Everything here is open-source and available on <a href="https://github.com/Sawyinator/sawyinator.github.io/" target="_blank" rel="noopener noreferrer" class="underline decoration-current/30 hover:decoration-current/100 transition-colors">GitHub</a>. Explore it at your own leisure.
                     </p>
                 </div>
             </div>
 
             <div class="glass p-8 rounded-3xl text-left space-y-4">
-                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                     The Story of Sawyinator.uk
                 </h2>
                 <div class="opacity-70 leading-relaxed space-y-4">
                     <p>
-                        Most of this website is just a passion project that I started because of one simple thing, and that thing is <a href="../projects/a-int/" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">A-INT</a>. So, story-time.
+                        Most of this website is just a passion project that I started because of one simple thing, and that thing is <a href="../projects/a-int/" target="_blank" rel="noopener noreferrer" class="underline decoration-current/30 hover:decoration-current/100 transition-colors">A-INT</a>. So, story-time.
                     </p>
                     <p>
                         When I was in high school, I was in my business class, and I was bored as all hell. Naturally, I started doing everything in my power to pay less attention to the teacher, and that resulted in me fiddling around with the Apple Watch I had on at the time. I started flicking through the different face styles you could have, messing around with the complications, and I landed on the Numerals Duo style. While doing this, I managed to stumble across the different numeral styles available, and at the time I think there was only Arabic-Indic and Devanagari. At this point in my life, I didn't even know that there were different styles for numbers; I had thought that everyone used the Western Arabic digits, so I ended up being quite intrigued. I decided "fuck it," flipped on the Arabic-Indic digits, and let it stick. Anything to get away from the boredom of business—and learning this fascinating new number system seemed like a good way to do that.
@@ -187,10 +278,10 @@
                         After a long while (maybe a couple of years? I'm pretty bad with time, to be honest), I decided that because my fluency hadn't improved at all, I needed to do something. So I hopped on Gemini and generated a simple basis for A-INT.
                     </p>
                     <p>
-                        I got sick of throwing this HTML file I had downloaded on my PC around, so I bit the bullet, made a GitHub account, and uploaded A-INT. This made it click in my head: "Oh shit, this is public now, and if people need it, they can use it." I began working on making the page appealing and selling this HTML file (metaphorically selling—the file was and is free). Things spiralled; I added a feature to A-INT, then another, and then another, and I ended up with a pretty solid program. But I still had one issue: I was sick of this damn HTML file. That led me to GitHub Pages, a free way to have the project be accessible from any browser. Therefore, I began work on a <a href="../legacy/legacy-v2/" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">basic landing page</a> and uploaded A-INT to GitHub Pages (this was still sawyinator.github.io at the time).
+                        I got sick of throwing this HTML file I had downloaded on my PC around, so I bit the bullet, made a GitHub account, and uploaded A-INT. This made it click in my head: "Oh shit, this is public now, and if people need it, they can use it." I began working on making the page appealing and selling this HTML file (metaphorically selling—the file was and is free). Things spiralled; I added a feature to A-INT, then another, and then another, and I ended up with a pretty solid program. But I still had one issue: I was sick of this damn HTML file. That led me to GitHub Pages, a free way to have the project be accessible from any browser. Therefore, I began work on a <a href="../legacy/legacy-v2/" target="_blank" rel="noopener noreferrer" class="underline decoration-current/30 hover:decoration-current/100 transition-colors">basic landing page</a> and uploaded A-INT to GitHub Pages (this was still sawyinator.github.io at the time).
                     </p>
                     <p>
-                        Something about having a website that everyone in the world could access lit a fire under me, and the urge to build, and build, and build just overtook me. After improving A-INT to a point where I didn't think it had much more room for improvement, I decided to buy a domain. I looked across Cloudflare and found that '<a href="../" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">sawyinator.uk</a>' was pretty damn cheap. (To be honest, I don't remember if the <a href="../projects/cmd-shutdown-timer/" target="_blank" rel="noopener noreferrer" class="text-white underline decoration-white/30 hover:decoration-white/100 transition-colors">CMD Shutdown Timer</a> or the new domain name came first, so we're just going with the story that the domain name came first.)
+                        Something about having a website that everyone in the world could access lit a fire under me, and the urge to build, and build, and build just overtook me. After improving A-INT to a point where I didn't think it had much more room for improvement, I decided to buy a domain. I looked across Cloudflare and found that '<a href="../" target="_blank" rel="noopener noreferrer" class="underline decoration-current/30 hover:decoration-current/100 transition-colors">sawyinator.uk</a>' was pretty damn cheap. (To be honest, I don't remember if the <a href="../projects/cmd-shutdown-timer/" target="_blank" rel="noopener noreferrer" class="underline decoration-current/30 hover:decoration-current/100 transition-colors">CMD Shutdown Timer</a> or the new domain name came first, so we're just going with the story that the domain name came first.)
                     </p>
                     <p>
                         So, I bought it.
@@ -229,7 +320,7 @@
                     const diffTime = Math.abs(now - pubDate);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                    if (diffDays <= 30) {
+                    if (diffDays <= 3000) {
                         document.getElementById('new-badge').classList.remove('hidden');
                     }
 
@@ -247,6 +338,90 @@
         }
 
         fetchLatestVideo();
+
+        // Theme System (Ported from index.html)
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            
+            // Update profile pic border color for Frutiger theme
+            const profilePic = document.querySelector('.profile-pic');
+            if (theme === 'frutiger') {
+                profilePic.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+            } else {
+                profilePic.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('selected-theme') || 'default';
+        setTheme(savedTheme);
+
+        // Dynamic Blobs for Default Theme
+        const blobColors = [
+            '#2563eb', // Vibrant Blue
+            '#4f46e5', // Indigo
+            '#7c3aed', // Violet
+            '#3b82f6', // Light Blue
+            '#6366f1'  // Indigo/Purple
+        ];
+
+        function createBlob(initialX = null) {
+            if (document.body.getAttribute('data-theme') !== 'default') return;
+            
+            const container = document.getElementById('bgBlobs');
+            if (!container) return;
+
+            const blob = document.createElement('div');
+            blob.className = 'blob';
+            
+            const size = Math.random() * 500 + 400;
+            const color = blobColors[Math.floor(Math.random() * blobColors.length)];
+            const startTop = Math.random() * 100;
+            const duration = 40000; // 40s to cross
+            
+            const startX = initialX !== null ? initialX : 110;
+            const travelDistance = startX + 50;
+            const adjustedDuration = initialX !== null ? (duration * (travelDistance / 160)) : duration;
+
+            blob.style.width = `${size}px`;
+            blob.style.height = `${size}px`;
+            blob.style.background = color;
+            blob.style.top = `${startTop}%`;
+            blob.style.left = `${startX}%`;
+            blob.style.opacity = '0';
+            blob.style.transition = `transform ${adjustedDuration}ms linear, opacity 3s ease`;
+            
+            container.appendChild(blob);
+
+            setTimeout(() => {
+                blob.style.transform = `translateX(-250vw)`;
+                blob.style.opacity = '0.35';
+            }, 100);
+
+            const fadeOutTime = 5000;
+            setTimeout(() => {
+                if (blob.parentNode) {
+                    blob.style.opacity = '0';
+                }
+            }, adjustedDuration - fadeOutTime);
+
+            setTimeout(() => {
+                if (blob.parentNode) {
+                    blob.parentNode.removeChild(blob);
+                }
+            }, adjustedDuration + 100);
+        }
+
+        setInterval(() => {
+            if (document.body.getAttribute('data-theme') === 'default') {
+                createBlob();
+            }
+        }, 6000);
+
+        for(let i=0; i<4; i++) {
+            const randomX = Math.random() * 100;
+            setTimeout(() => createBlob(randomX), i * 500);
+        }
     </script>
 </body>
 </html>
