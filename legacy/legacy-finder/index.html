@@ -251,13 +251,43 @@
         --card-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.4);
     }
 
+    .bg-blobs {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+        display: none;
+    }
+
+    [data-theme="modern"] .bg-blobs {
+        display: block;
+    }
+
+    .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.3;
+        animation: float 20s infinite alternate;
+    }
+
+    .blob-1 { width: 400px; height: 400px; background: #007DFF; top: -100px; left: -100px; }
+    .blob-2 { width: 350px; height: 350px; background: #7c3aed; bottom: -50px; right: -50px; animation-delay: -5s; }
+    .blob-3 { width: 300px; height: 300px; background: #3b82f6; top: 40%; left: 60%; animation-delay: -10s; }
+
+    @keyframes float {
+        from { transform: translate(0, 0) scale(1); }
+        to { transform: translate(60px, 40px) scale(1.1); }
+    }
+
     [data-theme="modern"] .theme-option.active {
         color: #000;
     }
 
     body {
         margin: 0;
-        padding: 0;
+        padding: 180px 0 0;
         font-family: var(--font-main);
         background: var(--bg-pattern, none), var(--bg-gradient);
         background-attachment: fixed;
@@ -270,15 +300,62 @@
     }
 
     header {
-        margin: 60px 20px 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 60px 20px 40px;
         text-align: center;
+        z-index: 900;
+        transition: all 0.5s var(--bounce);
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    header * { pointer-events: auto; }
+
+    .header-content {
+        display: inline-block;
+        transition: all 0.5s var(--bounce);
+        padding: 0;
+        border-radius: 20px;
+        position: relative;
+    }
+
+    header.scrolled {
+        padding: 0;
+        height: 84px;
+        justify-content: center;
+    }
+
+    header.scrolled .header-content {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--card-border);
+        padding: 10px 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        border-radius: 40px;
+        pointer-events: auto;
+    }
+
+    [data-theme="modern"] header.scrolled .header-content {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
     }
 
     h1 {
         font-size: 2.5rem;
         letter-spacing: -1px;
-        margin-bottom: 10px;
+        margin: 0;
         color: #ffffff;
+        transition: all 0.5s var(--bounce);
+    }
+
+    header.scrolled h1 {
+        font-size: 1.2rem;
     }
 
     h1 a {
@@ -295,6 +372,15 @@
         opacity: 0.6;
         font-weight: 300;
         color: var(--text-dim);
+        margin: 10px 0 0;
+        transition: all 0.4s ease;
+    }
+
+    header.scrolled p {
+        height: 0;
+        opacity: 0;
+        margin: 0;
+        overflow: hidden;
     }
 
     nav {
@@ -777,12 +863,18 @@ li.hidden {
 </style>
 </head>
 <body>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
     <div class="search-wrapper" id="searchWrapper">
         <div class="theme-toggle" onclick="toggleThemeMenu(event)" title="Change Theme">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
         </div>
         <div class="theme-menu" id="themeMenu">
-            <div class="theme-option" onclick="setTheme('modern')">Modern (Default)</div>
+            <div class="theme-option" onclick="setTheme('modern')">Default</div>
             <div class="theme-option" onclick="setTheme('classic')">Classic</div>
             <div class="theme-option" onclick="setTheme('legacy')">Legacy</div>
             <div class="theme-option" onclick="setTheme('frutiger')">Frutiger Aero</div>
@@ -801,10 +893,12 @@ li.hidden {
         <span>Main Page</span>
     </a>
     
-    <header>
-        <h1><a href="../../aboutme/">Sawyinator</a>.uk | LEGACY FINDER</h1>
-        <p>This is a subpage where you can view the first versions of all of my projects.</p>
-        <p>(all of these projects can be accessed by simply adding 'legacy' to the end of any page url)</p>
+    <header id="mainHeader">
+        <div class="header-content">
+            <h1><a href="../../aboutme/">Sawyinator</a>.uk | LEGACY FINDER</h1>
+            <p>This is a subpage where you can view the first versions of all of my projects.</p>
+            <p>(all of these projects can be accessed by simply adding 'legacy' to the end of any page url)</p>
+        </div>
     </header>
 
     <nav>
@@ -1080,6 +1174,16 @@ function filterProjects() {
     // Small timeout to trigger animation
     setTimeout(() => modal.classList.add('active'), 10);
 }
+
+// Header Scroll Effect
+window.addEventListener('scroll', () => {
+    const header = document.getElementById('mainHeader');
+    if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+    } else {
+        header.classList.remove('scrolled');
+    }
+});
 
 // Theme System
 function toggleThemeMenu(event) {
