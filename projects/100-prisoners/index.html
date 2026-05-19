@@ -574,7 +574,8 @@
                     const boxEl = document.getElementById(`box-${currentBoxId}`);
                     boxEl.classList.add('revealed', 'active');
                     boxEl.innerHTML = `
-                        <span class="text-xl">${box.content}</span>
+                        <span class="text-[9px] opacity-40 leading-none mb-0.5">${currentBoxId}</span>
+                        <span class="text-lg leading-tight">${box.content}</span>
                     `;
                     
                     // Add step to preview
@@ -622,7 +623,10 @@
                         const boxEl = document.getElementById(`box-${nextId}`);
                         if (boxEl && !boxEl.classList.contains('fail')) {
                             boxEl.classList.add('fail', 'opacity-40');
-                            boxEl.innerHTML = `<span class="text-lg opacity-30">${boxes[nextId-1].content}</span>`;
+                            boxEl.innerHTML = `
+                                <span class="text-[9px] opacity-20 leading-none mb-0.5">${nextId}</span>
+                                <span class="text-lg opacity-30 leading-tight">${boxes[nextId-1].content}</span>
+                            `;
                         }
                         if (nextId === boxes[nextId-1].content) break; // Self-loop safety
                         nextId = boxes[nextId-1].content;
@@ -683,7 +687,10 @@
                     failCycle.forEach(id => {
                         const el = document.getElementById(`box-${id}`);
                         el.classList.add('fail');
-                        el.innerHTML = `<span class="font-black text-xl">${boxes[id-1].content}</span>`;
+                        el.innerHTML = `
+                            <span class="text-[9px] opacity-40 leading-none mb-0.5">${id}</span>
+                            <span class="font-black text-lg leading-tight">${boxes[id-1].content}</span>
+                        `;
                     });
                     break;
                 }
