@@ -278,7 +278,20 @@ function setupRace(names) {
         else { countDisplay.innerText = count; }
     }, 1000);
 
-    Render.run(render); Runner.run(Runner.create(), engine);
+    Render.run(render);
+    
+    // Capped update loop for high refresh rate monitors
+    let lastTime = performance.now();
+    function update(time) {
+        if (!time) time = performance.now();
+        const delta = time - lastTime;
+        if (delta >= (1000 / 60)) {
+            Engine.update(engine, 1000 / 60);
+            lastTime = time - (delta % (1000 / 60));
+        }
+        requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
 }
 
 function toggleLeaderboard() {

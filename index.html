@@ -246,6 +246,13 @@
         z-index: 2;
     }
 
+    [data-theme="frutiger"] .theme-option:hover {
+        background: rgba(255, 255, 255, 0.5);
+        color: #000;
+        box-shadow: inset 0 2px 5px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }
+
     /* Default Redesign (Modern/Shiny/Bouncy) */
     [data-theme="default"] {
         --bg-gradient: conic-gradient(from 230.29deg at 51.63% 52.16%, #000000 0deg, #0f172a 360deg);
@@ -286,6 +293,177 @@
 
     [data-theme="default"] .theme-option.active {
         color: #000;
+    }
+
+    /* Wii Theme */
+    [data-theme="wii"] {
+        --bg-gradient: radial-gradient(circle, #f8f8f8 0%, #e8e8e8 100%);
+        --bg-pattern: radial-gradient(#d0d0d0 1px, transparent 1px);
+        --card-bg: #ffffff;
+        --card-border: #d0d0d0;
+        --text-main: #444444;
+        --text-dim: #777777;
+        --accent: #00a0e9;
+        --accent-hover: #00b0ff;
+        --glass-blur: 0px;
+        --modal-bg: #ffffff;
+        --radius-card: 18px;
+        --radius-btn: 50%;
+        --card-shadow: 0 6px 12px rgba(0,0,0,0.08), inset 0 0 20px rgba(0,0,0,0.02);
+        --font-main: 'Inter', sans-serif;
+    }
+
+    [data-theme="wii"] body {
+        background-size: 40px 40px;
+        padding-bottom: 120px;
+        padding-top: 80px;
+    }
+
+    [data-theme="wii"] #mainHeader {
+        margin-bottom: 30px;
+    }
+
+    [data-theme="wii"] #mainHeader h1 {
+        font-weight: 300;
+        color: #666;
+        letter-spacing: -0.5px;
+        font-size: 2.5rem;
+    }
+
+    [data-theme="wii"] ul {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 25px;
+        max-width: 1200px;
+        padding: 20px;
+    }
+
+    [data-theme="wii"] li a {
+        aspect-ratio: 1.6 / 1;
+        background: linear-gradient(145deg, #ffffff, #f0f0f0);
+        border: 3px solid #e0e0e0;
+        border-radius: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 25px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.06), inset 0 0 25px rgba(0,0,0,0.03);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: visible; /* Allow badge to pop out */
+    }
+
+    [data-theme="wii"] li a:hover {
+        transform: scale(1.1);
+        border-color: #00a0e9;
+        box-shadow: 0 0 30px rgba(0, 160, 233, 0.4), 0 15px 35px rgba(0,0,0,0.1);
+        z-index: 10;
+    }
+
+    [data-theme="wii"] .project-icon {
+        width: 90px;
+        height: 90px;
+        margin-bottom: 15px;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+
+    [data-theme="wii"] .project-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #444;
+        text-transform: none;
+        letter-spacing: -0.2px;
+        opacity: 0.9;
+    }
+
+    [data-theme="wii"] .new-badge {
+        background: #ff4b4b;
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(255, 75, 75, 0.4);
+        transform: translate(-30%, -30%);
+    }
+
+    [data-theme="wii"] .info-btn {
+        background: #f8f8f8;
+        color: #999;
+        border: 2px solid #eee;
+        bottom: 15px;
+        right: 15px;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    /* Wii Bottom Bar */
+    .wii-bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        background: linear-gradient(to bottom, #f8f8f8, #e0e0e0);
+        border-top: 2px solid #d0d0d0;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 50px;
+        z-index: 2000;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+    }
+
+    [data-theme="wii"] .wii-bottom-bar {
+        display: flex;
+    }
+
+    .wii-logo-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .wii-logo-text {
+        font-size: 28px;
+        font-weight: 700;
+        color: #444;
+        font-style: italic;
+        letter-spacing: -1px;
+    }
+
+    .wii-clock {
+        font-size: 32px;
+        font-weight: 300;
+        color: #666;
+        font-family: monospace;
+    }
+
+    .wii-nav-btns {
+        display: flex;
+        gap: 20px;
+    }
+
+    .wii-nav-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #d0d0d0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .wii-nav-btn:hover {
+        background: #f0f0f0;
+        border-color: #00a0e9;
+        color: #00a0e9;
+        transform: scale(1.1);
     }
 
     body {
@@ -440,7 +618,7 @@
         aspect-ratio: 1 / 1; 
         box-sizing: border-box;
         position: relative; /* Necessary for absolute title positioning */
-        overflow: hidden;
+        overflow: visible; /* Changed from hidden to allow badges to pop out */
     }
 
     li a:hover {
@@ -913,6 +1091,7 @@ li.hidden {
             <div class="theme-option" onclick="setTheme('classic')">Classic</div>
             <div class="theme-option" onclick="setTheme('legacy')">Legacy</div>
             <div class="theme-option" onclick="setTheme('frutiger')">Frutiger Aero</div>
+            <div class="theme-option" onclick="setTheme('wii')">Wii</div>
         </div>
         <div class="search-container">
             <div class="search-toggle" onclick="toggleSearch(event)">
@@ -1044,6 +1223,24 @@ li.hidden {
     </div>
 </div>
 
+<div class="wii-bottom-bar">
+    <div class="wii-logo-container">
+        <div class="wii-nav-btn" title="Wii Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="wii-logo-text">Wii</div>
+    </div>
+    <div class="wii-clock" id="wiiClock">12:00</div>
+    <div class="wii-nav-btns">
+        <div class="wii-nav-btn" title="Previous Page">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+        <div class="wii-nav-btn" title="Next Page">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+    </div>
+</div>
+
 <script>
 function openModal(event, btn) {
     event.preventDefault();
@@ -1111,7 +1308,7 @@ function createBlob(initialX = null) {
     const size = Math.random() * 500 + 400;
     const color = blobColors[Math.floor(Math.random() * blobColors.length)];
     const startTop = Math.random() * 100;
-    const duration = 40000; // 40s to cross
+    const duration = Math.random() * (60000 - 35000) + 35000; // Random duration between 35s and 60s
     
     // If initialX is provided, adjust duration proportionally
     const startX = initialX !== null ? initialX : 110;
@@ -1177,6 +1374,17 @@ function setTheme(theme) {
     document.body.setAttribute('data-theme', theme);
     localStorage.setItem('selected-theme', theme);
     
+    // Wii Clock Logic
+    if (theme === 'wii') {
+        updateWiiClock();
+        if (!window.wiiClockInterval) {
+            window.wiiClockInterval = setInterval(updateWiiClock, 1000);
+        }
+    } else if (window.wiiClockInterval) {
+        clearInterval(window.wiiClockInterval);
+        window.wiiClockInterval = null;
+    }
+    
     // Handle icon swapping for Legacy theme
     document.querySelectorAll('.project-icon').forEach(img => {
         const logo = img.getAttribute('data-logo') || img.src;
@@ -1235,6 +1443,16 @@ function clearSearch(event) {
     input.focus();
     clearBtn.classList.remove('visible');
     filterProjects();
+}
+
+function updateWiiClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const clockElement = document.getElementById('wiiClock');
+    if (clockElement) {
+        clockElement.innerText = `${hours}:${minutes}`;
+    }
 }
 
 // Close search when clicking outside

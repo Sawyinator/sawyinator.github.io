@@ -2478,14 +2478,18 @@
             Render.run(previewRender);
             
             // Custom update loop for FPS cap
-            let lastTime = 0;
+            let lastTime = performance.now();
             function previewUpdate(time) {
-                if (time - lastTime >= (1000 / 60)) {
+                if (!time) time = performance.now();
+                const delta = time - lastTime;
+                if (delta >= (1000 / 60)) {
+                    // Update physics at fixed 60fps
                     Engine.update(previewEngine, 1000 / 60);
-                    lastTime = time;
+                    lastTime = time - (delta % (1000 / 60));
                 }
                 previewAnimationId = requestAnimationFrame(previewUpdate);
             }
+            if (previewAnimationId) cancelAnimationFrame(previewAnimationId);
             previewAnimationId = requestAnimationFrame(previewUpdate);
 
             // Add side walls (visual indicators + physical boundaries)
@@ -3544,10 +3548,13 @@
                 }
             }, 1000);
 
-            let lastTime = 0;
+            let lastTime = performance.now();
 
             function update(time) {
-                if (time - lastTime >= (1000 / 60)) {
+                if (!time) time = performance.now();
+                const delta = time - lastTime;
+                
+                if (delta >= (1000 / 60)) {
                     Engine.update(engine, 1000 / 60);
                     if (startTime) {
                         raceTime += 1 / 60;
@@ -3618,10 +3625,11 @@
                             }
                         }
                     });
-                    lastTime = time;
+                    lastTime = time - (delta % (1000 / 60));
                 }
                 animationFrameId = requestAnimationFrame(update);
             }
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(update);
         }
 
