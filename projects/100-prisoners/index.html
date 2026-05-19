@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 Prisoners Visualiser - Sawyinator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .node { stroke: #fff; stroke-width: 1.5px; transition: r 0.3s ease; }
+        .link { stroke: rgba(255, 255, 255, 0.2); stroke-opacity: 0.6; stroke-width: 1.5px; fill: none; transition: stroke 0.3s ease; }
+        .box-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
+        .box { 
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s ease, border-color 0.3s ease;
+            width: 44px;
+            height: 44px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .box:hover { transform: scale(1.05); z-index: 10; }
+        .box.animate-pop { animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+        @keyframes pop-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .box.revealed { background-color: #3b82f6; color: white; border-color: transparent; }
+        .box.success { background-color: #22c55e; color: white; border-color: transparent; }
+        .box.fail { background-color: #ef4444; color: white; border-color: transparent; }
+        .box.active { ring: 2px ring-offset-2 ring-blue-400; z-index: 20; }
+        
+        .strategy-obscured {
+            position: relative;
+        }
+        .strategy-obscured::after {
+            content: "Hidden until failure";
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 30;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #64748b;
+            border-radius: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: opacity 0.3s ease;
+        }
+        .strategy-revealed::after {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* Custom scrollbar for logs */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); }
+        
+        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        
+        @keyframes pulse-success {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        .pulse-success { animation: pulse-success 2s infinite; }
+    </style>
+</head>
+<body class="bg-[#020617] text-slate-100 min-h-screen">
+    <div class="fixed inset-0 bg-[radial-gradient(circle_at_50%_-20%,_#1e293b,_transparent)] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+            <div>
+                <a href="../../index.html" class="inline-flex items-center text-slate-400 hover:text-white transition-colors mb-4 group">
+                    <i data-lucide="chevron-left" class="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Projects
+                </a>
+                <h1 class="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
+                    100 Prisoners Visualiser
+                </h1>
+                <p class="text-slate-400 mt-2 max-w-xl">
+                    Explore one of the most counter-intuitive probability problems. Each prisoner has a 50% chance, yet collectively they have over 31%.
+                </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="flex items-center gap-2 px-4 py-2 glass rounded-xl border border-blue-500/20">
+                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Winning Strategy</span>
+                    <span class="text-blue-400 font-bold">Enabled</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Controls Panel -->
+            <aside class="lg:col-span-3 space-y-6">
+                <!-- Configuration -->
+                <div class="glass p-6 rounded-3xl space-y-6 border border-slate-800">
+                    <h2 class="text-lg font-bold flex items-center">
+                        <i data-lucide="settings" class="w-5 h-5 mr-2 text-blue-400"></i>
+                        Configuration
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-400 flex justify-between">
+                                Box Count
+                                <span id="boxCountVal" class="text-blue-400 font-mono">100</span>
+                            </label>
+                            <input type="range" id="boxCount" min="10" max="200" step="10" value="100" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                            <p class="text-[10px] text-slate-500">Limits: 50% attempts per prisoner</p>
+                        </div>
+
+                        <button id="shuffleBtn" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 group">
+                            <i data-lucide="shuffle" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500"></i>
+                            Randomise Boxes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulation Controls -->
+                <div class="glass p-6 rounded-3xl space-y-6 border border-slate-800">
+                    <h2 class="text-lg font-bold flex items-center">
+                        <i data-lucide="play" class="w-5 h-5 mr-2 text-green-400"></i>
+                        Simulation
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-sm text-slate-400 mb-1">
+                            <span>Speed</span>
+                            <span id="speedVal" class="text-blue-400">1x</span>
+                        </div>
+                        <input type="range" id="simSpeed" min="1" max="100" value="50" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500 mb-4">
+                        
+                        <button id="runOneBtn" class="w-full py-2.5 px-4 glass hover:bg-blue-600/20 border-blue-500/30 rounded-xl text-sm font-medium transition-all">
+                            Run Single Prisoner
+                        </button>
+                        <button id="runAllBtn" class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700/80 rounded-xl text-sm font-medium transition-all">
+                            Run Full Trial
+                        </button>
+                        <button id="runStatsBtn" class="w-full py-2.5 px-4 glass hover:bg-purple-600/20 border-purple-500/30 rounded-xl text-sm font-medium transition-all">
+                            Stress Test (1000 Runs)
+                        </button>
+                        <button id="resetStateBtn" class="w-full py-2.5 px-4 text-slate-500 hover:text-white text-sm">
+                            Clear Simulation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="glass p-6 rounded-3xl space-y-4 border border-slate-800 overflow-hidden relative">
+                    <h2 class="text-lg font-bold flex items-center">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5 mr-2 text-purple-400"></i>
+                        Results
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-900/50 p-3 rounded-2xl border border-slate-800/50">
+                            <p class="text-[10px] text-slate-500 uppercase">Successes</p>
+                            <p id="statSuccess" class="text-xl font-bold text-green-400 font-mono">0</p>
+                        </div>
+                        <div class="bg-slate-900/50 p-3 rounded-2xl border border-slate-800/50">
+                            <p class="text-[10px] text-slate-500 uppercase">Failures</p>
+                            <p id="statFail" class="text-xl font-bold text-red-400 font-mono">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-2xl border border-slate-800/50">
+                        <p class="text-[10px] text-slate-500 uppercase">Win Rate</p>
+                        <p id="statRate" class="text-2xl font-bold text-white font-mono">0%</p>
+                        <div class="mt-2 w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="rateBar" class="h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Workspace -->
+            <main class="lg:col-span-9 space-y-6">
+                <!-- Visualization Tabs -->
+                <div class="glass rounded-3xl border border-slate-800 flex flex-col h-[700px] relative">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+                        <div class="flex gap-6">
+                            <button id="viewGrid" class="text-sm font-semibold py-2 transition-all tab-active">Grid View</button>
+                            <button id="viewLoops" class="text-sm font-semibold py-2 text-slate-500 hover:text-slate-300 transition-all">Loop Graph</button>
+                        </div>
+                        <div id="statusIndicator" class="flex items-center gap-2">
+                             <div class="w-2 h-2 rounded-full bg-slate-500"></div>
+                             <span class="text-xs text-slate-500 font-medium">Ready</span>
+                        </div>
+                    </div>
+
+                    <!-- Content Views -->
+                    <div class="flex-1 relative overflow-hidden group">
+                        <!-- Grid View -->
+                        <div id="gridView" class="absolute inset-0 p-8 overflow-auto">
+                            <div id="boxesContainer" class="box-grid">
+                                <!-- Generated JS content -->
+                            </div>
+                        </div>
+
+                        <!-- Graph View -->
+                        <div id="loopView" class="absolute inset-0 hidden">
+                            <svg id="loopSvg" class="w-full h-full"></svg>
+                            <div class="absolute bottom-6 left-6 text-xs text-slate-500 bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+                                <ul class="space-y-1">
+                                    <li class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                        Cycle &le; 50% items
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                        Long cycle (&gt; 50%)
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Overlay for Running States -->
+                        <div id="simOverlay" class="absolute inset-0 bg-slate-950/20 pointer-events-none transition-opacity duration-300 opacity-0 flex items-center justify-center">
+                            <div class="bg-slate-900 px-6 py-3 rounded-2xl border border-slate-800 shadow-2xl flex items-center gap-3">
+                                <div class="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full font-mono"></div>
+                                <span class="text-sm font-medium uppercase tracking-widest text-blue-400">Simulation in progress...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trial Info Section (Now below grid) -->
+                <div id="trialInfo" class="opacity-0 transition-opacity duration-300">
+                    <div class="glass p-6 rounded-3xl border border-blue-500/30 flex flex-col gap-6 shadow-2xl">
+                        <div class="flex items-center gap-12 pb-4 border-b border-white/10">
+                            <div class="flex flex-col">
+                                <span class="text-xs uppercase font-bold text-slate-500">Current Prisoner</span>
+                                <span id="currentPrisonerId" class="text-3xl font-black text-blue-400 font-mono">-</span>
+                            </div>
+                            <div class="flex flex-col border-l border-white/10 pl-12">
+                                <span class="text-xs uppercase font-bold text-slate-500">Box Attempt</span>
+                                <span id="currentAttemptCount" class="text-3xl font-black text-slate-100 font-mono">-</span>
+                            </div>
+                            <div id="trialResultBadge" class="ml-auto px-4 py-2 rounded-xl text-xs font-bold uppercase hidden">
+                                Success
+                            </div>
+                        </div>
+                        
+                        <div id="pathReview" class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs uppercase font-bold text-slate-500 block">Journey Progression</span>
+                                <span class="text-[10px] text-slate-600">Click a step to highlight the box</span>
+                            </div>
+                            <div id="pathSteps" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                                <span class="text-slate-500 text-sm italic">Run a simulation to see the path...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Debug/Log Panel -->
+                <div class="glass flex flex-col md:flex-row rounded-3xl border border-slate-800 overflow-hidden">
+                    <div class="flex-1 p-6 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500">Prisoner Log</h2>
+                            <button id="clearLog" class="text-[10px] uppercase font-bold text-slate-600 hover:text-slate-200">Clear</button>
+                        </div>
+                        <div id="logArea" class="h-44 overflow-y-auto space-y-1 font-mono text-xs pr-4">
+                            <div class="text-slate-500 italic">Welcome to the simulation. Randomise boxes to begin.</div>
+                        </div>
+                    </div>
+                    <div id="strategyBreakdown" class="w-full md:w-80 bg-slate-900/50 p-6 border-l border-slate-800 space-y-4 strategy-obscured transition-all duration-500">
+                        <h3 class="text-xs font-bold uppercase text-slate-500">Strategy Breakdown</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Longest Cycle</span>
+                                <span id="maxCycleLen" class="text-white font-bold">-</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Total Cycles</span>
+                                <span id="totalCycles" class="text-white font-bold">-</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500 leading-relaxed mt-4">
+                                If the longest cycle is greater than <span id="failThreshold">50</span>, the prisoners will lose. This occurs in approx. 69% of cases.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Initialization and Core Logic -->
+    <script>
+        // State Management
+        let boxes = []; // Array of {id, content, revealed, belongsToCycle}
+        let cycles = []; // Array of arrays containing box IDs
+        let stats = { success: 0, fail: 0 };
+        let isSimulating = false;
+        let lastRunData = null;
+
+        // UI Refs
+        const boxesContainer = document.getElementById('boxesContainer');
+        const boxCountEl = document.getElementById('boxCount');
+        const boxCountVal = document.getElementById('boxCountVal');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const logArea = document.getElementById('logArea');
+        const maxCycleLenEl = document.getElementById('maxCycleLen');
+        const totalCyclesEl = document.getElementById('totalCycles');
+        const failThresholdEl = document.getElementById('failThreshold');
+        const statSuccessEl = document.getElementById('statSuccess');
+        const statFailEl = document.getElementById('statFail');
+        const statRateEl = document.getElementById('statRate');
+        const rateBar = document.getElementById('rateBar');
+        const runOneBtn = document.getElementById('runOneBtn');
+        const runAllBtn = document.getElementById('runAllBtn');
+        const runStatsBtn = document.getElementById('runStatsBtn');
+        const resetStateBtn = document.getElementById('resetStateBtn');
+        const simOverlay = document.getElementById('simOverlay');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const trialInfo = document.getElementById('trialInfo');
+        const currentPrisonerIdEl = document.getElementById('currentPrisonerId');
+        const currentAttemptCountEl = document.getElementById('currentAttemptCount');
+        const pathStepsContainer = document.getElementById('pathSteps');
+        const trialResultBadge = document.getElementById('trialResultBadge');
+        const strategyBreakdown = document.getElementById('strategyBreakdown');
+
+        // Tabs
+        const gridView = document.getElementById('gridView');
+        const loopView = document.getElementById('loopView');
+        const viewGridBtn = document.getElementById('viewGrid');
+        const viewLoopsBtn = document.getElementById('viewLoops');
+
+        const speedInput = document.getElementById('simSpeed');
+        const speedValEl = document.getElementById('speedVal');
+
+        // Logic
+        function init() {
+            lucide.createIcons();
+            generateBoxes();
+            
+            boxCountEl.addEventListener('input', (e) => {
+                boxCountVal.textContent = e.target.value;
+                failThresholdEl.textContent = Math.floor(e.target.value / 2);
+                generateBoxes();
+            });
+
+            shuffleBtn.addEventListener('click', generateBoxes);
+            runOneBtn.addEventListener('click', simSinglePrisoner);
+            runAllBtn.addEventListener('click', runFullTrial);
+            runStatsBtn.addEventListener('click', runStressTest);
+            resetStateBtn.addEventListener('click', resetSimulation);
+            
+            viewGridBtn.addEventListener('click', () => switchTab('grid'));
+            viewLoopsBtn.addEventListener('click', () => switchTab('loops'));
+            
+            document.getElementById('clearLog').addEventListener('click', () => {
+                logArea.innerHTML = '<div class="text-slate-500 italic">Log cleared.</div>';
+            });
+
+            speedInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                let display = '';
+                if (val < 10) display = 'Detailed';
+                else if (val < 40) display = '0.5x';
+                else if (val < 60) display = '1x';
+                else if (val < 85) display = '10x';
+                else display = 'Instant';
+                speedValEl.textContent = display;
+            });
+        }
+
+        function switchTab(tab) {
+            if (tab === 'grid') {
+                gridView.classList.remove('hidden');
+                loopView.classList.add('hidden');
+                viewGridBtn.classList.add('tab-active');
+                viewGridBtn.classList.remove('text-slate-500');
+                viewLoopsBtn.classList.remove('tab-active');
+                viewLoopsBtn.classList.add('text-slate-500');
+            } else {
+                gridView.classList.add('hidden');
+                loopView.classList.remove('hidden');
+                viewGridBtn.classList.remove('tab-active');
+                viewGridBtn.classList.add('text-slate-500');
+                viewLoopsBtn.classList.remove('tab-active');
+                viewLoopsBtn.classList.add('text-slate-500');
+                renderGraph();
+            }
+        }
+
+        function generateBoxes() {
+            if (isSimulating) return;
+            const count = parseInt(boxCountEl.value);
+            
+            // Visual feedback for button
+            const originalText = shuffleBtn.innerHTML;
+            shuffleBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Shuffled!`;
+            shuffleBtn.classList.replace('bg-blue-600', 'bg-green-600');
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                shuffleBtn.innerHTML = originalText;
+                shuffleBtn.classList.replace('bg-green-600', 'bg-blue-600');
+                lucide.createIcons();
+            }, 1000);
+
+            const contents = Array.from({length: count}, (_, i) => i + 1);
+            // Fisher-Yates Shuffle
+            for (let i = contents.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [contents[i], contents[j]] = [contents[j], contents[i]];
+            }
+
+            boxes = contents.map((c, i) => ({
+                id: i + 1,
+                content: c,
+                revealed: false,
+                status: 'default'
+            }));
+
+            detectCycles();
+            renderBoxes();
+            updateCycleStats();
+            clearLogs();
+            strategyBreakdown.classList.add('strategy-obscured');
+            strategyBreakdown.classList.remove('strategy-revealed');
+            trialInfo.classList.add('opacity-0');
+            addLog(`Generated ${count} boxes. Max cycle length: ${Math.max(...cycles.map(c => c.length))}`, 'info');
+            
+            // Auto switch to graph if we shuffled just to see structure
+            if (!loopView.classList.contains('hidden')) {
+                renderGraph();
+            }
+            
+            updateStatus('Ready', 'slate');
+        }
+
+        function detectCycles() {
+            cycles = [];
+            const visited = new Set();
+            
+            for (let i = 0; i < boxes.length; i++) {
+                const startId = i + 1;
+                if (visited.has(startId)) continue;
+                
+                const cycle = [];
+                let currentBoxId = startId;
+                
+                while (!visited.has(currentBoxId)) {
+                    visited.add(currentBoxId);
+                    cycle.push(currentBoxId);
+                    currentBoxId = boxes[currentBoxId - 1].content;
+                }
+                cycles.push(cycle);
+                
+                // Map box to cycle
+                cycle.forEach(id => {
+                    boxes[id-1].cycleIndex = cycles.length - 1;
+                });
+            }
+        }
+
+        function updateCycleStats() {
+            const maxLen = Math.max(...cycles.map(c => c.length));
+            maxCycleLenEl.textContent = maxLen;
+            totalCyclesEl.textContent = cycles.length;
+            
+            const threshold = parseInt(boxCountEl.value) / 2;
+            if (maxLen > threshold) {
+                maxCycleLenEl.className = 'text-red-400 font-bold';
+            } else {
+                maxCycleLenEl.className = 'text-green-400 font-bold';
+            }
+        }
+
+        function renderBoxes() {
+            boxesContainer.innerHTML = '';
+            boxes.forEach((box, i) => {
+                const el = document.createElement('div');
+                el.id = `box-${box.id}`;
+                el.className = 'glass rounded-lg border-2 border-white/10 flex flex-col items-center justify-center text-[11px] font-black cursor-help box animate-pop';
+                el.style.animationDelay = `${Math.min(i * 5, 300)}ms`;
+                el.innerHTML = `
+                    <span class="text-slate-500 opacity-50">${box.id}</span>
+                `;
+                el.title = `Label: ${box.id}`;
+                boxesContainer.appendChild(el);
+            });
+        }
+
+        function updateStatus(text, color) {
+            statusIndicator.innerHTML = `
+                <div class="w-2 h-2 rounded-full bg-${color}-500 ${color === 'blue' ? 'animate-pulse' : ''}"></div>
+                <span class="text-xs text-${color}-500 font-medium">${text}</span>
+            `;
+        }
+
+        function addLog(msg, type = 'default') {
+            const el = document.createElement('div');
+            const colors = {
+                default: 'text-slate-300',
+                info: 'text-blue-400',
+                success: 'text-green-400',
+                fail: 'text-red-400',
+                prisoner: 'text-purple-400 border-l-2 border-purple-500 pl-2 my-1'
+            };
+            el.className = colors[type] || colors.default;
+            el.textContent = `> ${msg}`;
+            logArea.appendChild(el);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function clearLogs() {
+            logArea.innerHTML = '';
+        }
+
+        async function simSinglePrisoner() {
+            if (isSimulating) return;
+            
+            // Find unopened box IDs
+            const unopenedIds = boxes.filter(b => {
+                const el = document.getElementById(`box-${b.id}`);
+                return el && !el.classList.contains('revealed') && !el.classList.contains('success') && !el.classList.contains('fail');
+            }).map(b => b.id);
+
+            // If everything is already revealed, reset visual state before running
+            if (unopenedIds.length === 0) {
+                renderBoxes();
+                const id = Math.floor(Math.random() * boxes.length) + 1;
+                isSimulating = true;
+                updateStatus('Simulating...', 'blue');
+                await runPrisoner(id, true);
+            } else {
+                const id = unopenedIds[Math.floor(Math.random() * unopenedIds.length)];
+                isSimulating = true;
+                updateStatus('Simulating...', 'blue');
+                await runPrisoner(id, true);
+            }
+            
+            isSimulating = false;
+            updateStatus('Ready', 'slate');
+        }
+
+        async function runPrisoner(prisonerId, animate = false) {
+            const threshold = boxes.length / 2;
+            let currentBoxId = prisonerId;
+            let count = 0;
+            let found = false;
+            let path = [];
+
+            if (animate) {
+                trialInfo.classList.remove('opacity-0');
+                currentPrisonerIdEl.textContent = prisonerId;
+                trialResultBadge.classList.add('hidden');
+                pathStepsContainer.innerHTML = '';
+            }
+
+            addLog(`Prisoner ${prisonerId} starts tracking their loop...`, 'info');
+
+            while (count < threshold && !found) {
+                count++;
+                const box = boxes[currentBoxId - 1];
+                path.push({ boxId: currentBoxId, content: box.content });
+                
+                if (animate) {
+                    currentAttemptCountEl.textContent = count;
+                    const boxEl = document.getElementById(`box-${currentBoxId}`);
+                    boxEl.classList.add('revealed', 'active');
+                    boxEl.innerHTML = `
+                        <span class="text-xl">${box.content}</span>
+                    `;
+                    
+                    // Add step to preview
+                    const stepEl = document.createElement('div');
+                    stepEl.className = 'w-7 h-7 flex items-center justify-center rounded bg-white/5 border border-white/10 text-[10px] font-mono hover:bg-blue-500/20 cursor-pointer transition-colors';
+                    stepEl.textContent = box.content;
+                    stepEl.title = `Attempt ${count}: Box ${currentBoxId} contained ${box.content}`;
+                    stepEl.onclick = () => highlightBox(currentBoxId);
+                    pathStepsContainer.appendChild(stepEl);
+                    pathStepsContainer.scrollTop = pathStepsContainer.scrollHeight;
+
+                    // Wider speed disparity
+                    const val = speedInput.value;
+                    let delay = 0;
+                    if (val < 10) delay = 1500;
+                    else if (val < 40) delay = 400;
+                    else if (val < 60) delay = 100;
+                    else if (val < 85) delay = 20;
+                    else delay = 1;
+
+                    await new Promise(r => setTimeout(r, delay));
+                    boxEl.classList.remove('active');
+                }
+
+                if (box.content === prisonerId) {
+                    found = true;
+                } else {
+                    currentBoxId = box.content;
+                }
+            }
+
+            if (animate) {
+                path.forEach(step => {
+                    const boxEl = document.getElementById(`box-${step.boxId}`);
+                    boxEl.classList.add(found ? 'success' : 'fail');
+                });
+
+                if (!found) {
+                    strategyBreakdown.classList.remove('strategy-obscured');
+                    strategyBreakdown.classList.add('strategy-revealed');
+                    let nextId = boxes[currentBoxId - 1].content;
+                    let safetyCounter = 0;
+                    while(nextId !== prisonerId && safetyCounter < 200) {
+                        safetyCounter++;
+                        const boxEl = document.getElementById(`box-${nextId}`);
+                        if (boxEl && !boxEl.classList.contains('fail')) {
+                            boxEl.classList.add('fail', 'opacity-40');
+                            boxEl.innerHTML = `<span class="text-lg opacity-30">${boxes[nextId-1].content}</span>`;
+                        }
+                        if (nextId === boxes[nextId-1].content) break; // Self-loop safety
+                        nextId = boxes[nextId-1].content;
+                    }
+                    // Highlight the prisoner's starting box if it wasn't reached
+                    const startBoxEl = document.getElementById(`box-${prisonerId}`);
+                    if (startBoxEl && !startBoxEl.classList.contains('fail')) {
+                         startBoxEl.classList.add('fail', 'opacity-40');
+                    }
+                }
+
+                // Show badge
+                trialResultBadge.classList.remove('hidden');
+                trialResultBadge.textContent = found ? 'Success' : 'Failed';
+                trialResultBadge.className = `ml-auto px-2 py-1 rounded text-[10px] font-bold uppercase ${found ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`;
+            }
+
+            if (found) {
+                addLog(`✓ Prisoner ${prisonerId} found their number in ${count} attempts.`, 'success');
+            } else {
+                addLog(`✗ Prisoner ${prisonerId} failed after ${threshold} attempts. Loop exceeded limit.`, 'fail');
+            }
+            
+            return found;
+        }
+
+        function highlightBox(id) {
+            const el = document.getElementById(`box-${id}`);
+            if (el) {
+                el.classList.add('active');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => el.classList.remove('active'), 1500);
+            }
+        }
+
+        async function runFullTrial() {
+            if (isSimulating) return;
+            isSimulating = true;
+            simOverlay.classList.remove('opacity-0');
+            simOverlay.classList.add('opacity-100');
+            updateStatus('Full Trial Running...', 'blue');
+            clearLogs();
+            
+            renderBoxes();
+
+            let allFound = true;
+            for (let i = 1; i <= boxes.length; i++) {
+                const found = await fastTrial(i);
+                if (!found) {
+                    allFound = false;
+                    strategyBreakdown.classList.remove('strategy-obscured');
+                    strategyBreakdown.classList.add('strategy-revealed');
+                    addLog(`Trial Terminated: Prisoner ${i} failed.`, 'fail');
+                    
+                    // Reveal the offending cycle on the grid UI
+                    const failCycleIndex = boxes[i-1].cycleIndex;
+                    const failCycle = cycles[failCycleIndex];
+                    failCycle.forEach(id => {
+                        const el = document.getElementById(`box-${id}`);
+                        el.classList.add('fail');
+                        el.innerHTML = `<span class="font-black text-xl">${boxes[id-1].content}</span>`;
+                    });
+                    break;
+                }
+            }
+
+            if (allFound) {
+                addLog(`CRITICAL SUCCESS: All prisoners survived.`, 'success');
+                stats.success++;
+                statSuccessEl.textContent = stats.success;
+                boxesContainer.classList.add('pulse-success');
+                setTimeout(() => boxesContainer.classList.remove('pulse-success'), 3000);
+            } else {
+                stats.fail++;
+                statFailEl.textContent = stats.fail;
+            }
+
+            updateStats();
+            isSimulating = false;
+            simOverlay.classList.add('opacity-0');
+            simOverlay.classList.remove('opacity-100');
+            updateStatus('Finished', 'slate');
+        }
+
+        async function fastTrial(prisonerId) {
+            const threshold = boxes.length / 2;
+            let currentBoxId = prisonerId;
+            let count = 0;
+            
+            while (count < threshold) {
+                count++;
+                const content = boxes[currentBoxId - 1].content;
+                if (content === prisonerId) return true;
+                currentBoxId = content;
+            }
+            return false;
+        }
+
+        function runStressTest() {
+            if (isSimulating) return;
+            isSimulating = true;
+            simOverlay.classList.remove('opacity-0');
+            simOverlay.classList.add('opacity-100');
+            
+            const runs = 1000;
+            let s = 0, f = 0;
+            
+            for(let i=0; i<runs; i++) {
+                const count = parseInt(boxCountEl.value);
+                const contents = Array.from({length: count}, (_, i) => i + 1);
+                for (let x = contents.length - 1; x > 0; x--) {
+                    const j = Math.floor(Math.random() * (x + 1));
+                    [contents[x], contents[j]] = [contents[j], contents[x]];
+                }
+                
+                const threshold = count / 2;
+                const visited = new Set();
+                let maxCycle = 0;
+                for (let x = 0; x < contents.length; x++) {
+                    if (visited.has(x)) continue;
+                    let c = 0, curr = x;
+                    while (!visited.has(curr)) {
+                        visited.add(curr);
+                        curr = contents[curr] - 1;
+                        c++;
+                    }
+                    if (c > maxCycle) maxCycle = c;
+                }
+                if (maxCycle <= threshold) s++; else f++;
+            }
+            
+            stats.success += s;
+            stats.fail += f;
+            statSuccessEl.textContent = stats.success;
+            statFailEl.textContent = stats.fail;
+            updateStats();
+            
+            addLog(`Bulk Run Finished: ${s} Wins, ${f} Lapses.`, 'info');
+            simOverlay.classList.add('opacity-0');
+            simOverlay.classList.remove('opacity-100');
+            isSimulating = false;
+        }
+
+        function updateStats() {
+            const total = stats.success + stats.fail;
+            const rate = total === 0 ? 0 : (stats.success / total * 100);
+            statRateEl.textContent = rate.toFixed(1) + '%';
+            rateBar.style.width = rate + '%';
+        }
+
+        function resetSimulation() {
+            stats = { success: 0, fail: 0 };
+            statSuccessEl.textContent = 0;
+            statFailEl.textContent = 0;
+            updateStats();
+            generateBoxes();
+        }
+
+        let simulation;
+        function renderGraph() {
+            const width = loopView.clientWidth;
+            const height = loopView.clientHeight;
+            const threshold = boxes.length / 2;
+
+            d3.select("#loopSvg").selectAll("*").remove();
+            
+            const svg = d3.select("#loopSvg")
+                .attr("viewBox", [0, 0, width, height]);
+
+            const nodes = boxes.map(b => ({
+                id: b.id,
+                content: b.content,
+                cycleIndex: b.cycleIndex,
+                isLong: cycles[b.cycleIndex].length > threshold
+            }));
+
+            const links = nodes.map(n => ({
+                source: n.id,
+                target: n.content
+            }));
+
+            simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(30).strength(1))
+                .force("charge", d3.forceManyBody().strength(-50))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collision", d3.forceCollide().radius(15));
+
+            const container = svg.append("g");
+
+            svg.call(d3.zoom()
+                .scaleExtent([0.1, 8])
+                .on("zoom", ({transform}) => {
+                    container.attr("transform", transform);
+                }));
+
+            svg.append("defs").append("marker")
+                .attr("id", "arrowhead")
+                .attr("viewBox", "-0 -5 10 10")
+                .attr("refX", 20)
+                .attr("refY", 0)
+                .attr("orient", "auto")
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("xoverflow", "visible")
+                .append("svg:path")
+                .attr("d", "M 0,-5 L 10 ,0 L 0,5")
+                .attr("fill", "rgba(255,255,255,0.3)")
+                .style("stroke", "none");
+
+            const link = container.append("g")
+                .selectAll("path")
+                .data(links)
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("marker-end", "url(#arrowhead)")
+                .attr("stroke", d => nodes[d.source.id-1].isLong ? "#ef4444" : "#22c55e");
+
+            const node = container.append("g")
+                .selectAll("g")
+                .data(nodes)
+                .enter().append("g")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            node.append("circle")
+                .attr("r", 12)
+                .attr("class", "node")
+                .attr("fill", d => d.isLong ? "#ef4444" : "#22c55e")
+                .attr("stroke", d => d.isLong ? "#991b1b" : "#166534");
+
+            node.append("text")
+                .text(d => d.id)
+                .attr("text-anchor", "middle")
+                .attr("dy", ".35em")
+                .attr("fill", "white")
+                .attr("font-size", "8px")
+                .attr("font-weight", "bold")
+                .style("pointer-events", "none");
+
+            simulation.on("tick", () => {
+                link.attr("d", d => {
+                    const dx = d.target.x - d.source.x,
+                          dy = d.target.y - d.source.y,
+                          dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+                    return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+                });
+                node.attr("transform", d => `translate(${d.x},${d.y})`);
+            });
+
+            function dragstarted(event) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+            function dragged(event) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+            function dragended(event) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
