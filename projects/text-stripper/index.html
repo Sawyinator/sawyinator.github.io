@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                if (window.location.pathname.endsWith('/')) window.location.href = 'index.html';
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        let href = link.getAttribute('href');
+                        if (href.endsWith('/') && !href.startsWith('http') && !href.startsWith('//')) {
+                            e.preventDefault();
+                            window.location.href = href + 'index.html';
+                        }
+                    }
+                }, true);
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A fast, clean utility to strip text of HTML tags, styling formats, markdown tags, non-standard whitespace, and other clutter.">
+
+    <meta name="title" content="Text Stripper">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sawyinator.uk/projects/text-stripper/">
+    <meta property="og:title" content="Sawyinator.uk">
+    <meta property="og:description" content="A fast, clean utility to strip text of HTML tags, styling formats, markdown tags, non-standard whitespace, and other clutter.">
+    <meta property="og:image" content="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%230891b2%22/><g transform=%22scale(2.5) translate(8, 8)%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M21 4H3v2h18V4zM21 18H3v2h18v-2zM10 11H3v2h7v-2zM21 11h-7v2h7v-2z%22/></g></svg>">
+    <meta name="theme-color" content="#0891b2">
+
+    <title>Text Stripper</title>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2306b6d4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 4H3v2h18V4zM21 18H3v2h18v-2zM10 11H3v2h7v-2zM21 11h-7v2h7v-2z'%3E%3C/path%3E%3C/svg%3E">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configure Tailwind for class-based dark mode
+        tailwind.config = {
+            darkMode: 'class'
+        }
+
+        // Immediate check to prevent theme flickering
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.3 !important;
+        }
+
+        #profile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(9, 9, 11, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        #profile-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .profile-pic {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #27272a;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #0891b2;
+            overflow: hidden;
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .profile-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .profile-link {
+            background: #18181b;
+            color: #f4f4f5;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid #27272a;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .profile-link svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .profile-link:hover {
+            background: #0891b2;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .credit {
+            font-size: 0.75rem;
+            color: #71717a;
+            font-weight: normal;
+            letter-spacing: 0.5px;
+        }
+
+        .credit span {
+            cursor: pointer;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+
+        .credit span:hover {
+            color: #0891b2;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 min-h-screen p-8 pt-16">
+    <a href="../../" class="fixed top-4 left-4 flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors z-50">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Back to main website
+    </a>
+
+    <div class="max-w-3xl mx-auto">
+        <header class="mb-8 flex items-center justify-between">
+            <div class="flex items-baseline gap-3">
+                <h1 class="text-2xl font-bold tracking-tight">Text<span class="text-cyan-600 dark:text-cyan-500">Stripper</span></h1>
+                <div class="credit">By <span onclick="openProfile()">Sawyinator</span></div>
+            </div>
+
+            <button id="theme-toggle" class="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-cyan-500 transition-all group">
+                <i data-lucide="sun" class="hidden dark:block w-5 h-5 text-zinc-400 dark:text-cyan-500 group-hover:text-cyan-600 transition-colors"></i>
+                <i data-lucide="moon" class="block dark:hidden w-5 h-5 text-zinc-500 group-hover:text-cyan-600 transition-colors"></i>
+            </button>
+        </header>
+
+        <div class="grid gap-6">
+            <!-- INPUT CONTAINER -->
+            <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden focus-within:border-cyan-500 transition-all">
+                <div class="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800">
+                    <div class="flex items-center gap-4">
+                        <label class="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Input Text (Rich/Dirty)</label>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button id="clear-btn-input" class="px-3 py-1.5 text-zinc-600 dark:text-zinc-400 hover:text-cyan-700 dark:hover:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg text-xs font-bold transition-all flex items-center gap-2" title="Clear Text">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            Clear
+                        </button>
+                        <button id="reset-size-btn-input" class="px-3 py-1.5 text-zinc-600 dark:text-zinc-400 hover:text-cyan-700 dark:hover:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg text-xs font-bold transition-all flex items-center gap-2" title="Reset Textbox Size">
+                            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                            Reset Size
+                        </button>
+                        <div class="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-1"></div>
+                        <button id="undo-btn" class="p-2 text-zinc-500 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded-lg transition-all" title="Undo (Ctrl+Z)">
+                            <i data-lucide="undo-2" class="w-4 h-4"></i>
+                        </button>
+                        <button id="redo-btn" class="p-2 text-zinc-500 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded-lg transition-all" title="Redo (Ctrl+Y)">
+                            <i data-lucide="redo-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <textarea id="input-text" placeholder="Paste HTML, Markdown, accented letters, messy spaces or files-scraped dumps here..." class="w-full h-64 p-4 bg-white dark:bg-zinc-900 text-sm outline-none transition-all resize-y font-mono border-none text-zinc-900 dark:text-zinc-100"></textarea>
+            </div>
+
+            <!-- OPTS CHECKBOXES / SWITCHES -->
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
+                <div class="flex items-center justify-between mb-4 border-b border-zinc-100 dark:border-zinc-800 pb-3">
+                    <h2 class="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="settings" class="w-4 h-4 text-cyan-500"></i>
+                        Stripping Presets & Controls
+                    </h2>
+                    <div class="flex gap-2">
+                        <button onclick="setPreset('all')" class="px-2.5 py-1 rounded bg-cyan-100 dark:bg-cyan-950/40 text-[10px] uppercase font-bold text-cyan-700 dark:text-cyan-300 hover:bg-cyan-200 transition-all border border-cyan-300/20">All Filters</button>
+                        <button onclick="setPreset('html-only')" class="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-[10px] uppercase font-bold text-zinc-650 dark:text-zinc-400 hover:bg-zinc-200 transition-all">HTML Only</button>
+                        <button onclick="setPreset('md-only')" class="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-[10px] uppercase font-bold text-zinc-650 dark:text-zinc-400 hover:bg-zinc-200 transition-all">Markdown Only</button>
+                        <button onclick="setPreset('none')" class="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-[10px] uppercase font-bold text-zinc-650 dark:text-zinc-400 hover:bg-zinc-200 transition-all">Clear All</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 cursor-pointer hover:bg-cyan-50/25 dark:hover:bg-cyan-950/10 transition-colors group">
+                        <input type="checkbox" id="opt-html" checked onchange="triggerTransform()" class="mt-1 accent-cyan-600 rounded">
+                        <div>
+                            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-cyan-600 transition-colors">Strip HTML Tags</span>
+                            <span class="block text-[11px] text-zinc-500 dark:text-zinc-400">Deletes &lt;div&gt;, &lt;script&gt;, CSS blocks, comments, and decodes HTML entities.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 cursor-pointer hover:bg-cyan-50/25 dark:hover:bg-cyan-950/10 transition-colors group">
+                        <input type="checkbox" id="opt-markdown" checked onchange="triggerTransform()" class="mt-1 accent-cyan-600 rounded">
+                        <div>
+                            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-cyan-600 transition-colors">Strip Markdown formatting</span>
+                            <span class="block text-[11px] text-zinc-500 dark:text-zinc-400">Removes header markings (#), bold/italic (*, _), list symbols, code dividers.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 cursor-pointer hover:bg-cyan-50/25 dark:hover:bg-cyan-950/10 transition-colors group">
+                        <input type="checkbox" id="opt-smart" checked onchange="triggerTransform()" class="mt-1 accent-cyan-600 rounded">
+                        <div>
+                            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-cyan-600 transition-colors">Normalise Typographic Ornaments</span>
+                            <span class="block text-[11px] text-zinc-500 dark:text-zinc-400">Replaces curly quotes (“ ”), smart apostrophes (’), dashes (—), ellipses (…) with basic keyboard text.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 cursor-pointer hover:bg-cyan-50/25 dark:hover:bg-cyan-950/10 transition-colors group">
+                        <input type="checkbox" id="opt-whitespace" checked onchange="triggerTransform()" class="mt-1 accent-cyan-600 rounded">
+                        <div>
+                            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-cyan-600 transition-colors">Collapse Whitespace</span>
+                            <span class="block text-[11px] text-zinc-500 dark:text-zinc-400">Replaces tabs, massive block lines, and duplicate consecutive spaces with a clean space structure.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 cursor-pointer hover:bg-cyan-50/25 dark:hover:bg-cyan-950/10 transition-colors group">
+                        <input type="checkbox" id="opt-accents" onchange="triggerTransform()" class="mt-1 accent-cyan-600 rounded">
+                        <div>
+                            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-cyan-600 transition-colors">Strip Accents & Diacritics</span>
+                            <span class="block text-[11px] text-zinc-500 dark:text-zinc-400">Converts accented characters into simple ASCII equivalents (e.g. cr&egrave;me br&ucirc;l&eacute;e &rarr; creme brulee).</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 cursor-pointer hover:bg-cyan-50/25 dark:hover:bg-cyan-950/10 transition-colors group">
+                        <input type="checkbox" id="opt-urls" onchange="triggerTransform()" class="mt-1 accent-cyan-600 rounded">
+                        <div>
+                            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-cyan-600 transition-colors">Strip Complete URL Links</span>
+                            <span class="block text-[11px] text-zinc-500 dark:text-zinc-400">Deletes all HTTP, HTTPS, and naked domain links entirely from your pasted text block.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 cursor-pointer hover:bg-cyan-50/25 dark:hover:bg-cyan-950/10 transition-colors group">
+                        <input type="checkbox" id="opt-numbers" onchange="triggerTransform()" class="mt-1 accent-cyan-600 rounded">
+                        <div>
+                            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-cyan-600 transition-colors">Strip All Numbers</span>
+                            <span class="block text-[11px] text-zinc-500 dark:text-zinc-400">Deletes all numeric characters (0-9) inside your text completely.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 cursor-pointer hover:bg-cyan-50/25 dark:hover:bg-cyan-950/10 transition-colors group">
+                        <input type="checkbox" id="opt-symbols" onchange="triggerTransform()" class="mt-1 accent-cyan-600 rounded">
+                        <div>
+                            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-cyan-600 transition-colors">Strip specialty Symbols & Emojis</span>
+                            <span class="block text-[11px] text-zinc-500 dark:text-zinc-400">Strips emojis (✨, ⚡, 😭), arrow elements, odd icons, and other non-text components.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTON -->
+            <div class="flex flex-wrap gap-2 justify-center">
+                <button onclick="stripTextDirect()" class="px-6 py-3 bg-cyan-600 dark:bg-cyan-650 hover:bg-cyan-500 dark:hover:bg-cyan-600 text-white rounded-xl text-sm font-semibold shadow-md active:scale-[0.98] transition-all flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> Run Stripping Process
+                </button>
+            </div>
+
+            <!-- OUTPUT SECTION -->
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <label class="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Output Text (Pure Text)</label>
+                        <div id="change-warning" class="flex items-center gap-1.5 text-[11px] font-medium text-cyan-600 dark:text-cyan-400 hidden">
+                            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                            <span>Text modified, click the stripping button or check options to update the output.</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="copy-btn" onclick="copyOutput()" class="flex items-center gap-2 text-xs font-bold text-cyan-600 hover:text-cyan-700 transition-colors">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            Copy Text
+                        </button>
+                    </div>
+                </div>
+                <textarea id="output-text" readonly placeholder="Your cleaned, pure stripped text will appear here..." class="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm outline-none resize-none overflow-hidden text-zinc-800 dark:text-zinc-250 font-mono"></textarea>
+            </div>
+
+            <!-- ANALYSIS CHIPS (ELEGANT STATS) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-100/50 dark:bg-zinc-900/30 p-4 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
+                <div class="flex flex-col items-center justify-center p-3 text-center">
+                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Length (Init)</span>
+                    <span id="stat-init-chars" class="text-lg font-bold font-mono text-zinc-650 dark:text-zinc-350">0</span>
+                    <span id="stat-init-words" class="text-[10px] text-zinc-400 font-mono">0 words</span>
+                </div>
+                <div class="flex flex-col items-center justify-center p-3 text-center border-l border-zinc-200 dark:border-zinc-800">
+                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Length (Final)</span>
+                    <span id="stat-final-chars" class="text-lg font-bold font-mono text-cyan-600 dark:text-cyan-400">0</span>
+                    <span id="stat-final-words" class="text-[10px] text-zinc-400 font-mono">0 words</span>
+                </div>
+                <div class="flex flex-col items-center justify-center p-3 text-center border-l border-zinc-200 dark:border-zinc-800">
+                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Savings</span>
+                    <span id="stat-savings-pct" class="text-lg font-bold font-mono text-green-500">0%</span>
+                    <span id="stat-savings-chars" class="text-[10px] text-zinc-400 font-mono">0 chars saved</span>
+                </div>
+                <div class="flex flex-col items-center justify-center p-3 text-center border-l border-zinc-200 dark:border-zinc-800">
+                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Original Lines</span>
+                    <span id="stat-lines-delta" class="text-lg font-bold font-mono text-zinc-650 dark:text-zinc-350">0 &rarr; 0</span>
+                    <span class="text-[10px] text-zinc-400">line count</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE MODAL OVERLAY -->
+    <div id="profile-overlay" onclick="closeProfile(event)">
+        <div class="bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl max-w-sm w-full text-center" onclick="event.stopPropagation()">
+            <div class="profile-pic">
+                <img src="https://raw.githubusercontent.com/Sawyinator/assets/main/sawyinator.github.io/svg/sawyinator-youtube.svg" alt="Sawyinator" onerror="this.parentElement.style.display='none';">
+            </div>
+            <h2 class="text-xl font-bold mb-1 text-zinc-900 dark:text-zinc-100">Sawyinator</h2>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">silly guy</p>
+            <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-6 leading-relaxed">
+                I decided to create this as a simple, ad-free way to capitalise things or strip unnecessary formatting from text. I hate pages packed with ads.
+            </p>
+
+            <div class="profile-links">
+                <a href="../../aboutme/" class="profile-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    About Me
+                </a>
+                <a href="https://github.com/Sawyinator" target="_blank" class="profile-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    GitHub
+                </a>
+                <a href="https://youtube.com/@sawyinator" target="_blank" class="profile-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                    </svg>
+                    YouTube
+                </a>
+            </div>
+            <button class="mt-8 w-full py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-bold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors" onclick="closeProfile()">CLOSE</button>
+        </div>
+    </div>
+
+    <script>
+        function openProfile() {
+            document.getElementById('profile-overlay').classList.add('active');
+        }
+
+        function closeProfile() {
+            document.getElementById('profile-overlay').classList.remove('active');
+        }
+
+        const input = document.getElementById('input-text');
+        const output = document.getElementById('output-text');
+        const copyBtn = document.getElementById('copy-btn');
+        const warning = document.getElementById('change-warning');
+        const themeToggle = document.getElementById('theme-toggle');
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        const clearBtnInput = document.getElementById('clear-btn-input');
+        const resetSizeBtnInput = document.getElementById('reset-size-btn-input');
+
+        // Checkbox Elements
+        const optHtml = document.getElementById('opt-html');
+        const optMarkdown = document.getElementById('opt-markdown');
+        const optSmartCheck = document.getElementById('opt-smart');
+        const optWhitespace = document.getElementById('opt-whitespace');
+        const optAccents = document.getElementById('opt-accents');
+        const optUrls = document.getElementById('opt-urls');
+        const optNumbers = document.getElementById('opt-numbers');
+        const optSymbols = document.getElementById('opt-symbols');
+
+        // Stats Elements
+        const statInitChars = document.getElementById('stat-init-chars');
+        const statInitWords = document.getElementById('stat-init-words');
+        const statFinalChars = document.getElementById('stat-final-chars');
+        const statFinalWords = document.getElementById('stat-final-words');
+        const statSavingsPct = document.getElementById('stat-savings-pct');
+        const statSavingsChars = document.getElementById('stat-savings-chars');
+        const statLinesDelta = document.getElementById('stat-lines-delta');
+
+        const INPUT_STORAGE_KEY = 'text_stripper_input_height';
+
+        // Load saved heights
+        const savedInputHeight = localStorage.getItem(INPUT_STORAGE_KEY);
+        if (savedInputHeight) {
+            input.style.height = savedInputHeight + 'px';
+        }
+
+        // Save heights on resize
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.target === input) {
+                    localStorage.setItem(INPUT_STORAGE_KEY, input.offsetHeight);
+                }
+            }
+        });
+        resizeObserver.observe(input);
+
+        resetSizeBtnInput.addEventListener('click', () => {
+            input.style.height = '';
+            localStorage.removeItem(INPUT_STORAGE_KEY);
+        });
+
+        // Toggle theme handler
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        function adjustOutputHeight() {
+            output.style.height = 'auto';
+            output.style.height = output.scrollHeight + 'px';
+        }
+
+        // Presets
+        function setPreset(preset) {
+            optHtml.checked = (preset === 'all' || preset === 'html-only');
+            optMarkdown.checked = (preset === 'all' || preset === 'md-only');
+            optSmartCheck.checked = (preset === 'all');
+            optWhitespace.checked = (preset === 'all');
+            optAccents.checked = (preset === 'all');
+            optUrls.checked = (preset === 'all');
+            optNumbers.checked = (preset === 'all');
+            optSymbols.checked = (preset === 'all');
+
+            triggerTransform();
+        }
+
+        function countWords(str) {
+            if (!str) return 0;
+            const clean = str.trim();
+            if (clean === "") return 0;
+            return clean.split(/\s+/).length;
+        }
+
+        function triggerTransform() {
+            if (input.value) {
+                warning.classList.remove('hidden');
+                stripTextDirect();
+            }
+        }
+
+        function stripTextDirect() {
+            const rawText = input.value;
+            if (!rawText) {
+                output.value = '';
+                updateStats(0, 0, 0, 0, 0, 0);
+                return;
+            }
+
+            warning.classList.add('hidden');
+            let result = rawText;
+
+            // 1. Strip HTML tags / CSS / Scripts
+            if (optHtml.checked) {
+                // Strip comments
+                result = result.replace(/<!--[\s\S]*?-->/g, '');
+                // Block script/style/iframe completely with tags
+                result = result.replace(/<(script|style|iframe)[^>]*>[\s\S]*?<\/\1>/gi, '');
+                // Replace any other HTML tags
+                result = result.replace(/<[^>]*>/g, '');
+                // Decode special entities
+                const decoder = document.createElement('textarea');
+                decoder.innerHTML = result;
+                result = decoder.value;
+            }
+
+            // 2. Strip Complete URL Links
+            if (optUrls.checked) {
+                result = result.replace(/https?:\/\/[^\s]+/gi, '');
+                result = result.replace(/www\.[a-zA-Z0-9-]+\.[a-zA-Z]{2,}[^\s]*/gi, '');
+            }
+
+            // 3. Strip Markdown Formatting
+            if (optMarkdown.checked) {
+                // Remove codeblocks
+                result = result.replace(/```[\s\S]*?```/g, '');
+                // Remove inline code
+                result = result.replace(/`([^`]+)`/g, '$1');
+                // Remove images `![alt](url)`
+                result = result.replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1');
+                // Remove links `[text](url)`
+                result = result.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+                // Remove headers `# `
+                result = result.replace(/^\s{0,3}#{1,6}\s+/gm, '');
+                // Bold/Italics
+                result = result.replace(/(\*\*|__)(.*?)\1/g, '$2');
+                result = result.replace(/(\*|_)(.*?)\1/g, '$2');
+                // Strikethrough
+                result = result.replace(/(~~)(.*?)\1/g, '$2');
+                // Blockquotes
+                result = result.replace(/^\s{0,3}>\s?/gm, '');
+                // Lists markers
+                result = result.replace(/^\s{0,3}[-*+]\s+/gm, '');
+                result = result.replace(/^\s{0,3}\d+\.\s+/gm, '');
+            }
+
+            // 4. Transform Typographic Smart Quotes & Dash Ornaments
+            if (optSmartCheck.checked) {
+                result = result
+                    .replace(/[\u201C\u201D\u201F\u2033\u2036]/g, '"') // Smart double-quotes
+                    .replace(/[\u2018\u2019\u201B\u2032\u2035]/g, "'") // Smart single-quotes / apostrophes
+                    .replace(/[\u2013\u2014]/g, '-')                   // En & Em dashes
+                    .replace(/\u2026/g, '...');                        // Ellipsis
+            }
+
+            // 5. Clean Accents & Diacritics
+            if (optAccents.checked) {
+                result = result.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            }
+
+            // 6. Complete numbers stripping
+            if (optNumbers.checked) {
+                result = result.replace(/[0-9]/g, '');
+            }
+
+            // 7. Strip weird symbols/Emojis
+            if (optSymbols.checked) {
+                // Match wide-range emoji groups, custom symbols, mathematical fractions
+                result = result.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F191}-\u{1F251}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F300}-\u{1F5FF}\u{2300}-\u{23FF}\u{2B50}\u{2934}\u{2935}\u{2190}-\u{21FF}]/gu, '');
+            }
+
+            // 8. Trim and Whitespace Normalisation
+            if (optWhitespace.checked) {
+                // Trim trailing blank spaces on lines
+                result = result.replace(/[ \t]+$/gm, '');
+                // Replace multi consecutive horizontal spaces with a single space
+                result = result.replace(/[ \t]+/g, ' ');
+                // Limit multiple blank line breaks to a maximum of 2 consecutive breaks
+                result = result.replace(/\n{3,}/g, '\n\n');
+                result = result.trim();
+            }
+
+            output.value = result;
+            adjustOutputHeight();
+
+            // Perform Stats Evaluation
+            const initLen = rawText.length;
+            const finalLen = result.length;
+            const initWords = countWords(rawText);
+            const finalWords = countWords(result);
+            const savingsChars = initLen - finalLen;
+            const savingsPct = initLen > 0 ? Math.max(0, Math.round((savingsChars / initLen) * 100)) : 0;
+            const initLines = rawText.split('\n').filter(Boolean).length;
+            const finalLines = result.split('\n').filter(Boolean).length;
+
+            updateStats(initLen, initWords, finalLen, finalWords, savingsPct, savingsChars, initLines, finalLines);
+        }
+
+        function updateStats(initC, initW, finalC, finalW, saveP, saveC, initL=0, finalL=0) {
+            statInitChars.textContent = initC.toLocaleString();
+            statInitWords.textContent = `${initW.toLocaleString()} words`;
+            statFinalChars.textContent = finalC.toLocaleString();
+            statFinalWords.textContent = `${finalW.toLocaleString()} words`;
+            statSavingsPct.textContent = `${saveP}%`;
+            statSavingsChars.textContent = `${saveC.toLocaleString()} saved`;
+            statLinesDelta.textContent = `${initL} → ${finalL}`;
+        }
+
+        input.addEventListener('input', () => {
+            if (output.value) {
+                warning.classList.remove('hidden');
+            }
+            updateUndoRedoState();
+        });
+
+        undoBtn.addEventListener('click', () => {
+            input.focus();
+            document.execCommand('undo');
+            updateUndoRedoState();
+        });
+
+        redoBtn.addEventListener('click', () => {
+            input.focus();
+            document.execCommand('redo');
+            updateUndoRedoState();
+        });
+
+        clearBtnInput.addEventListener('click', () => {
+            input.value = '';
+            output.value = '';
+            adjustOutputHeight();
+            warning.classList.add('hidden');
+            updateStats(0, 0, 0, 0, 0, 0);
+            input.focus();
+            updateUndoRedoState();
+        });
+
+        function updateUndoRedoState() {
+            setTimeout(() => {
+                undoBtn.disabled = !document.queryCommandEnabled('undo');
+                redoBtn.disabled = !document.queryCommandEnabled('redo');
+            }, 0);
+        }
+
+        input.addEventListener('focus', updateUndoRedoState);
+        input.addEventListener('mouseup', updateUndoRedoState);
+        input.addEventListener('keyup', updateUndoRedoState);
+
+        async function copyOutput() {
+            if (!output.value) return;
+
+            try {
+                await navigator.clipboard.writeText(output.value);
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> Copied!';
+                lucide.createIcons();
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    lucide.createIcons();
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+        }
+
+        // Run Initial Lucide Build
+        lucide.createIcons();
+        updateUndoRedoState();
+    </script>
+</body>
+
+</html>
